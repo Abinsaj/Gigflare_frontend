@@ -1,11 +1,11 @@
 import { useFormik } from "formik";
 import * as Yup from 'yup';
-import { Link, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { Toaster, toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { registerClient } from "../../Redux/actions/userActions";
 import { useAppDispatch } from "../../Redux/store";
 import { FcGoogle } from "react-icons/fc";
+
 
 const SignupForm = () => {
 
@@ -20,15 +20,47 @@ const SignupForm = () => {
             password: "",
             confirmPassword: ""
         },
+        validationSchema: Yup.object({
+            name: Yup.string()
+                .transform((value) => value.trim())
+                .matches(
+                    /^[A-Z][a-zA-Z]*$/,
+                    "First letter should be capital"
+                )
+                .required('Name is required'),
+            email: Yup.string()
+                .transform((value) => value.trim())
+                .email('Invalid email address')
+                .required("Email is required"),
+            phone: Yup.string()
+                .transform((value)=>value.trim())
+                .matches(/^[0-9]{10}$/,"Phone number must be 10 digits")
+                .required("Phone number is required"),
+            password: Yup.string()
+                .transform((value)=> value.trim())
+                .min(8,"password must be atleast 8 characters")
+                .required("password is required"),
+            confirmPassword: Yup.string()
+                .transform((value)=> value.trim())
+                .oneOf([Yup.ref("password"),""],"Password must match")
+                .required("Confirm password is required")
+        })
+        ,
         onSubmit: async (values) => {
             try {
                 const responseResult = await dispatch(registerClient(values))
-                if (responseResult) {
-                    navigate('/otp')
+                console.log(responseResult, 'this is the resonse')
+                if (responseResult.data.success) {
+                    toast.success('Signup successful, OTP has been sent to your email');
+                    navigate('/otp');
                 }
-                console.log(values)
-            } catch (error) {
-                toast.error("An error occured during the registration")
+
+            } catch (error: any) {
+                if (error.response && error.response.data && error.response.data.message) {
+                    toast.error(error.response.data.message);
+                } else {
+                    toast.error('An error occurred during registration');
+                }
             }
         }
     })
@@ -60,7 +92,7 @@ const SignupForm = () => {
                                 className="mx-auto h-12 w-auto"
                             />
                             <h2 className="mt-4 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
-                                Sign up 
+                                Sign up
                             </h2>
                         </div>
 
@@ -81,8 +113,13 @@ const SignupForm = () => {
                                             className="w-full border-b border-black text-sm bg-[#f5f5f5] outline-none px-1 py-1"
                                             value={formik.values.name}
                                             onChange={formik.handleChange}
+                                            onBlur={formik.handleBlur}
                                         />
-
+                                        {formik.touched.name && formik.errors.name ? (
+                                            <div className="text-red-500 text-sm">
+                                                {formik.errors.name}
+                                            </div>
+                                        ) : null}
                                     </div>
                                 </div>
 
@@ -100,8 +137,14 @@ const SignupForm = () => {
                                             autoComplete="email"
                                             value={formik.values.email}
                                             onChange={formik.handleChange}
+                                            onBlur={formik.handleBlur}
                                             className="w-full border-b border-black text-sm bg-[#f5f5f5] outline-none px-1 py-1"
                                         />
+                                        {formik.touched.email && formik.errors.email ? (
+                                            <div className="text-red-500 text-sm">
+                                                {formik.errors.email}
+                                            </div>
+                                        ) : null}
                                     </div>
                                 </div>
 
@@ -119,9 +162,14 @@ const SignupForm = () => {
                                             autoComplete=""
                                             value={formik.values.phone}
                                             onChange={formik.handleChange}
+                                            onBlur={formik.handleBlur}
                                             className="w-full border-b border-black text-sm bg-[#f5f5f5] outline-none px-1 py-1"
                                         />
-
+                                        {formik.touched.phone && formik.errors.phone ? (
+                                            <div className="text-red-500 text-sm">
+                                                {formik.errors.phone}
+                                            </div>
+                                        ) : null}
                                     </div>
                                 </div>
 
@@ -139,7 +187,14 @@ const SignupForm = () => {
                                             autoComplete="current-password"
                                             value={formik.values.password}
                                             onChange={formik.handleChange}
-                                            className="w-full border-b border-black text-sm bg-[#f5f5f5] outline-none px-1 py-1" />
+                                            onBlur={formik.handleBlur}
+                                            className="w-full border-b border-black text-sm bg-[#f5f5f5] outline-none px-1 py-1" 
+                                            />
+                                            {formik.touched.password && formik.errors.password ? (
+                                            <div className="text-red-500 text-sm">
+                                                {formik.errors.password}
+                                            </div>
+                                        ) : null}
                                     </div>
                                 </div>
 
@@ -157,8 +212,14 @@ const SignupForm = () => {
                                             autoComplete="current-password"
                                             value={formik.values.confirmPassword}
                                             onChange={formik.handleChange}
+                                            onBlur={formik.handleBlur}
                                             className="w-full border-b border-black text-sm bg-[#f5f5f5] outline-none px-1 py-1"
                                         />
+                                        {formik.touched.confirmPassword && formik.errors.confirmPassword ? (
+                                            <div className="text-red-500 text-sm">
+                                                {formik.errors.confirmPassword}
+                                            </div>
+                                        ) : null}
                                     </div>
                                 </div>
 
@@ -167,7 +228,7 @@ const SignupForm = () => {
                                         type="submit"
                                         className="flex h-12 w-full justify-center rounded-md bg-black px-3 py-3 text-sm font-semibold leading-6 text-white  mt-8 shadow-sm hover:bg-[#04A118] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#04A118]"
                                     >
-                                        Sign in
+                                        Sign Up
                                     </button>
                                     <div className="flex items-center justify-center py-5">
                                         <div className="flex-1 border-t border-black"></div>
@@ -193,7 +254,7 @@ const SignupForm = () => {
 
                             <p className="mt-10 text-center text-sm text-gray-500">
                                 Already have an  account?{' '}
-                                <a href="#" className="font-semibold leading-6 text-[#04A118] hover:text-[#04A118]">
+                                <a href="/login" className="font-semibold leading-6 text-[#04A118] hover:text-[#04A118]">
                                     Sign In
                                 </a>
                             </p>

@@ -1,120 +1,230 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { UserCircleIcon, TrashIcon } from '@heroicons/react/24/solid'
 import { useFormik } from 'formik'
-import { freelancerApplication } from '../../Redux/actions/freelancerAction'
 import { toast } from 'sonner'
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import * as Yup from 'yup'
 
 
-    interface FreelanceData {
-        firstName: string;
-        lastName: string;
-        photo?: string;
-        description: string;
-        language: string[];
-        experience: {
-            expertise: string;
-            fromYear: number;
-            toYear: number;
-        }[]; 
-        skills: string[];
-        education?: {
-            collageName: string;
-            title: string;
-            year: number;
-        }[];
-        certification?: {
-            name: string;
-            year: number;
-        }[];
-        portfolio?: string;
-        email: string;
-        phone?: string;
-    }
-    
+const url = 'http://localhost:7070/freelancer';
+
+interface FreelanceData {
+    firstName: string;
+    lastName: string;
+    photo?: File;
+    description: string;
+    language: string[];
+    experience: Array<{
+        expertise: string;
+        fromYear: number;
+        toYear: number;
+    }>;
+    skills: string[];
+    education ?: Array<{
+        collageName: string;
+        title: string;
+        year: number;
+    }>;
+    certification?: Array<{
+        name: string;
+        year: number;
+        file?: File;
+    }>;
+    portfolio?: string;
+    email: string;
+    phone?: string;
+}
 
 export default function Application() {
-
     const navigate = useNavigate()
+    const [imagePreview, setImagePreview] = useState<string | null>(null)
+    const fileInputRef = useRef<HTMLInputElement>(null)
 
-    const [educations, setEducations] = useState<any>([])
-    const [newEducation, setNewEducation] = useState({})
+    const [educations, setEducations] = useState<FreelanceData['education']>([])
+    const [newEducation, setNewEducation] = useState<{ collageName: string; title: string; year: number }>({
+        collageName: '',
+        title: '',
+        year: new Date().getFullYear()
+    })
     const [isEducationModalOpen, setIsEducationModalOpen] = useState(false)
 
-    const [certifications, setCertifications] = useState<any>([])
-    const [newCertification, setNewCertification] = useState({ name: '', from: '', year: '' })
+    const [certifications, setCertifications] = useState<FreelanceData['certification']>([])
+    const [newCertification, setNewCertification] = useState<{ name: string; year: string; file: File | null }>({ name: '', year: '', file: null })
     const [isCertificationModalOpen, setIsCertificationModalOpen] = useState(false)
 
-    const [personalWebsite, setPersonalWebsite] = useState('')
-
-    const [skills, setSkills] = useState<any>([])
+    const [skills, setSkills] = useState<string[]>([])
     const [newSkill, setNewSkill] = useState('')
-    const [isSkillModalOpen, setIsSkillModalOpen] = useState(false)
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            const file = e.target.files[0]
+            formik.setFieldValue('photo', file)
+
+            const previewImage = URL.createObjectURL(file)
+            setImagePreview(previewImage)
+        }
+    }
+
+    const handleCertificateFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            const file = e.target.files[0]
+            setNewCertification({ ...newCertification, file })
+        }
+    }
 
     const addEducation = () => {
-        setEducations([...educations, newEducation])
-        formik.setFieldValue("education", [...formik.values.education, newEducation]);
-        setNewEducation({})
-        setIsEducationModalOpen(false)
+        if (newEducation.collageName && newEducation.title) {
+            const updatedEducations = [...formik.values.education!, newEducation]
+            setEducations(updatedEducations)
+            formik.setFieldValue("education", updatedEducations)
+            setNewEducation({ collageName: '', title: '', year: new Date().getFullYear() })
+            setIsEducationModalOpen(false)
+        } else {
+            toast.error('Please fill all education fields')
+        }
     }
 
     const addCertification = () => {
-        setCertifications([...certifications, newCertification])
-        formik.setFieldValue('certification',[...formik.values.certification, newCertification])
-        setNewCertification({ name: '', from: '', year: '' })
-        setIsCertificationModalOpen(false)
+        if (newCertification.name && newCertification.year && newCertification.file) {
+            const newCert = {
+                name: newCertification.name,
+                year: parseInt(newCertification.year),
+                file: newCertification.file
+            };
+            const updatedCertifications = [...formik.values.certification!, newCert]
+            setCertifications(updatedCertifications)
+            formik.setFieldValue('certification', updatedCertifications)
+            setNewCertification({ name: '', year: '', file: null })
+            setIsCertificationModalOpen(false)
+        } else {
+            toast.error('Please fill all certification fields')
+        }
     }
 
     const addSkill = () => {
-        setSkills([...skills, newSkill])
-        setNewSkill('')
-        setIsSkillModalOpen(false)
+        if (newSkill.trim()) {
+            const updatedSkills = [...formik.values.skills, newSkill.trim()]
+            setSkills(updatedSkills)
+            formik.setFieldValue("skills", updatedSkills);
+            setNewSkill('')
+        }
     }
 
     const deleteEducation = (index: number) => {
-        setEducations((prevEducations: any[]) => prevEducations.filter((_, i) => i !== index))
+        const updatedEducations = formik.values.education!.filter((_, i) => i !== index)
+        setEducations(updatedEducations)
+        formik.setFieldValue("education", updatedEducations)
     }
 
-    const deletCertificate = (index: number) => {
-        setCertifications((prev: any[]) => prev.filter((_, i) => i !== index))
+    const deleteCertificate = (index: number) => {
+        const updatedCertifications = formik.values.certification!.filter((_, i) => i !== index)
+        setCertifications(updatedCertifications)
+        formik.setFieldValue("certification", updatedCertifications)
     }
 
-    const formik = useFormik({
+    const deleteSkill = (skillToDelete: string) => {
+        const updatedSkills = formik.values.skills.filter(skill => skill !== skillToDelete)
+        setSkills(updatedSkills)
+        formik.setFieldValue('skills', updatedSkills)
+    }
+
+    const formik = useFormik<FreelanceData>({
         initialValues: {
             firstName: '',
             lastName: '',
-            photo: '',
+            photo: undefined,
             description: '',
-            language: [] as string[], 
+            language: [],
             experience: [
                 {
                     expertise: '',
                     fromYear: 0,
                     toYear: 0
                 }
-            ], 
+            ],
             skills: [],
             education: [],
-            certification: [], 
+            certification: [],
             portfolio: '',
             email: '',
             phone: ''
-        },   
-        onSubmit: async(values) => {
+        },
+        validationSchema: Yup.object({
+            firstName: Yup.string()
+            .transform((value)=>value.trim())
+            .matches(/^[A-Z][a-zA-Z]*$/, "First letter should be capital letter")
+            .required("First name is required"),
+            lastName: Yup.string()
+            .transform((value)=>value.trim())
+            .matches(/^[A-Z][a-zA-Z]*$/, "Last letter should start with capital letter")
+            .required("Last name is required"),
+            description: Yup.string()
+            .transform((value)=>value.trim())
+            .min(50, "Minimum 70 words required")
+            .required("Description is required"),
+            language: Yup.array()
+            .of(Yup.string().required('Language is required'))
+            .min(1,"At least one language must be selected"),
+            // experience: Yup.array().of(
+            //     Yup.object().shape({
+            //         expertise:Yup.string().requie
+            //     })
+            // )
+        }),
+        onSubmit: async (values) => {
             try {
-                const responseResult = await freelancerApplication(values)
-                if(responseResult){
-                    navigate('/freelancer/home')
+                const formData = new FormData()
+
+                formData.append('firstName', values.firstName)
+                formData.append('lastName', values.lastName)
+                formData.append('description', values.description)
+                formData.append('email', values.email)
+                formData.append('phone', values.phone || '')
+                formData.append('portfolio', values.portfolio || '')
+
+                formData.append('language', JSON.stringify(values.language))
+                formData.append('skills', JSON.stringify(values.skills))
+
+                formData.append('experience', JSON.stringify(values.experience))
+                formData.append('education', JSON.stringify(values.education))
+
+
+                if (values.photo instanceof File) {
+                    formData.append('photo', values.photo)
                 }
+
+                values.certification!.forEach((cert, index) => {
+                    formData.append(`certification[${index}][name]`, cert.name)
+                    formData.append(`certification[${index}][year]`, cert.year.toString())
+                    if (cert.file instanceof File) {
+                        formData.append(`certification[${index}][file]`, cert.file)
+                    }
+                })
+
+                const response = await axios.post('http://localhost:7070/freelancer/application', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                })
+
+                console.log('Server response:', response.data)
+                toast.success(response.data.message)
+                navigate('/freelancer/home')
             } catch (error: any) {
-                toast.error('Freelancer application filed')
+                console.error('Error submitting freelancer application:', error);
+                if (error.response && error.response.data) {
+                    toast.error(error.response.data.message);
+                } else {
+                    toast.error('An error occurred during the submission');
+                }
             }
         }
     })
 
     return (
         <div className='container mx-auto px-4 sm:px-6 lg:px-8'>
-            <form onSubmit={formik.handleSubmit}>
+            <form onSubmit={formik.handleSubmit} encType="multipart/form-data">
                 <div className="space-y-28 pt-16">
                     {/* Personal Info Section */}
                     <div className="border-b border-gray-900/10 pb-12">
@@ -159,9 +269,29 @@ export default function Application() {
                                     Photo
                                 </label>
                                 <div className="flex items-center gap-x-3 w-3/4">
-                                    <UserCircleIcon className="h-36 w-36 text-gray-300" type='file' aria-hidden="true" />
-                                    <input type="file" 
-                                    value={formik.values.photo}/>
+                                    {imagePreview ? (
+                                        <img
+                                            src={imagePreview}
+                                            alt="Uploaded preview"
+                                            className="h-36 w-36 rounded-full object-cover"
+                                        />
+                                    ) : (
+                                        <UserCircleIcon className="h-36 w-36 text-gray-300" aria-hidden="true" />
+                                    )}
+                                    <input
+                                        type="file"
+                                        ref={fileInputRef}
+                                        className="hidden"
+                                        onChange={handleFileChange}
+                                        accept="image/*"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="px-3 py-2 text-sm font-semibold text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2"
+                                    >
+                                        Add
+                                    </button>
                                 </div>
                             </div>
 
@@ -175,9 +305,9 @@ export default function Application() {
                                         id="description"
                                         name="description"
                                         rows={3}
+                                        placeholder="Describe yourself..."
                                         value={formik.values.description}
                                         onChange={formik.handleChange}
-                                        placeholder="Describe yourself..."
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
                                     />
                                 </div>
@@ -185,13 +315,13 @@ export default function Application() {
 
                             {/* Select Language */}
                             <div className="flex items-start">
-                                <label htmlFor="selectLanguage" className="block py-3 text-sm font-medium leading-6 text-gray-900 w-1/4">
+                                <label htmlFor="language" className="block py-3 text-sm font-medium leading-6 text-gray-900 w-1/4">
                                     Select Language
                                 </label>
                                 <div className="w-3/4">
                                     <select
-                                        id="selectLanguage"
-                                        name="selectLanguage"
+                                        id="language"
+                                        name="language"
                                         value={formik.values.language}
                                         onChange={formik.handleChange}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
@@ -216,30 +346,30 @@ export default function Application() {
                         <div className="mt-10 space-y-16">
                             {/* Experience */}
                             <div className="flex items-start">
-                                <label htmlFor="Expertise" className="block text-sm font-medium py-3 leading-6 text-gray-900 w-1/4">
+                                <label htmlFor="experience" className="block text-sm font-medium py-3 leading-6 text-gray-900 w-1/4">
                                     Experience
                                 </label>
                                 <div className="flex space-x-2 w-3/4">
                                     <input
                                         type="text"
                                         placeholder="Expertise In"
-                                        value={formik.values.experience[0]?.expertise || ''}
-                                        onChange={formik.handleChange}
+                                        value={formik.values.experience[0].expertise}
+                                        onChange={(e) => formik.setFieldValue('experience[0].expertise', e.target.value)}
                                         className="w-1/3 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
                                     />
                                     <input
                                         type="number"
                                         placeholder="From (Year)"
-                                        value={formik.values.experience[0]?.fromYear || ''}
-                                        onChange={formik.handleChange}
+                                        value={formik.values.experience[0].fromYear}
+                                        onChange={(e) => formik.setFieldValue('experience[0].fromYear', e.target.value)}
                                         className="w-1/3 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
                                     />
                                     <input
                                         type="number"
                                         placeholder="To (Year)"
-                                        value={formik.values.experience[0]?.toYear || ''}
-                                        onChange={formik.handleChange}
-                                        className="w-1/3 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
+                                        value={formik.values.experience[0].toYear}
+                                        onChange={(e) => formik.setFieldValue('experience[0].toYear', e.target.value)}
+                                        className="w-1/3 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1  focus:ring-gray-600 focus:border-gray-600 ring-0"
                                     />
                                 </div>
                             </div>
@@ -249,29 +379,40 @@ export default function Application() {
                                 <label htmlFor="skills" className="block text-sm font-medium leading-6 py-3 text-gray-900 w-1/4">
                                     Skills
                                 </label>
-                                <div className=" relative w-3/4">
-                                    <input
-                                        type="text"
-                                        placeholder="Skills"
-                                        value={formik.values.skills}
-                                        aria-placeholder={skills}
-                                        onChange={formik.handleChange}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
-
-                                    />
-                                    {skills && (
-                                        <TrashIcon
-                                            className="absolute right-2 top-1/4 mb-6 transform -translate-y-1/2 h-5 w-5 text-gray-400 cursor-pointer hover:text-gray-600"
-                                            onClick={() => setSkills([])} // Clear the input when clicked
+                                <div className="relative w-3/4 flex flex-col">
+                                    <div className="flex">
+                                        <input
+                                            type="text"
+                                            id="skills"
+                                            placeholder={formik.values.skills.join(', ')}
+                                            value={newSkill}
+                                            onChange={(e) => setNewSkill(e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
                                         />
+                                        <button
+                                            type="button"
+                                            className="ml-2 px-4 py-2 text-sm font-medium text-white bg-black rounded-md hover:bg-[#1AA803] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1AA803]"
+                                            onClick={addSkill}
+                                        >
+                                            Add
+                                        </button>
+                                    </div>
+                                    {formik.values.skills.length > 0 && (
+                                        <div className="mt-2 flex flex-wrap gap-2">
+                                            {formik.values.skills.map((skill: string, index: number) => (
+                                                <div key={index} className="bg-gray-200 px-2 py-1 rounded-md flex items-center">
+                                                    <span>{skill}</span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => deleteSkill(skill)}
+                                                        className="ml-2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                                                    >
+                                                        <TrashIcon className="h-4 w-4" />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
                                     )}
-                                    <button
-                                        type="button"
-                                        className="mt-2 text-sm text-[#1AA803] hover:underline"
-                                        onClick={() => setIsSkillModalOpen(true)}
-                                    >
-                                        + Add New
-                                    </button>
                                 </div>
                             </div>
 
@@ -284,23 +425,23 @@ export default function Application() {
                                     <table className="min-w-full border-collapse border border-gray-300">
                                         <thead>
                                             <tr className='text-gray-400 text-balance border bg-gray-500/10 border-gray-300 px-4'>
-                                                <th className="font-normal py-2">College/University/Name</th>
+                                                <th className="font-normal py-2">College/University Name</th>
                                                 <th className="font-normal px-4 py-2">Title</th>
                                                 <th className="font-normal px-4 py-2">Year</th>
+                                                <th className="font-normal px-4 py-2">Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {educations.map((edu: any, index: any) => (
+                                            {formik.values.education?.map((edu, index) => (
                                                 <tr key={index}>
-                                                    <td className="border border-gray-300 px-4 py-2">{edu.university}</td>
+                                                    <td className="border border-gray-300 px-4 py-2">{edu.collageName}</td>
                                                     <td className="border border-gray-300 px-4 py-2">{edu.title}</td>
                                                     <td className="border border-gray-300 px-4 py-2">{edu.year}</td>
-                                                    <td className=" border-gray-300 ">
+                                                    <td className="border border-gray-300 px-4 py-2">
                                                         <button
                                                             type="button"
                                                             onClick={() => deleteEducation(index)}
                                                             className="text-gray-500 hover:text-gray-700 focus:outline-none"
-                                                            aria-label={`Delete education entry for ${edu.university}`}
                                                         >
                                                             <TrashIcon className="h-5 w-5" />
                                                         </button>
@@ -330,19 +471,23 @@ export default function Application() {
                                             <tr className='text-gray-400 text-balance border bg-gray-500/10 border-gray-300 px-4'>
                                                 <th className="font-normal items-start py-2">Certificate or Award</th>
                                                 <th className="font-normal px-4 py-2">Year</th>
+                                                <th className="font-normal px-4 py-2">File</th>
+                                                <th className="font-normal px-4 py-2">Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {certifications.map((cert: any, index: any) => (
+                                            {certifications!.map((cert: any, index: number) => (
                                                 <tr key={index}>
                                                     <td className="border border-gray-300 px-4 py-2">{cert.name}</td>
                                                     <td className="border border-gray-300 px-4 py-2">{cert.year}</td>
-                                                    <td className=" border-gray-300 ">
+                                                    <td className="border border-gray-300 px-4 py-2">
+                                                        {cert.file ? cert.file.name : 'No file'}
+                                                    </td>
+                                                    <td className="border border-gray-300 px-4 py-2">
                                                         <button
                                                             type="button"
-                                                            onClick={() => deletCertificate(index)}
+                                                            onClick={() => deleteCertificate(index)}
                                                             className="text-gray-500 hover:text-gray-700 focus:outline-none"
-                                                            aria-label={`Delete education entry for ${cert.name}`}
                                                         >
                                                             <TrashIcon className="h-5 w-5" />
                                                         </button>
@@ -369,9 +514,11 @@ export default function Application() {
                                 <div className="w-3/4">
                                     <input
                                         type="url"
-                                        value={personalWebsite}
-                                        onChange={(e) => setPersonalWebsite(e.target.value)}
+                                        id="portfolio"
+                                        name="portfolio"
                                         placeholder="Provide a link to your own professional website"
+                                        value={formik.values.portfolio}
+                                        onChange={formik.handleChange}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
                                     />
                                 </div>
@@ -387,25 +534,31 @@ export default function Application() {
                         </p>
 
                         <div className="mt-10 space-y-8">
-                            {/* Verified */}
+                            {/* Email */}
                             <div className="flex items-center w-2/4">
                                 <input
-                                    id="verified"
-                                    name="verified"
-                                    placeholder='Email'
+                                    id="email"
+                                    name="email"
+                                    type="email"
+                                    placeholder='Your Registered Email'
+                                    value={formik.values.email}
+                                    onChange={formik.handleChange}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
                                 />
-                                <label htmlFor="verified" className="ml-2 block text-sm font-medium leading-6 text-gray-900">
+                                <label htmlFor="email" className="ml-2 block text-sm font-medium leading-6 text-gray-900">
                                     Verified
                                 </label>
                             </div>
 
-                            {/* Candidates */}
-                            <div className="flex items-center w-2/4">
+                            {/* Phone */}
+                            <div className="flex items-start w-2/4">
                                 <input
-                                    id="candidates"
-                                    name="candidates"
+                                    id="phone"
+                                    name="phone"
+                                    type="tel"
                                     placeholder='Phone'
+                                    value={formik.values.phone}
+                                    onChange={formik.handleChange}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
                                 />
                                 <p className="ml-6 text-gray-500 text-sm">We will never share your phone number.</p>
@@ -428,38 +581,33 @@ export default function Application() {
                 </div>
             </form>
 
-            {/* Education Modal  */}
+            {/* Education Modal */}
             {isEducationModalOpen && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
                     <div className="bg-white w-3/5 p-5 rounded shadow-lg z-60">
-                        <h2 className="text-lg font-bold mb-4">Add Education</h2>
-
-                        <select
+                        <h2 className="text-lg font-bold mb-4">Add New Education</h2>
+                        <input
+                            type="text"
+                            placeholder="College/University Name"
+                            value={newEducation.collageName}
+                            onChange={(e) => setNewEducation({ ...newEducation, collageName: e.target.value })}
                             className="w-full mb-2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
-                            onChange={(e) => setNewEducation({ ...newEducation, university: e.target.value })}
-                        >
-                            <option value="">Select university</option>
-                            <option value="harvard">Harvard University</option>
-                            <option value="mit">MIT</option>
-                            <option value="stanford">Stanford University</option>
-                        </select>
-                        <select
-                            className="w-full mb-2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
+                        />
+                        <input
+                            type="text"
+                            placeholder="Title"
+                            value={newEducation.title}
                             onChange={(e) => setNewEducation({ ...newEducation, title: e.target.value })}
-                        >
-                            <option value="">Select title</option>
-                            <option value="bachelor">Bachelor's</option>
-                            <option value="master">Master's</option>
-                            <option value="phd">Ph.D.</option>
-                        </select>
-
+                            className="w-full mb-2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
+                        />
                         <select
                             className="w-full mb-2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
-                            onChange={(e) => setNewEducation({ ...newEducation, year: e.target.value })}
+                            onChange={(e) => setNewEducation({ ...newEducation, year: parseInt(e.target.value) })}
+                            value={newEducation.year}
                         >
                             <option value="">Select year</option>
                             {[...Array(30)].map((_, i) => (
-                                <option key={i} value={`${new Date().getFullYear() - i}`}>
+                                <option key={i} value={new Date().getFullYear() - i}>
                                     {new Date().getFullYear() - i}
                                 </option>
                             ))}
@@ -482,7 +630,6 @@ export default function Application() {
                 </div>
             )}
 
-            {/* Certification Modal */}
             {isCertificationModalOpen && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
                     <div className="bg-white w-3/5 p-5 rounded shadow-lg z-60">
@@ -492,12 +639,12 @@ export default function Application() {
                             placeholder="Certificate or Award"
                             value={newCertification.name}
                             onChange={(e) => setNewCertification({ ...newCertification, name: e.target.value })}
-                            className="w-full mb-2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
+                            className="w-full mb-2 px-3 py-2 border border-gray-300 rounded-md  shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
                         />
-
                         <select
                             className="w-full mb-2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
                             onChange={(e) => setNewCertification({ ...newCertification, year: e.target.value })}
+                            value={newCertification.year}
                         >
                             <option value="">Select year</option>
                             {[...Array(30)].map((_, i) => (
@@ -506,6 +653,11 @@ export default function Application() {
                                 </option>
                             ))}
                         </select>
+                        <input
+                            type="file"
+                            onChange={handleCertificateFileChange}
+                            className="w-full mb-2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
+                        />
                         <div className="flex justify-end space-x-2 mt-4">
                             <button
                                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600"
@@ -516,36 +668,6 @@ export default function Application() {
                             <button
                                 className="px-4 py-2 text-sm font-medium text-white bg-black border border-transparent rounded-md hover:bg-[#1AA803] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1AA803]"
                                 onClick={addCertification}
-                            >
-                                Save
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Skill Modal */}
-            {isSkillModalOpen && (
-                <div className="fixed inset-0  flex items-center justify-center bg-black bg-opacity-50 z-50">
-                    <div className="bg-white w-3/5 p-5 rounded shadow-lg z-60">
-                        <h2 className="text-lg font-bold mb-4">Add New Skill</h2>
-                        <input
-                            type="text"
-                            placeholder="Skill"
-                            value={newSkill}
-                            onChange={(e) => setNewSkill(e.target.value)}
-                            className="w-full mb-2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
-                        />
-                        <div className="flex justify-end space-x-2 mt-4">
-                            <button
-                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600"
-                                onClick={() => setIsSkillModalOpen(false)}
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                className="px-4 py-2 text-sm font-medium text-white bg-black border border-transparent rounded-md hover:bg-[#1AA803] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1AA803]"
-                                onClick={addSkill}
                             >
                                 Save
                             </button>

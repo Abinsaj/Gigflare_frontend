@@ -14,18 +14,15 @@ export const registerClient = (userData:{
     return async () =>{
         try {
             const response = await axios.post(`${url}/register`, userData);
-            if(response.data.status === true){
-                localStorage.setItem('userEmail',userData.email)
-                return response
+            console.log(response,'this is the actual reponse')
+            if (response.status === 200 && response.data.success) {
+                localStorage.setItem('userEmail', userData.email);
+                localStorage.setItem('userName', userData.name);
             }
             return response
         } catch (error: any) {
-            if(error.response.status === 409){
-                console.error('email already in use')
-                return false
-            }else{
-                throw error
-            }
+            console.error('Error in registerClient action:', error);
+            throw error;
         }
     }
 }
@@ -76,6 +73,38 @@ export const resendOtp = ()=>{
         }
     }
 }
+
+export const verifyForgotEmail = (email: string)=>{
+    return async()=>{
+        try {
+            console.log(email,'this this')
+            const response = await axios.post(`${url}/forgotEmail`, {email})
+            console.log(response,'this is it')
+            if(response.data == 'Email verified otp has sent'){
+                return true
+            }else if(response.data == 'Email verification failed'){
+                return false
+            }
+        } catch (error) {
+            throw error
+        }
+    }
+}
+
+// export const verifyForgotOtp = async(otp: string)=>{
+//     try {
+//         console.log('kjfklaad')
+//         const response = await axios.post(`${url}/verifyforgototp`,{otp})
+//         console.log(response,' this is the reponse we get')
+//         if(response.data === 'verified'){
+//             return true
+//         }else{
+//             return false
+//         }
+//     } catch (error: any) {
+//         throw error
+//     }
+// }
 
 
 

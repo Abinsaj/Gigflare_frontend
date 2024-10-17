@@ -1,35 +1,46 @@
 import { useFormik } from 'formik';
 import { useDispatch, useSelector } from 'react-redux';
-import { useFormAction, useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { verifyLogin } from '../../Redux/actions/userActions';
 import { AppDispatch } from '../../Redux/store';
-import { toast,Toaster } from 'sonner';
+import { toast } from 'sonner';
+import * as Yup from "yup"
 
 const LoginForm = () => {
 
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
-    const { userInfo } = useSelector((state: any)=> state.user);
+    const { userInfo } = useSelector((state: any) => state.user);
 
     const formik = useFormik({
-        initialValues:{
+        initialValues: {
             email: "",
             password: "",
         },
-        onSubmit: async(values)=>{
+        validationSchema: Yup.object({
+            email: Yup.string()
+                .transform((value) => value.trim())
+                .email("Invalid email address")
+                .required('Email is required'),
+            password: Yup.string()
+                .transform((value) => value.trim())
+                .min(8, "Minimum 8 characters required")
+                .required("Password is required")
+        }),
+        onSubmit: async (values) => {
             try {
                 const loginResult = await dispatch(verifyLogin(values)).unwrap();
-                if(loginResult){
-                    if(loginResult.userInfo?.isBlocked){
+                if (loginResult) {
+                    if (loginResult.userInfo?.isBlocked) {
                         toast.error('You are restricted from accessing the site.')
                         return
                     }
                     toast.success('Login successful')
-                    setTimeout(()=>{
+                    setTimeout(() => {
                         navigate("/")
-                    },1500)
+                    }, 1500)
                 }
-                
+
             } catch (error: any) {
                 toast.error(error.message || "An error occured")
             }
@@ -65,7 +76,7 @@ const LoginForm = () => {
                             <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
                                 Log In
                             </h2>
-                           
+
                         </div>
 
                         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
@@ -86,7 +97,13 @@ const LoginForm = () => {
                                             onChange={formik.handleChange}
                                             onBlur={formik.handleBlur}
                                             autoComplete="email"
-                                            className="w-full border-b border-black text-sm bg-[#f5f5f5] outline-none px-1 py-1" />
+                                            className="w-full border-b border-black text-sm bg-[#f5f5f5] outline-none px-1 py-1" 
+                                            />
+                                            {formik.touched.email && formik.errors.email ? (
+                                                <div className='text-red-500 text-sm'>
+                                                    {formik.errors.email}
+                                                </div>
+                                            ):null }
                                     </div>
                                 </div>
 
@@ -105,11 +122,19 @@ const LoginForm = () => {
                                             onChange={formik.handleChange}
                                             onBlur={formik.handleBlur}
                                             autoComplete="current-password"
-                                            className="w-full border-b border-black text-sm bg-[#f5f5f5] outline-none px-1 py-1"/>
+                                            className="w-full border-b border-black text-sm bg-[#f5f5f5] outline-none px-1 py-1" />
+                                            {formik.touched.password && formik.errors.password ? (
+                                                <div className='text-red-500 text-sm'>
+                                                    {formik.errors.password}
+                                                </div>
+                                            ):null }
                                     </div>
                                 </div>
-
+                                <div className='items-end'>
+                                    <Link to='/forgotpassword ' className='text-sm text-gray-500 hover:text-black'>Forgot Password ?</Link>
+                                </div>
                                 <div>
+
                                     <button
                                         type="submit"
                                         className="flex w-full justify-center rounded-md bg-black px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-[#04A118] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#04A118]">
@@ -120,13 +145,13 @@ const LoginForm = () => {
 
                             <p className="mt-10 text-center text-sm text-gray-500">
                                 Don't have an GIGFLARE account?{' '}
-                                <a href="#" className="font-semibold leading-6 text-[#04A118] hover:text-[#04A118]">
+                                <a href="/signup" className="font-semibold leading-6 text-[#04A118] hover:text-[#04A118]">
                                     Sign Up
                                 </a>
                             </p>
                         </div>
                     </div>
-                </div> 
+                </div>
             </div>
         </>
     )
