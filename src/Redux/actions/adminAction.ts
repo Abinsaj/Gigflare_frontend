@@ -7,8 +7,8 @@ export const verifyAdmin = createAsyncThunk(
     'admin/authlogin',
     async({email, password}:{email: string, password: string},thunkAPI)=>{
         try {
-            const response = await axios.post(`${url}/verifyAdmin`,{email, password})
-            return response.data.data
+            const response = await axios.post(`${url}/verifyAdmin`,{email, password},{withCredentials:true})
+            return response.data
         } catch (error: any) {
             return thunkAPI.rejectWithValue(error.response.data || error.message)
         }

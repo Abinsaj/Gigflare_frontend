@@ -11,6 +11,7 @@ interface User {
     isFreelancer?: boolean;
     isBlocked: boolean;
     freelancerCredentials?: {};
+    profile?:string
 }
 
 interface UserState {
@@ -22,8 +23,8 @@ interface UserState {
 }
 
 const initialState: UserState = {
-    userInfo: null,
-    accessToken: null,
+    userInfo: localStorage.getItem('userInfo') ? JSON.parse(localStorage.getItem('userInfo')!) : null,
+    accessToken: localStorage.getItem('accessToken') || null,
     refreshToken: null,
     loading: false,
     error: null
@@ -37,6 +38,8 @@ const userSlice = createSlice({
             state.userInfo = null;
             state.accessToken = null;
             state.refreshToken = null;
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('userInfo');
         },
         setLoading(state,action){
             state.loading = action.payload
@@ -53,6 +56,7 @@ const userSlice = createSlice({
         })
         .addCase(verifyLogin.fulfilled,(state, action: PayloadAction<{accessToken: string; userInfo: User}>)=>{
             const { accessToken, userInfo } = action.payload
+            console.log(userInfo, ' this is the user info we got from backend')
             state.userInfo = userInfo;
             console.log(state.userInfo)
             state.accessToken = accessToken;

@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from 'react'
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
 import axios from 'axios'
+// import axiosInstance from '../../config/userInstance'
 import { User } from '../../Types/userInterface'
 import { toast } from 'sonner'
+import { useSelector } from 'react-redux'
+import { RootState } from '../../Redux/store'
 
 const url = 'http://localhost:7070'
 
-const Users = () => {
+const UsersList = () => {
+
+  const admin = useSelector((state:RootState)=>state.admin.adminInfo)
+  console.log(admin,'qwertyui')
+
   const [userData, setUserData] = useState<User[]>([])
   const [showModal, setShowModal] = useState(false)
   const [modalAction, setModalAction] = useState<"block" | "unblock">("block")
@@ -15,8 +22,8 @@ const Users = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const userList = await axios.get(`${url}/admin/getUsers`)
-        console.log(userList.data.users, ' this is the users list')
+        const userList = await axios.get(`${url}/admin/getUsers`,{withCredentials:true})
+        console.log(userList.data.users, ' this is the users list') 
         const data = userList.data.users
         setUserData(data)
       } catch (error) {
@@ -38,11 +45,11 @@ const Users = () => {
     try {
       const response = await axios.put(`${url}/admin/blockUser/${selectedUser.email}`, {
         isBlocked: modalAction === "block"
-      })
+      },{withCredentials:true})
 
       if (response.data.success) {
         setUserData(userData.map(user => 
-          user.userId === selectedUser.userId 
+          user.email === selectedUser.email 
             ? { ...user, isBlocked: modalAction === "block" } 
             : user
         ))
@@ -167,4 +174,4 @@ const Users = () => {
   )
 }
 
-export default Users
+export default UsersList

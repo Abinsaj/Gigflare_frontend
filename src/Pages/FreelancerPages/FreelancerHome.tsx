@@ -80,7 +80,7 @@ const FreelancerHome = () => {
                         <p className="text-sm sm:text-lg lg:text-xl font-normal text-white mb-6 lg:mb-8 opacity-90">
                             You bring the skill. We'll make earning easy.
                         </p>
-                        <a href='/freelancer/application' className="inline-flex justify-center items-center py-2 sm:py-3 px-4 sm:px-5 text-sm sm:text-base font-medium text-green-500 rounded-md bg-gray-600 bg-opacity-70 hover:bg-gray-700/80  ">
+                        <a href='/application' className="inline-flex justify-center items-center py-2 sm:py-3 px-4 sm:px-5 text-sm sm:text-base font-medium text-green-500 rounded-md bg-gray-600 bg-opacity-70 hover:bg-gray-700/80  ">
                             Become a Freelancer
                         </a>
                     </div>

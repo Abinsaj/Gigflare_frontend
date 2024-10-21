@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { verifyAdmin } from '../../Redux/actions/adminAction'
 import { AppDispatch } from '../../Redux/store'
+import { setAdmin } from '../../Redux/slices/adminSlice'
 
 const AdminLoginForm = () => {
     const dispatch = useDispatch<AppDispatch>()
@@ -27,7 +28,8 @@ const AdminLoginForm = () => {
                     toast.error('wrong Password');
                 }else{
                     toast.success('Login successful');
-                    navigate('/admin/dashboard')
+                    dispatch(setAdmin(submit.payload.cred))
+                    navigate('/admin/')
                 }
             } catch (error) {
                 toast.error('Invalid Credential for Admin Login')

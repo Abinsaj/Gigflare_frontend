@@ -24,6 +24,7 @@ const adminSlice = createSlice({
     reducers:{
         clearAdmin(state){
             state.adminInfo = null;
+            localStorage.removeItem('adminInfo')
             state.loading = false;
             state.error = null
         },
@@ -32,6 +33,9 @@ const adminSlice = createSlice({
         },
         setError(state, action){
             state.error = action.payload;
+        },
+        setAdmin(state,action){
+            state.adminInfo = action.payload
         }
     },
     extraReducers: (builder)=>{
@@ -41,9 +45,13 @@ const adminSlice = createSlice({
             state.error = null;
         })
         .addCase(verifyAdmin.fulfilled,(state, action)=>{
-            state.adminInfo = action.payload;
+            console.log('its hererereerererrrer')
+            const {cred} = action.payload
+            state.adminInfo = cred;
             state.loading = false;
             state.error = null;
+
+            localStorage.setItem('adminInfo',JSON.stringify(cred))
         })
         .addCase(verifyAdmin.rejected, (state, action)=>{
             state.loading = false;
@@ -51,5 +59,5 @@ const adminSlice = createSlice({
         })
     }
 })
-export const {clearAdmin, setLoading, setError} = adminSlice.actions
+export const {clearAdmin, setLoading, setError,setAdmin} = adminSlice.actions
 export default adminSlice.reducer

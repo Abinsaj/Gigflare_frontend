@@ -9,7 +9,7 @@ const Footer = () => {
           <div className="col-span-1">
             <img
               alt="Your Company"
-              src={require('../../Assets/logo.jpg')}
+              src={require('../../../Assets/logo.jpg')}
               className="h-14 w-auto "
             />
           </div>

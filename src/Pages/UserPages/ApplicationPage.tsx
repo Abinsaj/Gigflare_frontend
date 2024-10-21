@@ -1,4 +1,4 @@
-import Application from "../../Components/FreelancerComponent/FreelancerApplication1"
+import Application from "../../Components/UserComponent/FreelancerApplication1"
 import Navbar from "../../Components/FreelancerComponent/Navbar"
 
 const ApplicationPage = () => {

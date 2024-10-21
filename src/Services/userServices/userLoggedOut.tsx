@@ -1,5 +1,4 @@
-import { user } from "@nextui-org/react";
-import { UseSelector } from "react-redux";
+
 import { Navigate, Outlet } from "react-router-dom";
 
 const UserLoggedOut = ()=>{

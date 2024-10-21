@@ -1,8 +1,13 @@
 import React from 'react'
-import { Card, CardHeader, CardBody, Image } from "@nextui-org/react";
+import { Card, CardHeader, CardBody, Image, useSelect } from "@nextui-org/react";
+import { useSelector } from 'react-redux';
+import { RootState } from '../../Redux/store';
 
 
 const ClientHome = () => {
+
+    const data = useSelector((state:RootState)=>state.user.userInfo)
+    console.log(data)
 
     const links = [
         { name: 'Open roles', href: '#' },
@@ -73,7 +78,7 @@ const ClientHome = () => {
         <>
             <section className="bg-white relative">
                 {/* Content Div with Background Image */}
-                <div className="relative z-10 max-w-full px-20 py-24 mx-auto lg:py-36 lg:grid lg:grid-cols-12 lg:gap-8 xl:gap-0">
+                <div className=" relative min-h-screen z-10 max-w-full shadow-inner px-20 py-24 mx-auto lg:py-36 lg:grid lg:grid-cols-12 lg:gap-8 xl:gap-0">
                     {/* Background Image for the Div */}
                     <div className="absolute top-0 left-0 w-full h-full">
                         <img
@@ -81,11 +86,11 @@ const ClientHome = () => {
                             src={require('../../Assets/heroSection.jpg')}
                             alt="Background Image"
                         />
-                        <div className="absolute inset-0 bg-black opacity-50"></div> {/* Overlay for readability */}
+                        <div className="absolute inset-0 bg-black opacity-10"></div> {/* Overlay for readability */}
                     </div>
 
                     {/* Content on top of the background */}
-                    <div className="relative z-20 mr-auto place-self-center lg:col-span-7 text-white pl-10"> {/* Add padding-left */}
+                    <div className="relative  mr-auto place-self-center  lg:col-span-7 text-white pl-10 "> {/* Add padding-left */}
                         <h1 className="max-w-2xl mb-4 text-4xl font-extrabold tracking-tight leading-none md:text-5xl xl:text-6xl">
                             Find the right Freelance service right away
                         </h1>
@@ -205,11 +210,11 @@ const ClientHome = () => {
                         className="hidden sm:absolute sm:-top-10 sm:right-1/2 sm:-z-10 sm:mr-10 sm:block sm:transform-gpu sm:blur-3xl"
                     >
                         <div
-                            style={{
-                                clipPath:
-                                    'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)',
-                            }}
-                            className="aspect-[1097/845] w-[68.5625rem] bg-gradient-to-tr from-[#000000] opacity-10"
+                            // style={{
+                            //     clipPath:
+                            //         'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)',
+                            // }}
+                            className="aspect-[1097/845] w-[68.5625rem] bg-gradient-to-tr "
                         />
                     </div>
                     <div className="mx-auto max-w-7xl px-6 lg:px-8">

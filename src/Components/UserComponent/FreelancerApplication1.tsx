@@ -4,7 +4,10 @@ import { useFormik } from 'formik'
 import { toast } from 'sonner'
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import axiosInstance from '../../config/userInstance';
 import * as Yup from 'yup'
+import { useSelector } from 'react-redux';
+import { RootState } from '../../Redux/store';
 
 
 const url = 'http://localhost:7070/freelancer';
@@ -37,6 +40,9 @@ interface FreelanceData {
 }
 
 export default function Application() {
+
+    const data:any = useSelector((state:RootState)=>state.user.userInfo)
+
     const navigate = useNavigate()
     const [imagePreview, setImagePreview] = useState<string | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -150,30 +156,27 @@ export default function Application() {
             email: '',
             phone: ''
         },
-        validationSchema: Yup.object({
-            firstName: Yup.string()
-            .transform((value)=>value.trim())
-            .matches(/^[A-Z][a-zA-Z]*$/, "First letter should be capital letter")
-            .required("First name is required"),
-            lastName: Yup.string()
-            .transform((value)=>value.trim())
-            .matches(/^[A-Z][a-zA-Z]*$/, "Last letter should start with capital letter")
-            .required("Last name is required"),
-            description: Yup.string()
-            .transform((value)=>value.trim())
-            .min(50, "Minimum 70 words required")
-            .required("Description is required"),
-            language: Yup.array()
-            .of(Yup.string().required('Language is required'))
-            .min(1,"At least one language must be selected"),
-            // experience: Yup.array().of(
-            //     Yup.object().shape({
-            //         expertise:Yup.string().requie
-            //     })
-            // )
-        }),
+        // validationSchema: Yup.object({
+        //     firstName: Yup.string()
+        //     .transform((value)=>value.trim())
+        //     .matches(/^[A-Z][a-zA-Z]*$/, "First letter should be capital letter")
+        //     .required("First name is required"),
+        //     lastName: Yup.string()
+        //     .transform((value)=>value.trim())
+        //     .matches(/^[A-Z][a-zA-Z]*$/, "Last letter should start with capital letter")
+        //     .required("Last name is required"),
+        //     description: Yup.string()
+        //     .transform((value)=>value.trim())
+        //     .min(50, "Minimum 70 words required")
+        //     .required("Description is required"),
+        //     language: Yup.array()
+        //     .of(Yup.string().required('Language is required'))
+        //     .min(1,"At least one language must be selected"),
+            
+        // }),
         onSubmit: async (values) => {
             try {
+                console.log(values,'these are the values')
                 const formData = new FormData()
 
                 formData.append('firstName', values.firstName)
@@ -202,7 +205,7 @@ export default function Application() {
                     }
                 })
 
-                const response = await axios.post('http://localhost:7070/freelancer/application', formData, {
+                const response = await axiosInstance.post(`/freelancer/application/${data.userId}`, formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
@@ -327,9 +330,9 @@ export default function Application() {
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
                                     >
                                         <option value="">Select Language</option>
-                                        <option value="en">English</option>
-                                        <option value="es">Spanish</option>
-                                        <option value="fr">French</option>
+                                        <option value="English">English</option>
+                                        <option value="Spanish">Spanish</option>
+                                        <option value="French">French</option>
                                     </select>
                                 </div>
                             </div>
