@@ -1,25 +1,29 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { UserCircleIcon, MapPinIcon, ClockIcon } from 'lucide-react'
 import { RootState } from '../../Redux/store'
 import UserDetails from './UserDetails'
-import PostJob from './PostJob'
+import JobPost from './JobPost'
 
 
-const ProfileContent = () => (
+const ProfileContent = () => {
+  useEffect(()=>{
+
+  },[])
+return (
   <div className='bg-white w-full p-6 rounded-md shadow-md'>
     <h2 className="text-2xl font-semibold mb-4">Profile Content</h2>
     <p>This is where the profile content would go.</p>
   </div>
 )
+}
+
+  
+  
 
 
-const AddJobContent = () => (
-  <div>
-    <h2 className="text-2xl font-semibold mb-4">Add a New Job</h2>
-    <p>Here you can add a new job listing.</p>
-  </div>
-)
+
+
 
 const Logout = ()=>(
   <>
@@ -27,10 +31,15 @@ const Logout = ()=>(
 )
 
 export default function Profile() {
+
+  useEffect(()=>{
+
+  },[])
+
   const menuItems = [
     { name: 'Profile', Component: ProfileContent },
     { name: 'Personal Info', Component: UserDetails },
-    { name: 'Add Job', Component: PostJob },
+    { name: 'Add Job', Component: JobPost },
     // { name: 'Wallet', Component: AddJobContent },
     // { name: 'Contract', Component: AddJobContent },
     { name: 'Logout',Component: Logout},
@@ -39,6 +48,8 @@ export default function Profile() {
   const [activeItem, setActiveItem] = useState(menuItems[0].name)
 
   const data: any = useSelector((state: RootState) => state.user.userInfo)
+  
+  const activeComponent = menuItems.find(item => item.name === activeItem)?.Component;
 
   return (
     <div className='w-full  pb-10 flex flex-col bg-gray-100'>
@@ -89,7 +100,7 @@ export default function Profile() {
 
         <div className="w-full md:w-3/4 md:pl-8">
           
-            {menuItems.find(item => item.name === activeItem)?.Component()}
+        {activeComponent ? React.createElement(activeComponent) : <div>No component found</div>}
        
         </div>
       </div>

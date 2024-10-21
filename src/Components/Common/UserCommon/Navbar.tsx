@@ -99,7 +99,7 @@ const Navbar = () => {
                                 {/* Bell Icon */}
                                 <button
                                     type="button"
-                                    className="relative rounded-full bg-black p-1 text-gray-400 "
+                                    className="relative rounded-full bg-black p-1 text-gray-400 r"
                                 >
                                     <span className="sr-only">View notifications</span>
                                     <BellIcon aria-hidden="true" className="h-6 w-6" />

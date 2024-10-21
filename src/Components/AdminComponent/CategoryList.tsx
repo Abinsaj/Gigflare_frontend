@@ -5,14 +5,18 @@ import axiosInstance from '../../config/userInstance'
 import { toast } from 'sonner'
 
 
-interface Category{
-    name:string,
-    description: string
+interface Category {
+    _id: string
+    name: string,
+    description: string,
+    isBlocked: boolean
 }
 
 const CategoryList = () => {
 
     const [showModal, setShowModal] = useState(false)
+    const [blockModal, setBlockModal] = useState(false)
+    const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
     const [categoryName, setCategoryName] = useState('')
     const [description, setDescripion] = useState('')
     const [data, setData] = useState<Category[] | null>([])
@@ -21,6 +25,19 @@ const CategoryList = () => {
         setShowModal(false)
     }
 
+    const fetchData = async () => {
+        try {
+            const response = await axiosInstance.get('/admin/getcategories')
+            if (response.data.success) {
+                setData(response.data.data)
+
+            }
+        } catch (error: any) {
+            console.log(error.response.data.message)
+        }
+    }
+
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         try {
             e.preventDefault()
@@ -28,6 +45,7 @@ const CategoryList = () => {
             const response = await axiosInstance.post('/admin/category', { data })
             if (response.data.success) {
                 toast.success(response.data.message)
+                fetchData()
             } else {
                 toast.error(response.data.message)
             }
@@ -41,23 +59,42 @@ const CategoryList = () => {
         }
     }
 
-
-
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await axiosInstance.get('/admin/getcategories')
-                if (response.data.success) {
-                    setData(response.data.data)
-
-                }
-            } catch (error: any) {
-                console.log(error.response.data.message)
-            }
-        }
         fetchData()
     }, [])
 
+    const openBlockModal = (category: Category)=>{
+        setSelectedCategory(category)
+        setBlockModal(true)
+    }
+
+    const closeBlockModal = ()=>{
+        setBlockModal(false);
+        setSelectedCategory(null)
+    }
+
+    const handleBlockUnblock = async () => {
+        try {
+            if(selectedCategory){
+                const status = selectedCategory.isBlocked ? "unblock" : "block"
+                console.log(status)
+                const response = await axiosInstance.put(`/admin/blockcategory/${selectedCategory.name}`,{status: status })
+                if(response.data.success){
+                    if(response.data.success.message == 'category blocked'){
+                        toast.success('Category blocked successfully')
+                    }else{
+                        toast.success('Category unblocked successfully')
+                    }
+                    setBlockModal(false)
+                    fetchData()
+                }else{
+                    toast.error(response.data.message)
+                }
+            }
+        } catch (error: any) {
+            toast.error(error.response.data.message || "An error has occured")
+        }
+    }
 
     return (
         <>
@@ -85,28 +122,25 @@ const CategoryList = () => {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{category.name}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{category.description}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
+                                        {!category.isBlocked ? (
+                                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-500 text-black">
+                                                Active
+                                            </span>
+                                        ) : (
+                                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-500 text-black">
+                                                Blocked
+                                            </span>
+                                        )}
 
-                                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-500 text-black">
-                                            Blocked
-                                        </span>
-                                        {/* <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-500 text-black">
-                  Active
-                </span> */}
+
 
                                     </td>
                                     <td className='flex items-center justify-end pr-5 pt-3'>
-
-                                        {/* <button 
-                  className="bg-green-600 hover:bg-green-700 text-white font-bold py-1 px-3 rounded"
-                //   onClick={() => handleBlockUnblock(user, "unblock")}
-                >
-                  Unblock
-                </button> : */}
                                         <button
-                                            className="bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-3 rounded"
-                                        //   onClick={() => handleBlockUnblock(user, "block")}
+                                           className={`${category.isBlocked ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'} text-white font-bold py-1 px-3 rounded`}
+                                            onClick={() => openBlockModal(category)}
                                         >
-                                            Block
+                                            {category.isBlocked? 'Unblock' : 'Block'}
                                         </button>
 
                                     </td>
@@ -179,6 +213,32 @@ const CategoryList = () => {
                                     </button>
                                 </div>
                             </form>
+                        </div>
+                    </div>
+                )}
+
+                {blockModal && selectedCategory && (
+                    <div className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50'>
+                        <div className='bg-white p-6 rounded-lg shadow-md w-3/4 max-w-md h-auto'>
+                            <div className='flex justify-between items-center mb-4'>
+                                <h2 className='text-xl font-semibold py-2 text-black'>
+                                    {selectedCategory.isBlocked ? 'Unblock' : 'Block'} Category
+                                </h2>
+                                <button onClick={closeBlockModal} className="text-gray-500 hover:text-gray-700">
+                                    <X className="w-6 h-6" />
+                                </button>
+                            </div>
+
+                            <p>Are you sure you want to {selectedCategory.isBlocked ? 'unblock' : 'block'} this category?</p>
+
+                            <div className='flex justify-end pt-4'>
+                                <button onClick={handleBlockUnblock} className='px-4 py-2 bg-[#003F62] text-white rounded-md'>
+                                    Confirm
+                                </button>
+                                <button onClick={closeBlockModal} className='ml-3 px-4 py-2 bg-gray-300 text-black rounded-md'>
+                                    Cancel
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}
