@@ -5,4 +5,5 @@ interface User {
     email: string;
     phone: string;
     isBlocked: boolean;
+    isFreelancer: boolean;
 }

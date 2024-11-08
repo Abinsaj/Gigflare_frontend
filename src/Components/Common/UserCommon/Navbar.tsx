@@ -4,10 +4,11 @@ import { Bars3Icon, BellIcon, XMarkIcon, MagnifyingGlassIcon, EnvelopeIcon } fro
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../../Redux/store'
 
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { clearUser } from '../../../Redux/slices/userSlice'
 import { useEffect, useState } from 'react'
 import { User } from '../../../Types/userInterface'
+import BlockChecker from '../../../Services/userServices/blockChecker'
 
 
 const Navbar = () => {
@@ -22,8 +23,8 @@ const Navbar = () => {
     // function classNames(...classes: any) {
     //     return classes.filter(Boolean).join(' ')
     // },
-    const [userData, setUserData] = useState<User | null>()
     const dispatch = useDispatch()
+    const navigate = useNavigate()
 
     const userInfo = useSelector((state: RootState) => state.user.userInfo)
     console.log(userInfo, 'this is the userInfo we get')
@@ -60,25 +61,15 @@ const Navbar = () => {
                                     alt="Your Company"
                                     src={require('../../../Assets/logo.jpg')}
                                     className="h-10 w-auto "
+                                    onClick={()=>navigate('/')}
                                 />
                             </div>
-                            {/* <div className="hidden sm:ml-6 sm:block">
-                                <div className="flex space-x-4">
-                                    {navigation.map((item) => (
-                                        <a
-                                            key={item.name}
-                                            href={item.href}
-                                            aria-current={item.current ? 'page' : undefined}
-                                            className={classNames(
-                                                item.current ? 'hover:bg-gray-700 text-lime-600' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                                                'rounded-md px-3 py-2 text-sm font-medium',
-                                            )}
-                                        >
-                                            {item.name}
-                                        </a>
-                                    ))}
-                                </div>
-                            </div> */}
+
+                            <div className='flex justify-center items-center space-x-5 pl-14 text-gray-300 '>
+                                <p onClick={()=>navigate('/')} className='text-sm'>HOME</p>
+                                <p onClick={()=>navigate('/freelancerslist')} className='text-sm'>FIND TALENT</p>  
+                            </div>
+
                         </div>
 
                         {userInfo ? (
@@ -136,9 +127,17 @@ const Navbar = () => {
                                             </a>
                                         </MenuItem>
                                         <MenuItem>
-                                            <a href="/freelancer/home" className="block px-4 py-2 text-sm text-lime-600 text-bold hover:bg-gray-100">
-                                                Be a Freelancer
-                                            </a>
+                                            {userInfo.isFreelancer ?
+                                                (
+                                                    <a href="/freelancer/home" className="block px-4 py-2 text-sm text-lime-600 text-bold hover:bg-gray-100">
+                                                        Freelance home
+                                                    </a>
+                                                ) : (
+                                                    <a href="/freelancer/home" className="block px-4 py-2 text-sm text-lime-600 text-bold hover:bg-gray-100">
+                                                        Be a Freelancer
+                                                    </a>
+                                                )}
+
                                         </MenuItem>
                                         <MenuItem>
                                             <a onClick={handleLogout} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">

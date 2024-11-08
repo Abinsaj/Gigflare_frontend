@@ -4,13 +4,19 @@ import { useNavigate, Link } from 'react-router-dom';
 import { verifyLogin } from '../../Redux/actions/userActions';
 import { AppDispatch } from '../../Redux/store';
 import { toast } from 'sonner';
+import { FcGoogle } from "react-icons/fc";
 import * as Yup from "yup"
+import { useGoogleLogin } from '@react-oauth/google';
+import axiosInstance from '../../config/userInstance';
+import { googleLogin } from '../../Services/userServices/userAxiosCalls';
 
 const LoginForm = () => {
 
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const { userInfo } = useSelector((state: any) => state.user);
+
+    console.log('something//..')
 
     const formik = useFormik({
         initialValues: {
@@ -46,6 +52,29 @@ const LoginForm = () => {
             }
         }
     })
+
+    const handleGoogleAuth = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+            const result = await googleLogin(tokenResponse)
+            const password: string = 'Gig@flare'
+            const value = {email: result.email, password: password}
+            const loginResult = await dispatch(verifyLogin(value))
+            console.log(loginResult.payload,'this is the blah blah')
+            if(loginResult.payload){
+                toast.success('Login successful')
+                    setTimeout(() => {
+                        navigate("/")
+                    }, 1500)
+            }
+        },
+        onError: (error)=>{
+            console.error('Login Failed',error)
+        }
+    })
+
+    // const handleGoogleAuth = ()=>{
+    //     googleAuth()
+    // }
 
     return (
         <>
@@ -142,6 +171,16 @@ const LoginForm = () => {
                                     </button>
                                 </div>
                             </form>
+                            <button
+                                type="button"
+                                className="flex h-12 w-full justify-center border border-black rounded-md bg-[#f5f5f5] px-3 py-2 text-sm font-semibold mt-5 leading-6 text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-black"
+                                onClick={handleGoogleAuth} // Call the function directly
+                            >
+                                <div className="flex justify-center gap-1 pb-4">
+                                    <FcGoogle size={30} />
+                                    <h1 className="py-1">Google</h1>
+                                </div>
+                            </button>
 
                             <p className="mt-10 text-center text-sm text-gray-500">
                                 Don't have an GIGFLARE account?{' '}

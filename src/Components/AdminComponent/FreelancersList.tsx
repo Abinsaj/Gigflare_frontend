@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { ChevronLeft, ChevronRight, Calendar, X } from 'lucide-react'
 import axios from 'axios'
+import axiosInstance from '../../config/userInstance'
 
 const url = 'http://localhost:7070'
 
@@ -14,7 +15,7 @@ interface Freelancer {
 }
 
 export default function Freelancers() {
-  const [freelancers, setFreelancers] = useState<Freelancer[]>([])
+  const [freelancers, setFreelancers] = useState<any[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedFreelancer, setSelectedFreelancer] = useState<Freelancer | null>(null)
   const [modalType, setModalType] = useState<'status' | 'block'>('status')
@@ -22,7 +23,14 @@ export default function Freelancers() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`${url}/admin/getfreelancer`, { withCredentials: true })
+        const response = await axiosInstance.get(`/admin/getFreelancers`)
+        console.log(response,'this is the response we get after fetching the freelancer')
+        // let data: any = []
+        // response.data.users.map((user:any)=>{
+        //   if(user.isFreelancer == true){
+        //     data.push(user)
+        //   }
+        // })
         setFreelancers(response.data)
       } catch (error) {
         console.error('Error fetching freelancers:', error)
@@ -42,27 +50,21 @@ export default function Freelancers() {
     setSelectedFreelancer(null)
   }
 
-  const handleStatusChange = async (newStatus: 'pending' | 'accepted' | 'rejected') => {
-    if (selectedFreelancer) {
-      try {
-        await axios.put(`${url}/admin/updatefreelancerstatus/${selectedFreelancer.id}`, { status: newStatus })
-        setFreelancers(freelancers.map(f =>
-          f.id === selectedFreelancer.id ? { ...f, status: newStatus } : f
-        ))
-        closeModal()
-      } catch (error) {
-        console.error('Error updating freelancer status:', error)
-      }
-    }
-  }
+  
 
   const handleBlockToggle = async () => {
-    if (selectedFreelancer) {
+    if (freelancers) {
       try {
-        const newBlockedStatus = !selectedFreelancer.isBlocked
-        await axios.put(`${url}/admin/togglefreelancerblock/${selectedFreelancer.id}`, { isBlocked: newBlockedStatus })
+        let newBlockedStatus:any
+        let email:any
+        freelancers.map((freelancer)=>{
+          newBlockedStatus = freelancer.isBlocked
+          email = freelancer.email
+        })
+        
+        await axios.put(`${url}/admin/blockUser/${email}`, { isBlocked: newBlockedStatus })
         setFreelancers(freelancers.map(f =>
-          f.id === selectedFreelancer.id ? { ...f, isBlocked: newBlockedStatus } : f
+          f.email === email ? { ...f, isBlocked: newBlockedStatus } : f
         ))
         closeModal()
       } catch (error) {
@@ -86,31 +88,32 @@ export default function Freelancers() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {freelancers.map((freelancer) => (
               <tr key={freelancer.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{freelancer.name}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-500">{freelancer.firstName} {freelancer.lastName}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{freelancer.email}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${freelancer.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                      freelancer.status === 'accepted' ? 'bg-green-100 text-green-800' :
-                        'bg-red-100 text-red-800'
-                    }`}>
-                    {freelancer.status}
-                  </span>
+                {freelancer.isBlocked ? 
+                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-500 text-black">
+                      Blocked
+                    </span> : 
+                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-500 text-black">
+                      Active
+                    </span>
+                  }
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{freelancer.date}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded mr-2"
-                    onClick={() => openModal(freelancer, 'status')}
-                  >
-                    Change Status
+                  <button  className="bg-[#003F62] hover:bg-[#002E62] text-white font-bold py-1 px-3 rounded mr-2">
+                    View Details
                   </button>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                 
                   <button
                     className={`${freelancer.isBlocked ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'} text-white font-bold py-1 px-3 rounded`}
                     onClick={() => openModal(freelancer, 'block')}
@@ -128,57 +131,32 @@ export default function Freelancers() {
           <ChevronLeft className="w-5 h-5 mr-2" />
           Previous
         </button>
-        <span className="text-sm text-gray-700">Page 1 of 3</span>
-        <button className="flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+        {/* <span className="text-sm text-gray-700">Page 1 of 3</span> */}
+        <button className="flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md bg-[#003F62] hover:bg-[#002E62] text-white">
           Next
           <ChevronRight className="w-5 h-5 ml-2" />
         </button>
       </div>
 
-      {isModalOpen && selectedFreelancer && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      {isModalOpen && freelancers && (
+        freelancers.map((freelancer)=>(
+<div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-5 rounded-lg shadow-lg">
             < div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">
                 {modalType === 'status'
                   ? 'Change Status'
-                  : `${selectedFreelancer.isBlocked ? 'Unblock' : 'Block'} Freelancer`}
+                  : `${freelancer.isBlocked ? 'Unblock' : 'Block'} Freelancer`}
               </h2>
               <button onClick={closeModal} className="text-gray-500 hover:text-gray-700">
                 <X className="w-6 h-6" />
               </button>
             </div>
 
-            {modalType === 'status' ? (
+             
               <div>
                 <p className="mb-4">
-                  Current status: <span className="font-semibold">{selectedFreelancer.status}</span>
-                </p>
-                <div className="flex justify-around">
-                  <button
-                    className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded"
-                    onClick={() => handleStatusChange('pending')}
-                  >
-                    Pending
-                  </button>
-                  <button
-                    className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
-                    onClick={() => handleStatusChange('accepted')}
-                  >
-                    Accept
-                  </button>
-                  <button
-                    className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
-                    onClick={() => handleStatusChange('rejected')}
-                  >
-                    Reject
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div>
-                <p className="mb-4">
-                  Are you sure you want to {selectedFreelancer.isBlocked ? 'unblock' : 'block'} this freelancer?
+                  Are you sure you want to {freelancer.isBlocked ? 'unblock' : 'block'} this freelancer?
                 </p>
                 <div className="flex justify-end">
                   <button
@@ -188,7 +166,7 @@ export default function Freelancers() {
                     Cancel
                   </button>
                   <button
-                    className={`px-4 py-2 ${selectedFreelancer.isBlocked
+                    className={`px-4 py-2 ${freelancer.isBlocked
                         ? 'bg-gradient-to-r from-lime-400 to-lime-500 text-white'
                         : 'bg-gradient-to-r from-rose-400 to-red-500 text-white'
                       } rounded`}
@@ -198,9 +176,11 @@ export default function Freelancers() {
                   </button>
                 </div>
               </div>
-            )}
+
           </div>
         </div>
+        ))
+        
       )}
 
     </div>

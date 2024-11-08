@@ -1,6 +1,7 @@
 import { createAsyncThunk, isRejectedWithValue } from "@reduxjs/toolkit";
 import axios from "axios";
 import {User} from '../../Types/userInterface'
+import axiosInstance from "../../config/userInstance";
 
 const url = 'http://localhost:7070';
 
@@ -52,7 +53,9 @@ export const verifyLogin = createAsyncThunk<{ accessToken: string; userInfo: Use
     'user/authLogin',
     async ({email,password},{rejectWithValue})=>{
         try {
-            const response = await axios.post(`${url}/login`,{email,password})
+            console.log('its hereeererrere')
+            const response = await axiosInstance.post(`/login`,{email,password})
+            // console.log('this is the response we got here')
             return response.data.cred
         } catch (error: any) {
             return rejectWithValue(error.response?.data || 'Login Failed')

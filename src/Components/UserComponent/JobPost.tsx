@@ -1,8 +1,12 @@
 import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { TrashIcon } from 'lucide-react';
 import { useFormik } from 'formik';
+import * as Yup from 'yup';
 import axiosInstance from '../../config/userInstance';
 import { toast } from 'sonner';
+import BlockChecker from '../../Services/userServices/blockChecker';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../Redux/store';
 
 interface Category {
     _id: string
@@ -13,28 +17,56 @@ interface Category {
 
 const JobPost = () => {
 
+    BlockChecker()
+
     const [newSkill, setNewSkill] = useState<string>('')
     const [data, setData] = useState<Category[] | null>([])
+    const userData = useSelector((state:RootState)=>state.user.userInfo)
     
-    useEffect(()=>{
-        const fetchData = async()=>{
+    useEffect(() => {
+        const fetchData = async () => {
             try {
                 const response = await axiosInstance.get('/admin/getcategories')
                 if (response.data.success) {
                     setData(response.data.data)
-    
                 }
             } catch (error: any) {
                 console.log(error.response.data.message)
             }
         }
         fetchData()
-    },[])
+    }, [])
 
     const deleteSkill = (skill: string) => {
         const updatedSkills = formik.values.skills.filter((s:string) => s !== skill)
         formik.setFieldValue('skills', updatedSkills)
     }
+
+    const validationSchema = Yup.object({
+        jobTitle: Yup.string()
+            .required('Job title is required')
+            .min(3, 'Job title must be at least 3 characters')
+            .max(100, 'Job title must not exceed 100 characters'),
+        jobDescription: Yup.string()
+            .required('Job description is required')
+            .min(50, 'Job description must be at least 50 characters')
+            .max(5000, 'Job description must not exceed 5000 characters'),
+        category: Yup.string()
+            .required('Category is required'),
+        budget: Yup.number()
+            .required('Budget is required')
+            .positive('Budget must be a positive number')
+            .integer('Budget must be an integer'),
+        deadline: Yup.date()
+            .required('Deadline is required')
+            .min(new Date(), 'Deadline must be in the future'),
+        language: Yup.string()
+            .required('Language is required'),
+        skills: Yup.array()
+            .of(Yup.string())
+            .min(1, 'At least one skill is required')
+            .max(10, 'Maximum 10 skills are allowed')
+    })
 
     const formik = useFormik({
         initialValues: {
@@ -46,34 +78,35 @@ const JobPost = () => {
             language: '',
             skills: []
         },
+        validationSchema: validationSchema,
         onSubmit: async (values) => {
             try {
-                console.log('this is the value we got ', values)
-                const response = await axiosInstance.post('/createjob',{values})
-                if(response.data.success){
+                const id = userData?.userId
+                const response = await axiosInstance.post('/createjob', { values, id })
+                if (response.data.success) {
                     toast.success(response.data.message)
-                }else{
+                    formik.resetForm()
+                    setNewSkill('')
+                } else {
                     toast.error(response.data.message)
                 }
             } catch (error: any) {
-                if(error.response && error.response.data && error.response.data.message){
-                    toast.error(error.resonse.data.message)
-                }else{
-                    toast.error('An error has ocuured')
+                if (error.response && error.response.data && error.response.data.message) {
+                    toast.error(error.response.data.message)
+                } else {
+                    toast.error('An error has occurred')
                 }
             }
         }
     })
 
-     const addSkill = (e:React.MouseEvent<HTMLButtonElement>) => {
+    const addSkill = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
-        if(newSkill.trim()){
-            
-            formik.setFieldValue('skills',[...formik.values.skills,newSkill])
+        if (newSkill.trim()) {
+            formik.setFieldValue('skills', [...formik.values.skills, newSkill])
             setNewSkill('')
         }
     }
-    console.log(formik.values.skills)
 
     return (
         <div>
@@ -91,9 +124,13 @@ const JobPost = () => {
                                 name='jobTitle'
                                 value={formik.values.jobTitle}
                                 onChange={formik.handleChange}
+                                onBlur={formik.handleBlur}
                                 placeholder='Describe your job here'
                                 className='w-full h-10 border border-gray-300 px-3 py-2 rounded-md shadow-sm'
                             />
+                            {formik.touched.jobTitle && formik.errors.jobTitle && (
+                                <div className="text-red-500 text-xs mt-1">{formik.errors.jobTitle}</div>
+                            )}
                         </div>
 
                         <div>
@@ -105,9 +142,13 @@ const JobPost = () => {
                                 name='jobDescription'
                                 value={formik.values.jobDescription}
                                 onChange={formik.handleChange}
+                                onBlur={formik.handleBlur}
                                 placeholder='Describe'
                                 className='w-full h-32 border border-gray-300 px-3 rounded-md shadow-sm'
                             />
+                            {formik.touched.jobDescription && formik.errors.jobDescription && (
+                                <div className="text-red-500 text-xs mt-1">{formik.errors.jobDescription}</div>
+                            )}
                         </div>
 
                         <div>
@@ -121,16 +162,17 @@ const JobPost = () => {
                                         name='category'
                                         value={formik.values.category}
                                         onChange={formik.handleChange}
+                                        onBlur={formik.handleBlur}
                                         className="w-full h-10 border border-gray-300 rounded-lg bg-[#ffffff] p-2 outline-none"
                                     >
-                                         <option value="">Select your Category</option>
-                                        {data!.map((category)=>(
-                                           
-                                        <option key={category._id} value={category.name}>{category.name}</option>
-                                        
+                                        <option value="">Select your Category</option>
+                                        {data!.map((category) => (
+                                            <option key={category._id} value={category.name}>{category.name}</option>
                                         ))}
-                                        
                                     </select>
+                                    {formik.touched.category && formik.errors.category && (
+                                        <div className="text-red-500 text-xs mt-1">{formik.errors.category}</div>
+                                    )}
                                 </div>
 
                                 <div className='flex flex-col w-1/3'>
@@ -139,13 +181,17 @@ const JobPost = () => {
                                     </label>
                                     <input
                                         id="budget"
-                                        type="text"
+                                        type="number"
                                         name='budget'
                                         value={formik.values.budget}
                                         onChange={formik.handleChange}
+                                        onBlur={formik.handleBlur}
                                         placeholder='Add Your Budget'
                                         className='h-10 border border-gray-300 px-3 shadow-sm mt-1 rounded-md mb-4'
                                     />
+                                    {formik.touched.budget && formik.errors.budget && (
+                                        <div className="text-red-500 text-xs mt-1">{formik.errors.budget}</div>
+                                    )}
                                 </div>
 
                                 <div className='flex flex-col w-1/3'>
@@ -158,8 +204,12 @@ const JobPost = () => {
                                         name='deadline'
                                         value={formik.values.deadline}
                                         onChange={formik.handleChange}
+                                        onBlur={formik.handleBlur}
                                         className='h-10 border border-gray-300 px-3 shadow-sm mt-1 rounded-md mb-4'
                                     />
+                                    {formik.touched.deadline && formik.errors.deadline && (
+                                        <div className="text-red-500 text-xs mt-1">{formik.errors.deadline}</div>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -174,15 +224,18 @@ const JobPost = () => {
                                 name='language'
                                 value={formik.values.language}
                                 onChange={formik.handleChange}
+                                onBlur={formik.handleBlur}
                                 placeholder='Add Language'
                                 className='w-full h-10 border border-gray-300 px-3 rounded-md shadow-sm'
                             />
+                            {formik.touched.language && formik.errors.language && (
+                                <div className="text-red-500 text-xs mt-1">{formik.errors.language}</div>
+                            )}
                         </div>
 
                         <div className="flex items-start pt-6">
-                            
                             <div className="relative w-full flex flex-col">
-                            <p className='text-xs font-medium px-1 py-1'>SKILLS</p>
+                                <p className='text-xs font-medium px-1 py-1'>SKILLS</p>
                                 <div className="flex">
                                     <input
                                         type="text"
@@ -215,9 +268,12 @@ const JobPost = () => {
                                         ))}
                                     </div>
                                 )}
+                                {formik.touched.skills && formik.errors.skills && (
+                                    <div className="text-red-500 text-xs mt-1">{formik.errors.skills}</div>
+                                )}
                             </div>
                         </div>
-                        <div className='w-full flex justify-end px-5'>
+                        <div className='w-full flex justify-center pl-10 px-5'>
                             <button
                                 type="submit"
                                 className='px-4 py-2 bg-[#1AA803] text-white shadow-sm rounded-md'

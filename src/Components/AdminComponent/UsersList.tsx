@@ -23,8 +23,8 @@ const UsersList = () => {
     const fetchData = async () => {
       try {
         const userList = await axios.get(`${url}/admin/getUsers`,{withCredentials:true})
-        console.log(userList.data.users, ' this is the users list') 
-        const data = userList.data.users
+        console.log(userList.data, ' this is the users list') 
+        const data = userList.data
         setUserData(data)
       } catch (error) {
         toast.error('Failed to fetch user data')
@@ -87,7 +87,7 @@ const UsersList = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {userData.map((user) => (
+            {userData?.map((user) => (
               <tr key={user.userId}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.userId}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.name}</td>

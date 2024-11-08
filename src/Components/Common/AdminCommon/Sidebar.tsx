@@ -12,6 +12,7 @@ const Sidebar = () => {
     { path: "/admin/freelancers", icon: Users, label: "FREELANCERS" },
     { path: "/admin/users", icon: UserCircle, label: "CLIENTS" },
     { path: "/admin/categories", icon: Tags, label: "CATEGORY" },
+    { path: "/admin/jobs", icon: CreditCard, label: "JOBS" },
     { path: "/admin/contracts", icon: FileText, label: "CONTRACTS" },
     { path: "/admin/payment", icon: CreditCard, label: "PAYMENT" },
   ]

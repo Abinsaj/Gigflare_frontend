@@ -2,12 +2,16 @@ import React from 'react'
 import { Route, Routes,  } from 'react-router-dom'
 import LoginPage from '../Pages/AdminPages/LoginPage'
 import Layout from '../Components/Common/AdminCommon/AdminLayout'
-import Freelancers from '../Components/AdminComponent/FreelancerApplicationList'
+import FreelancersApplication from '../Components/AdminComponent/FreelancerApplicationList'
 import Users from '../Components/AdminComponent/UsersList'
 import AdminLoggedIn from '../Services/adminServices/adminLoggedIn'
 import AdminLoggedOut from '../Services/adminServices/adminLoggedOut'
 import Dashboard from '../Components/AdminComponent/Dashboard'
 import CategoryList from '../Components/AdminComponent/CategoryList'
+import Freelancers from '../Components/AdminComponent/FreelancersList'
+import FreelancerDetails from '../Components/AdminComponent/FreelancerDetails'
+import JobLists from '../Components/AdminComponent/JobList'
+import JobDetails from '../Components/AdminComponent/JobDetails'
 
 
 function AdminRoutes() {
@@ -26,9 +30,13 @@ function AdminRoutes() {
       <Route path='' element = {<AdminLoggedIn/>}>
         <Route element={<Layout/>}>
           <Route index element={<Dashboard/>}/>
-          <Route path='applications' element={<Freelancers/>}/>
+          <Route path='applications' element={<FreelancersApplication/>}/>
           <Route path='users' element={<Users/>}/>
+          <Route path='freelancers' element={<Freelancers/>}/>
           <Route path='categories' element={<CategoryList/>}/>
+          <Route path='jobs' element={<JobLists/>}/>
+          <Route path='/jobdetails' element={<JobDetails/>}/>
+          <Route path='/freelancerdetails' element={<FreelancerDetails/>}/>
         </Route>
       </Route>
         

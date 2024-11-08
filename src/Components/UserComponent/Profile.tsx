@@ -4,12 +4,11 @@ import { UserCircleIcon, MapPinIcon, ClockIcon } from 'lucide-react'
 import { RootState } from '../../Redux/store'
 import UserDetails from './UserDetails'
 import JobPost from './JobPost'
+import BlockChecker from '../../Services/userServices/blockChecker'
+import UserChangePass from './UserChangePass'
 
 
 const ProfileContent = () => {
-  useEffect(()=>{
-
-  },[])
 return (
   <div className='bg-white w-full p-6 rounded-md shadow-md'>
     <h2 className="text-2xl font-semibold mb-4">Profile Content</h2>
@@ -18,13 +17,6 @@ return (
 )
 }
 
-  
-  
-
-
-
-
-
 const Logout = ()=>(
   <>
   </>
@@ -32,23 +24,29 @@ const Logout = ()=>(
 
 export default function Profile() {
 
-  useEffect(()=>{
 
-  },[])
+
+  BlockChecker()
+
 
   const menuItems = [
     { name: 'Profile', Component: ProfileContent },
     { name: 'Personal Info', Component: UserDetails },
     { name: 'Add Job', Component: JobPost },
-    // { name: 'Wallet', Component: AddJobContent },
-    // { name: 'Contract', Component: AddJobContent },
+    { name: 'Wallet' },
+    { name: 'Contract'},
+    {name: "Change Password",Component: UserChangePass},
     { name: 'Logout',Component: Logout},
   ]
 
   const [activeItem, setActiveItem] = useState(menuItems[0].name)
 
+  const handleMenuItem = (name: string)=>{
+    setActiveItem(name)
+  }
+
   const data: any = useSelector((state: RootState) => state.user.userInfo)
-  
+
   const activeComponent = menuItems.find(item => item.name === activeItem)?.Component;
 
   return (
@@ -90,7 +88,7 @@ export default function Profile() {
                 className={`w-full p-4 text-left rounded-md cursor-pointer transition-colors font-medium ${
                   activeItem === item.name ? 'bg-[#1AA803] text-white' : 'hover:bg-gray-100 text-gray-700'
                 }`}
-                onClick={() => setActiveItem(item.name)}
+                onClick={() => handleMenuItem(item.name)}
               >
                 {item.name}
               </button>

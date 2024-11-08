@@ -2,6 +2,11 @@
 import React, { useEffect, useState } from 'react'
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
 import axios from 'axios'
+import { updateApplication } from '../../Redux/actions/adminAction'
+import { useDispatch } from 'react-redux'
+import { AppDispatch } from '../../Redux/store'
+import { toast } from 'sonner'
+import { useNavigate } from 'react-router-dom'
 
 const url = 'http://localhost:7070'
 
@@ -17,6 +22,10 @@ interface Freelancer {
 }
 
 export default function FreelancerApplications() {
+
+  const navigate = useNavigate()
+
+  const dispatch = useDispatch<AppDispatch>()
   const [freelancers, setFreelancers] = useState<Freelancer[]>([])
 
   useEffect(() => {
@@ -34,12 +43,13 @@ export default function FreelancerApplications() {
 
   const handleStatusChange = async (applicationId: string, newStatus: 'pending' | 'accepted' | 'rejected') => {
     try {
-      await axios.put(`${url}/admin/updatefreelancerstatus/${applicationId}`, { status: newStatus })
+      const response =  await dispatch(updateApplication({applicationId, newStatus}))
+      console.log(response,'this  is the response')
       setFreelancers(freelancers.map(f => 
         f.applicationId === applicationId ? { ...f, status: newStatus } : f
       ))
-    } catch (error) {
-      console.error('Error updating freelancer status:', error)
+    } catch (error:any) {
+      toast.error('Error updating freelancer status:', error)
     }
   }
 
@@ -59,6 +69,7 @@ export default function FreelancerApplications() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+              <th></th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
             </tr>
           </thead>
@@ -77,6 +88,9 @@ export default function FreelancerApplications() {
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(freelancer.createdAt).toLocaleDateString()}</td>
+                <td className=''>
+                  <button className='px-4 py-2 border rounded-md bg-[#003F62] text-white' onClick={()=>navigate(`/admin/freelancerdetails`,{state:{freelancer}})}>View Details</button>
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <select
                     className="mt-1  w-4/5 py-2 px-3   bg-gray-50 rounded-2xl shadow-sm focus:outline-none "

@@ -1,12 +1,13 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { verifyLogin } from "../actions/userActions";
+import { updateApplication } from "../actions/adminAction";
 
 
 interface User {
     userId: string;
     name: string;
     email: string;
-    phone: string;
+    phone?: string;
     password?: string;
     isFreelancer?: boolean;
     isBlocked: boolean;
@@ -56,9 +57,8 @@ const userSlice = createSlice({
         })
         .addCase(verifyLogin.fulfilled,(state, action: PayloadAction<{accessToken: string; userInfo: User}>)=>{
             const { accessToken, userInfo } = action.payload
-            console.log(userInfo, ' this is the user info we got from backend')
             state.userInfo = userInfo;
-            console.log(state.userInfo)
+            console.log(state.userInfo,'this is the user info in slice')
             state.accessToken = accessToken;
             state.loading = false;
 

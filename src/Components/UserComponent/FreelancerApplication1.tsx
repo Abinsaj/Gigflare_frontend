@@ -2,15 +2,12 @@ import React, { useState, useRef } from 'react'
 import { UserCircleIcon, TrashIcon } from '@heroicons/react/24/solid'
 import { useFormik } from 'formik'
 import { toast } from 'sonner'
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import axiosInstance from '../../config/userInstance';
+import { useNavigate } from 'react-router-dom'
 import * as Yup from 'yup'
-import { useSelector } from 'react-redux';
-import { RootState } from '../../Redux/store';
-
-
-const url = 'http://localhost:7070/freelancer';
+import { useSelector } from 'react-redux'
+import { RootState } from '../../Redux/store'
+import axiosInstance from '../../config/userInstance'
+import BlockChecker from '../../Services/userServices/blockChecker'
 
 interface FreelanceData {
     firstName: string;
@@ -24,7 +21,7 @@ interface FreelanceData {
         toYear: number;
     }>;
     skills: string[];
-    education ?: Array<{
+    education?: Array<{
         collageName: string;
         title: string;
         year: number;
@@ -41,8 +38,9 @@ interface FreelanceData {
 
 export default function Application() {
 
-    const data:any = useSelector((state:RootState)=>state.user.userInfo)
+    BlockChecker()
 
+    const data: any = useSelector((state: RootState) => state.user.userInfo)
     const navigate = useNavigate()
     const [imagePreview, setImagePreview] = useState<string | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -62,25 +60,177 @@ export default function Application() {
     const [skills, setSkills] = useState<string[]>([])
     const [newSkill, setNewSkill] = useState('')
 
+    const validationSchema = Yup.object({
+        firstName: Yup.string()
+            .matches(/^[A-Z][a-zA-Z]*$/, "First letter should be capital")
+            .required("First name is required"),
+        lastName: Yup.string()
+            .matches(/^[A-Z][a-zA-Z]*$/, "First letter should be capital")
+            .required("Last name is required"),
+        description: Yup.string()
+            .min(50, "Minimum 50 characters required")
+            .required("Description is required"),
+        // language: Yup.array()
+        //     .of(Yup.string().required('Language is required'))
+        //     .min(1, "At least one language must be selected"),
+        experience: Yup.array().of(
+            Yup.object().shape({
+                expertise: Yup.string()
+                    .required('Expertise is required'),
+                fromYear: Yup.number()
+                    .required('From year is required')
+                    .min(2010, 'Year must be after 2010')
+                    .max(new Date().getFullYear(), 'Year cannot be in the future'),
+                toYear: Yup.number()
+                    .required('To year is required')
+                    .min(Yup.ref('fromYear'), 'To year must be greater than or equal to from year')
+                    .max(new Date().getFullYear(), 'Year cannot be in the future')
+            })
+        ),
+        skills: Yup.array()
+            .of(Yup.string().required('Skill is required'))
+            .min(1, 'At least one skill is required'),
+        education: Yup.array().of(
+            Yup.object().shape({
+                collageName: Yup.string()
+                    .required('College/University name is required')
+                    .min(2, 'College name must be at least 2 characters'),
+                title: Yup.string()
+                    .required('Title is required')
+                    .min(2, 'Title must be at least 2 characters'),
+                year: Yup.number()
+                    .required('Year is required')
+                    .min(1950, 'Year must be after 1950')
+                    .max(new Date().getFullYear(), 'Year cannot be in the future')
+            })
+        ),
+        certification: Yup.array().of(
+            Yup.object().shape({
+                name: Yup.string()
+                    .required('Certification name is required')
+                    .min(2, 'Certification name must be at least 2 characters'),
+                year: Yup.number()
+                    .required('Year is required')
+                    .min(1950, 'Year must be after 1950')
+                    .max(new Date().getFullYear(), 'Year cannot be in the future'),
+            })
+        ),
+       
+        email: Yup.string()
+            .required('Email is required')
+            .email('Must be a valid email address'),
+        phone: Yup.string()
+            .transform((value)=>value.trim())
+            .matches(/^[0-9]{10}$/,"Phone number must be 10 digits")
+            .required("Phone number is required"),
+    })
+
+    console.log(data)
+
+    const formik = useFormik<FreelanceData>({
+        initialValues: {
+            firstName: '',
+            lastName: '',
+            photo: undefined,
+            description: '',
+            language: [],
+            experience: [
+                {
+                    expertise: '',
+                    fromYear: 0,
+                    toYear: 0
+                }
+            ],
+            skills: [],
+            education: [],
+            certification: [],
+            portfolio: '',
+            email: '',
+            phone: ''
+        },
+        validationSchema:validationSchema,
+        onSubmit: async (values, { setSubmitting }) => {
+            if (formik.isValid) {
+                try {
+                    const formData = new FormData()
+
+                    formData.append('firstName', values.firstName)
+                    formData.append('lastName', values.lastName)
+                    formData.append('description', values.description)
+                    formData.append('email', values.email)
+                    formData.append('phone', values.phone || '')
+                    formData.append('portfolio', values.portfolio || '')
+
+                    formData.append('language', JSON.stringify(values.language))
+                    formData.append('skills', JSON.stringify(values.skills))
+
+                    formData.append('experience', JSON.stringify(values.experience))
+                    formData.append('education', JSON.stringify(values.education))
+
+                    if (values.photo instanceof File) {
+                        formData.append('photo', values.photo)
+                    }
+
+                    values.certification!.forEach((cert, index) => {
+                        formData.append(`certification[${index}][name]`, cert.name)
+                        formData.append(`certification[${index}][year]`, cert.year.toString())
+                        if (cert.file instanceof File) {
+                            formData.append(`certification`, cert.file)
+                        }
+                    })
+                  
+
+                    const response = await axiosInstance.post(`/freelancer/application/${data.userId}`, formData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                        },
+                    })
+                    toast.success(response.data.message)
+                    navigate('/freelancer/home')
+                } catch (error: any) {
+                    console.error('Error submitting freelancer application:', error);
+                    if (error.response && error.response.data) {
+                        toast.error(error.response.data.message);
+                    } else {
+                        toast.error('An error occurred during the submission');
+                    }
+                } finally {
+                    setSubmitting(false);
+                }
+            } else {
+                toast.error('Please correct the errors in the form before submitting');
+                setSubmitting(false);
+            }
+        }
+    })
+
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
             const file = e.target.files[0]
-            formik.setFieldValue('photo', file)
-
-            const previewImage = URL.createObjectURL(file)
-            setImagePreview(previewImage)
+            if (file.size > 5000000) { 
+                formik.setFieldError('photo', 'File too large')
+            } else {
+                formik.setFieldValue('photo', file)
+                const previewImage = URL.createObjectURL(file)
+                setImagePreview(previewImage)
+            }
         }
     }
 
     const handleCertificateFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
             const file = e.target.files[0]
-            setNewCertification({ ...newCertification, file })
+            if (file.size > 5000000) { 
+                toast.error('Certificate file is too large. Maximum size is 5MB.')
+            } else {
+                setNewCertification({ ...newCertification, file })
+            }
         }
     }
 
     const addEducation = () => {
-        if (newEducation.collageName && newEducation.title) {
+        const { collageName, title, year } = newEducation;
+        if (collageName && title && year) {
             const updatedEducations = [...formik.values.education!, newEducation]
             setEducations(updatedEducations)
             formik.setFieldValue("education", updatedEducations)
@@ -135,96 +285,6 @@ export default function Application() {
         formik.setFieldValue('skills', updatedSkills)
     }
 
-    const formik = useFormik<FreelanceData>({
-        initialValues: {
-            firstName: '',
-            lastName: '',
-            photo: undefined,
-            description: '',
-            language: [],
-            experience: [
-                {
-                    expertise: '',
-                    fromYear: 0,
-                    toYear: 0
-                }
-            ],
-            skills: [],
-            education: [],
-            certification: [],
-            portfolio: '',
-            email: '',
-            phone: ''
-        },
-        // validationSchema: Yup.object({
-        //     firstName: Yup.string()
-        //     .transform((value)=>value.trim())
-        //     .matches(/^[A-Z][a-zA-Z]*$/, "First letter should be capital letter")
-        //     .required("First name is required"),
-        //     lastName: Yup.string()
-        //     .transform((value)=>value.trim())
-        //     .matches(/^[A-Z][a-zA-Z]*$/, "Last letter should start with capital letter")
-        //     .required("Last name is required"),
-        //     description: Yup.string()
-        //     .transform((value)=>value.trim())
-        //     .min(50, "Minimum 70 words required")
-        //     .required("Description is required"),
-        //     language: Yup.array()
-        //     .of(Yup.string().required('Language is required'))
-        //     .min(1,"At least one language must be selected"),
-            
-        // }),
-        onSubmit: async (values) => {
-            try {
-                console.log(values,'these are the values')
-                const formData = new FormData()
-
-                formData.append('firstName', values.firstName)
-                formData.append('lastName', values.lastName)
-                formData.append('description', values.description)
-                formData.append('email', values.email)
-                formData.append('phone', values.phone || '')
-                formData.append('portfolio', values.portfolio || '')
-
-                formData.append('language', JSON.stringify(values.language))
-                formData.append('skills', JSON.stringify(values.skills))
-
-                formData.append('experience', JSON.stringify(values.experience))
-                formData.append('education', JSON.stringify(values.education))
-
-
-                if (values.photo instanceof File) {
-                    formData.append('photo', values.photo)
-                }
-
-                values.certification!.forEach((cert, index) => {
-                    formData.append(`certification[${index}][name]`, cert.name)
-                    formData.append(`certification[${index}][year]`, cert.year.toString())
-                    if (cert.file instanceof File) {
-                        formData.append(`certification[${index}][file]`, cert.file)
-                    }
-                })
-
-                const response = await axiosInstance.post(`/freelancer/application/${data.userId}`, formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
-                })
-
-                console.log('Server response:', response.data)
-                toast.success(response.data.message)
-                navigate('/freelancer/home')
-            } catch (error: any) {
-                console.error('Error submitting freelancer application:', error);
-                if (error.response && error.response.data) {
-                    toast.error(error.response.data.message);
-                } else {
-                    toast.error('An error occurred during the submission');
-                }
-            }
-        }
-    })
-
     return (
         <div className='container mx-auto px-4 sm:px-6 lg:px-8'>
             <form onSubmit={formik.handleSubmit} encType="multipart/form-data">
@@ -243,32 +303,45 @@ export default function Application() {
                                     Full Name
                                 </label>
                                 <div className="flex gap-4 w-3/4">
-                                    <input
-                                        id="firstName"
-                                        name="firstName"
-                                        type="text"
-                                        placeholder="First Name"
-                                        autoComplete="given-name"
-                                        value={formik.values.firstName}
-                                        onChange={formik.handleChange}
-                                        className="w-1/2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
-                                    />
-                                    <input
-                                        id="lastName"
-                                        name="lastName"
-                                        type="text"
-                                        placeholder="Last Name"
-                                        autoComplete="family-name"
-                                        value={formik.values.lastName}
-                                        onChange={formik.handleChange}
-                                        className="w-1/2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
-                                    />
+                                    <div className="w-1/2">
+                                        <input
+                                            id="firstName"
+                                            name="firstName"
+                                            type="text"
+                                            placeholder="First Name"
+                                            autoComplete="given-name"
+                                            value={formik.values.firstName}
+                                            onChange={formik.handleChange}
+                                            onBlur={formik.handleBlur}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
+                                        />
+                                        {formik.touched.firstName && formik.errors.firstName && (
+                                            <div className="text-red-500 text-sm mt-1">{formik.errors.firstName}</div>
+                                        )}
+                                    </div>
+                                    <div className="w-1/2">
+                                        <input
+                                            id="lastName"
+                                            name="lastName"
+                                            type="text"
+                                            placeholder="Last Name"
+                                            autoComplete="family-name"
+                                            value={formik.values.lastName}
+                                            onChange={formik.handleChange}
+                                            onBlur={formik.handleBlur}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
+                                        />
+                                        {formik.touched.lastName && formik.errors.lastName && (
+                                            <div className="text-red-500 text-sm mt-1">{formik.errors.lastName}</div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
 
                             {/* Photo */}
                             <div className="flex items-start">
                                 <label htmlFor="photo" className="block text-sm py-3 font-medium leading-6 text-gray-900 w-1/4">
+                                    
                                     Photo
                                 </label>
                                 <div className="flex items-center gap-x-3 w-3/4">
@@ -295,6 +368,9 @@ export default function Application() {
                                     >
                                         Add
                                     </button>
+                                    {formik.errors.photo && (
+                                        <div className="text-red-500 text-sm mt-1">{formik.errors.photo}</div>
+                                    )}
                                 </div>
                             </div>
 
@@ -307,12 +383,16 @@ export default function Application() {
                                     <textarea
                                         id="description"
                                         name="description"
-                                        rows={3}
+                                        
                                         placeholder="Describe yourself..."
                                         value={formik.values.description}
                                         onChange={formik.handleChange}
+                                        onBlur={formik.handleBlur}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
                                     />
+                                    {formik.touched.description && formik.errors.description && (
+                                        <div className="text-red-500 text-sm mt-1">{formik.errors.description}</div>
+                                    )}
                                 </div>
                             </div>
 
@@ -327,6 +407,7 @@ export default function Application() {
                                         name="language"
                                         value={formik.values.language}
                                         onChange={formik.handleChange}
+                                        onBlur={formik.handleBlur}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
                                     >
                                         <option value="">Select Language</option>
@@ -334,6 +415,9 @@ export default function Application() {
                                         <option value="Spanish">Spanish</option>
                                         <option value="French">French</option>
                                     </select>
+                                    {formik.touched.language && formik.errors.language && (
+                                        <div className="text-red-500 text-sm mt-1">{formik.errors.language}</div>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -358,24 +442,46 @@ export default function Application() {
                                         placeholder="Expertise In"
                                         value={formik.values.experience[0].expertise}
                                         onChange={(e) => formik.setFieldValue('experience[0].expertise', e.target.value)}
+                                        onBlur={formik.handleBlur}
                                         className="w-1/3 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
                                     />
                                     <input
                                         type="number"
-                                        placeholder="From (Year)"
+                                        placeholder="From(Year)"
                                         value={formik.values.experience[0].fromYear}
                                         onChange={(e) => formik.setFieldValue('experience[0].fromYear', e.target.value)}
+                                        onBlur={formik.handleBlur}
                                         className="w-1/3 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
                                     />
                                     <input
                                         type="number"
-                                        placeholder="To (Year)"
+                                        placeholder="To(Year)"
                                         value={formik.values.experience[0].toYear}
                                         onChange={(e) => formik.setFieldValue('experience[0].toYear', e.target.value)}
+                                        onBlur={formik.handleBlur}
                                         className="w-1/3 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1  focus:ring-gray-600 focus:border-gray-600 ring-0"
                                     />
                                 </div>
                             </div>
+                            {formik.touched.experience && formik.errors.experience && (
+                              <div className="text-red-500 text-sm mt-1">
+                                {Array.isArray(formik.errors.experience) 
+                                  ? formik.errors.experience.map((error, index) => (
+                                      <div key={index}>
+                                        {typeof error === 'string' 
+                                          ? error 
+                                          : Object.values(error).map((err, i) => (
+                                              <div key={i}>{err}</div>
+                                            ))
+                                        }
+                                      </div>
+                                    ))
+                                  : typeof formik.errors.experience === 'string' 
+                                    ? formik.errors.experience
+                                    : 'Invalid experience data'
+                                }
+                              </div>
+                            )}
 
                             {/* Skills */}
                             <div className="flex items-start mt-10">
@@ -390,6 +496,7 @@ export default function Application() {
                                             placeholder={formik.values.skills.join(', ')}
                                             value={newSkill}
                                             onChange={(e) => setNewSkill(e.target.value)}
+                                            onBlur={formik.handleBlur}
                                             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
                                         />
                                         <button
@@ -418,6 +525,9 @@ export default function Application() {
                                     )}
                                 </div>
                             </div>
+                            {formik.touched.skills && formik.errors.skills && (
+                                <div className="text-red-500 text-sm mt-1">{formik.errors.skills}</div>
+                            )}
 
                             {/* Education */}
                             <div className="flex items-start mt-10">
@@ -444,6 +554,7 @@ export default function Application() {
                                                         <button
                                                             type="button"
                                                             onClick={() => deleteEducation(index)}
+                                                            onBlur={formik.handleBlur}
                                                             className="text-gray-500 hover:text-gray-700 focus:outline-none"
                                                         >
                                                             <TrashIcon className="h-5 w-5" />
@@ -462,6 +573,9 @@ export default function Application() {
                                     </button>
                                 </div>
                             </div>
+                            {formik.touched.education && formik.errors.education && (
+                                <div className="text-red-500 text-sm mt-1">{formik.errors.education}</div>
+                            )}
 
                             {/* Certification */}
                             <div className="flex items-start mt-10">
@@ -490,6 +604,7 @@ export default function Application() {
                                                         <button
                                                             type="button"
                                                             onClick={() => deleteCertificate(index)}
+                                                            onBlur={formik.handleBlur}
                                                             className="text-gray-500 hover:text-gray-700 focus:outline-none"
                                                         >
                                                             <TrashIcon className="h-5 w-5" />
@@ -508,6 +623,9 @@ export default function Application() {
                                     </button>
                                 </div>
                             </div>
+                            {formik.touched.certification && formik.errors.certification && (
+                                <div className="text-red-500 text-sm mt-1">{formik.errors.certification}</div>
+                            )}
 
                             {/* Portfolio */}
                             <div className="flex items-start mt-10">
@@ -522,8 +640,9 @@ export default function Application() {
                                         placeholder="Provide a link to your own professional website"
                                         value={formik.values.portfolio}
                                         onChange={formik.handleChange}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus: focus:ring-gray-600 focus:border-gray-600 ring-0"
                                     />
+                                   
                                 </div>
                             </div>
                         </div>
@@ -546,12 +665,16 @@ export default function Application() {
                                     placeholder='Your Registered Email'
                                     value={formik.values.email}
                                     onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
                                 />
                                 <label htmlFor="email" className="ml-2 block text-sm font-medium leading-6 text-gray-900">
                                     Verified
                                 </label>
                             </div>
+                            {formik.touched.email && formik.errors.email && (
+                                <div className="text-red-500 text-sm mt-1">{formik.errors.email}</div>
+                            )}
 
                             {/* Phone */}
                             <div className="flex items-start w-2/4">
@@ -562,10 +685,14 @@ export default function Application() {
                                     placeholder='Phone'
                                     value={formik.values.phone}
                                     onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
                                 />
                                 <p className="ml-6 text-gray-500 text-sm">We will never share your phone number.</p>
                             </div>
+                            {formik.touched.phone && formik.errors.phone && (
+                                <div className="text-red-500 text-sm mt-1">{formik.errors.phone}</div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -589,7 +716,7 @@ export default function Application() {
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
                     <div className="bg-white w-3/5 p-5 rounded shadow-lg z-60">
                         <h2 className="text-lg font-bold mb-4">Add New Education</h2>
-                        <input
+                                                <input
                             type="text"
                             placeholder="College/University Name"
                             value={newEducation.collageName}

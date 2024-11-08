@@ -5,6 +5,9 @@ import { toast } from "sonner";
 import { registerClient } from "../../Redux/actions/userActions";
 import { useAppDispatch } from "../../Redux/store";
 import { FcGoogle } from "react-icons/fc";
+import { useGoogleLogin } from "@react-oauth/google";
+import axiosInstance from "../../config/userInstance";
+import {jwtDecode} from 'jwt-decode'
 
 
 const SignupForm = () => {
@@ -33,16 +36,16 @@ const SignupForm = () => {
                 .email('Invalid email address')
                 .required("Email is required"),
             phone: Yup.string()
-                .transform((value)=>value.trim())
-                .matches(/^[0-9]{10}$/,"Phone number must be 10 digits")
+                .transform((value) => value.trim())
+                .matches(/^[0-9]{10}$/, "Phone number must be 10 digits")
                 .required("Phone number is required"),
             password: Yup.string()
-                .transform((value)=> value.trim())
-                .min(8,"password must be atleast 8 characters")
+                .transform((value) => value.trim())
+                .min(8, "password must be atleast 8 characters")
                 .required("password is required"),
             confirmPassword: Yup.string()
-                .transform((value)=> value.trim())
-                .oneOf([Yup.ref("password"),""],"Password must match")
+                .transform((value) => value.trim())
+                .oneOf([Yup.ref("password"), ""], "Password must match")
                 .required("Confirm password is required")
         })
         ,
@@ -64,6 +67,33 @@ const SignupForm = () => {
             }
         }
     })
+
+    const googleSignIn = useGoogleLogin({
+        scope:'openid profile email',
+        onSuccess: async (tokenResponse) => {
+            // try {
+                const result = await axiosInstance.post('/google', { tokenResponse });  
+                console.log(result,'this is the result')
+                if(!result?.data.data){
+                    toast.error("User already exists,please do the login")
+                }else{
+                    toast.success("User registered successfully")
+                    setTimeout(()=>{
+                    navigate('/login')
+                    },2000)
+                }
+            // } catch (error) {
+                
+            // }
+        },
+        onError: (error)=>{
+            console.error('Login Failed',error)
+        }
+    })
+
+    const handleGoogleAuth = ()=>{
+        googleSignIn()
+    }
 
     return (
         <>
@@ -188,9 +218,9 @@ const SignupForm = () => {
                                             value={formik.values.password}
                                             onChange={formik.handleChange}
                                             onBlur={formik.handleBlur}
-                                            className="w-full border-b border-black text-sm bg-[#f5f5f5] outline-none px-1 py-1" 
-                                            />
-                                            {formik.touched.password && formik.errors.password ? (
+                                            className="w-full border-b border-black text-sm bg-[#f5f5f5] outline-none px-1 py-1"
+                                        />
+                                        {formik.touched.password && formik.errors.password ? (
                                             <div className="text-red-500 text-sm">
                                                 {formik.errors.password}
                                             </div>
@@ -236,21 +266,21 @@ const SignupForm = () => {
                                         <div className="flex-1 border-t border-black"></div>
                                     </div>
 
-                                    <button
-                                        type="submit"
-                                        className="flex h-12 w-full justify-center border border-black rounded-md bg-[#f5f5f5] px-3 py-2 text-sm  font-semibold leading-6 text-black   shadow-sm  focus-visible:outline focus-visible:outline-2  focus-visible:outline-black"
-                                    >
-                                        <div className="flex justify-center gap-1 pb-4 ">
 
-
-                                            <FcGoogle size={30} className="" />
-                                            <h1 className="py-1">Google</h1>
-                                        </div>
-
-                                    </button>
 
                                 </div>
                             </form>
+                            <button
+                                type="button"
+                                className="flex h-12 w-full justify-center border border-black rounded-md bg-[#f5f5f5] px-3 py-2 text-sm font-semibold leading-6 text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-black"
+                                onClick={handleGoogleAuth} // Call the function directly
+                            >
+                                <div className="flex justify-center gap-1 pb-4">
+                                    <FcGoogle size={30} />
+                                    <h1 className="py-1">Google</h1>
+                                </div>
+                            </button>
+
 
                             <p className="mt-10 text-center text-sm text-gray-500">
                                 Already have an  account?{' '}

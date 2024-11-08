@@ -10,6 +10,8 @@ import ForgotPasswordOtpPage from '../Pages/UserPages/ForgotPasswordOtp'
 import ChangePassword from '../Components/UserComponent/ChangePassword'
 import ApplicationPage from '../Pages/UserPages/ApplicationPage'
 import ProfilePage from '../Pages/UserPages/ProfilePage'
+import FreelancerListPage from '../Pages/UserPages/FreelancerListPage'
+
 
 const UserRoutes = () => {
   return (
@@ -29,6 +31,7 @@ const UserRoutes = () => {
         <Route path='' element = {<UserLoggedIn/>} >
           <Route path="/application" element = {<ApplicationPage/>}/> 
           <Route path='/profile' element = {<ProfilePage/>}/>  
+          <Route path='/freelancerslist' element={<FreelancerListPage/>}/>
         </Route>
            
 

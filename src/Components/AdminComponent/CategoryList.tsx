@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useFormik } from 'formik'
 import axiosInstance from '../../config/userInstance'
 import { toast } from 'sonner'
+import { removeCategory } from '../../Services/adminServices/adminAxiosCall'
 
 
 interface Category {
@@ -20,6 +21,9 @@ const CategoryList = () => {
     const [categoryName, setCategoryName] = useState('')
     const [description, setDescripion] = useState('')
     const [data, setData] = useState<Category[] | null>([])
+
+
+    console.log(data,'this is the category data')
 
     const closeModal = () => {
         setShowModal(false)
@@ -41,6 +45,8 @@ const CategoryList = () => {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         try {
             e.preventDefault()
+            setCategoryName('')
+            setDescripion('')
             const data = { name: categoryName, description: description }
             const response = await axiosInstance.post('/admin/category', { data })
             if (response.data.success) {
@@ -56,6 +62,18 @@ const CategoryList = () => {
             } else {
                 toast.error('An unexpected error had occured')
             }
+        }
+    }
+
+    const deleteCategory = async(name: string)=>{
+        try {
+            const response = await removeCategory(name)
+            if(response.success === true){
+                toast.success(response.message)
+                setData(prevData=>prevData?.filter(category => category.name!==name)|| null)
+            }
+        } catch (error) {
+            console.log(error)
         }
     }
 
@@ -135,14 +153,16 @@ const CategoryList = () => {
 
 
                                     </td>
-                                    <td className='flex items-center justify-end pr-5 pt-3'>
+                                    <td className='flex items-center justify-end pr-4 pt-3 gap-1'>
                                         <button
-                                           className={`${category.isBlocked ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'} text-white font-bold py-1 px-3 rounded`}
+                                           className={`${category.isBlocked ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'} text-white font-semibold py-1 px-3 rounded`}
                                             onClick={() => openBlockModal(category)}
                                         >
                                             {category.isBlocked? 'Unblock' : 'Block'}
                                         </button>
-
+                                        <button onClick={()=>deleteCategory(category.name)} className='bg-red-600 text-white py-1 px-3 rounded font-semibold'>
+                                            Delete
+                                        </button>
                                     </td>
                                 </tr>
                             ))
