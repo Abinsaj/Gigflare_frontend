@@ -16,7 +16,7 @@ const FreelancerProfile = () => {
     
     useEffect(()=>{
         const fetch = async()=>{
-            const data = await getDetails(userData.userId)
+            const data = await getDetails(userData._id)
             setFreelancerData(data)
         }
         fetch()
@@ -50,7 +50,7 @@ const FreelancerProfile = () => {
                                 </div>
                                 <div className="ml-auto flex flex-col items-end text-sm text-gray-600">
                                     <button
-                                    onClick={()=>navigate('/freelancer/editprofile',{state:{freelancerData:freelancerData}})}
+                                    onClick={()=>navigate('/freelancer/editprofile',{state:{freelancerData}})}
                                     className='px-3 py-2 bg-green-500 text-white rounded-md mb-3'
                                     >Update Profile</button>
                                     <div className="flex items-center">
@@ -122,7 +122,7 @@ const FreelancerProfile = () => {
                         <div className='border-b-2 pb-6'>
                             <div className="flex justify-between items-center mb-4">
                                 <h2 className="text-2xl font-bold">Web Developer</h2>
-                                <span className="text-2xl font-bold">1000/hr</span>
+                                <span className="text-2xl font-bold"></span>
                             </div>
                             <p className="text-gray-700">
                             {freelancerData?.description}

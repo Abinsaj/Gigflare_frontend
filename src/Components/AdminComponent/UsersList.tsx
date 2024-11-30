@@ -35,6 +35,7 @@ const UsersList = () => {
 
   const handleBlockUnblock = (user: User, action: "block" | "unblock") => {
     setSelectedUser(user)
+    console.log(selectedUser,'this is the selected user')
     setModalAction(action)
     setShowModal(true)
   }
@@ -43,6 +44,7 @@ const UsersList = () => {
     if (!selectedUser) return
 
     try {
+      console.log(selectedUser)
       const response = await axios.put(`${url}/admin/blockUser/${selectedUser.email}`, {
         isBlocked: modalAction === "block"
       },{withCredentials:true})
@@ -79,9 +81,9 @@ const UsersList = () => {
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">S.NO</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
               <th></th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
             </tr>
@@ -89,20 +91,20 @@ const UsersList = () => {
           <tbody className="bg-white divide-y divide-gray-200">
             {userData?.map((user) => (
               <tr key={user.userId}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.userId}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"></td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.name}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.phone}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {user.isBlocked ? 
                     <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-500 text-black">
                       Blocked
                     </span> : 
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-500 text-black">
+                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-200 text-gray-700">
                       Active
                     </span>
                   }
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.phone}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <button className="bg-[#003F62] hover:bg-[#002E62] text-white font-bold py-1 px-3 rounded mr-2">
                     View Details

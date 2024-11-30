@@ -15,21 +15,29 @@ interface Category {
     isBlocked: boolean
 }
 
-const JobPost = () => {
+interface JobPostProps {
+    onClose: () => void
+    onJobAdded: any
+}
+
+const JobPost = ({ onClose,onJobAdded }: JobPostProps) => {
 
     BlockChecker()
 
     const [newSkill, setNewSkill] = useState<string>('')
     const [data, setData] = useState<Category[] | null>([])
-    const userData = useSelector((state:RootState)=>state.user.userInfo)
-    
+    const userData = useSelector((state: RootState) => state.user.userInfo)
+
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const response = await axiosInstance.get('/admin/getcategories')
                 if (response.data.success) {
                     setData(response.data.data)
+                    
+                    
                 }
+                onJobAdded(false)
             } catch (error: any) {
                 console.log(error.response.data.message)
             }
@@ -38,7 +46,7 @@ const JobPost = () => {
     }, [])
 
     const deleteSkill = (skill: string) => {
-        const updatedSkills = formik.values.skills.filter((s:string) => s !== skill)
+        const updatedSkills = formik.values.skills.filter((s: string) => s !== skill)
         formik.setFieldValue('skills', updatedSkills)
     }
 
@@ -81,12 +89,15 @@ const JobPost = () => {
         validationSchema: validationSchema,
         onSubmit: async (values) => {
             try {
-                const id = userData?.userId
+                const id = userData?._id
                 const response = await axiosInstance.post('/createjob', { values, id })
                 if (response.data.success) {
                     toast.success(response.data.message)
                     formik.resetForm()
                     setNewSkill('')
+                    onJobAdded(response.data.data)
+                    console.log(response.data.data,'this the job data we got from backend after adding it')
+                    onClose()
                 } else {
                     toast.error(response.data.message)
                 }
@@ -109,24 +120,30 @@ const JobPost = () => {
     }
 
     return (
-        <div>
-            <div className='w-full bg-white p-6 rounded-md shadow-md'>
-                <h2 className='text-2xl font-semibold pb-4'>Post a Job</h2>
+        <div
+            className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center z-50"
+            onClick={onClose}
+        >
+            <div
+                className="w-4/5 bg-white p-10 rounded-md shadow-md"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <h2 className="text-3xl font-semibold pb-4">Post a Job</h2>
                 <form onSubmit={formik.handleSubmit}>
-                    <div className='space-y-5'>
+                    <div className="space-y-5">
                         <div>
-                            <label htmlFor="jobTitle" className='text-xs font-medium px-1'>
+                            <label htmlFor="jobTitle" className="text-xs font-medium px-1">
                                 JOB TITLE
                             </label>
                             <input
                                 id="jobTitle"
-                                type='text'
-                                name='jobTitle'
+                                type="text"
+                                name="jobTitle"
                                 value={formik.values.jobTitle}
                                 onChange={formik.handleChange}
                                 onBlur={formik.handleBlur}
-                                placeholder='Describe your job here'
-                                className='w-full h-10 border border-gray-300 px-3 py-2 rounded-md shadow-sm'
+                                placeholder="Describe your job here"
+                                className="w-full h-10 border border-gray-300 px-3 py-2 rounded-md shadow-sm"
                             />
                             {formik.touched.jobTitle && formik.errors.jobTitle && (
                                 <div className="text-red-500 text-xs mt-1">{formik.errors.jobTitle}</div>
@@ -134,17 +151,17 @@ const JobPost = () => {
                         </div>
 
                         <div>
-                            <label htmlFor="jobDescription" className='text-xs font-medium px-1'>
+                            <label htmlFor="jobDescription" className="text-xs font-medium px-1">
                                 JOB DESCRIPTION
                             </label>
                             <textarea
                                 id="jobDescription"
-                                name='jobDescription'
+                                name="jobDescription"
                                 value={formik.values.jobDescription}
                                 onChange={formik.handleChange}
                                 onBlur={formik.handleBlur}
-                                placeholder='Describe'
-                                className='w-full h-32 border border-gray-300 px-3 rounded-md shadow-sm'
+                                placeholder="Describe"
+                                className="w-full h-32 border border-gray-300 px-3 rounded-md shadow-sm"
                             />
                             {formik.touched.jobDescription && formik.errors.jobDescription && (
                                 <div className="text-red-500 text-xs mt-1">{formik.errors.jobDescription}</div>
@@ -175,37 +192,37 @@ const JobPost = () => {
                                     )}
                                 </div>
 
-                                <div className='flex flex-col w-1/3'>
-                                    <label htmlFor="budget" className='text-xs font-medium px-1'>
+                                <div className="flex flex-col w-1/3">
+                                    <label htmlFor="budget" className="text-xs font-medium px-1">
                                         BUDGET
                                     </label>
                                     <input
                                         id="budget"
                                         type="number"
-                                        name='budget'
+                                        name="budget"
                                         value={formik.values.budget}
                                         onChange={formik.handleChange}
                                         onBlur={formik.handleBlur}
-                                        placeholder='Add Your Budget'
-                                        className='h-10 border border-gray-300 px-3 shadow-sm mt-1 rounded-md mb-4'
+                                        placeholder="Add Your Budget"
+                                        className="h-10 border border-gray-300 px-3 shadow-sm mt-1 rounded-md mb-4"
                                     />
                                     {formik.touched.budget && formik.errors.budget && (
                                         <div className="text-red-500 text-xs mt-1">{formik.errors.budget}</div>
                                     )}
                                 </div>
 
-                                <div className='flex flex-col w-1/3'>
-                                    <label htmlFor="deadline" className='text-xs font-medium px-1'>
+                                <div className="flex flex-col w-1/3">
+                                    <label htmlFor="deadline" className="text-xs font-medium px-1">
                                         DEADLINE
                                     </label>
                                     <input
                                         id="deadline"
                                         type="date"
-                                        name='deadline'
+                                        name="deadline"
                                         value={formik.values.deadline}
                                         onChange={formik.handleChange}
                                         onBlur={formik.handleBlur}
-                                        className='h-10 border border-gray-300 px-3 shadow-sm mt-1 rounded-md mb-4'
+                                        className="h-10 border border-gray-300 px-3 shadow-sm mt-1 rounded-md mb-4"
                                     />
                                     {formik.touched.deadline && formik.errors.deadline && (
                                         <div className="text-red-500 text-xs mt-1">{formik.errors.deadline}</div>
@@ -215,18 +232,18 @@ const JobPost = () => {
                         </div>
 
                         <div>
-                            <label htmlFor="language" className='text-xs font-medium px-1'>
+                            <label htmlFor="language" className="text-xs font-medium px-1">
                                 LANGUAGE
                             </label>
                             <input
                                 id="language"
-                                type='text'
-                                name='language'
+                                type="text"
+                                name="language"
                                 value={formik.values.language}
                                 onChange={formik.handleChange}
                                 onBlur={formik.handleBlur}
-                                placeholder='Add Language'
-                                className='w-full h-10 border border-gray-300 px-3 rounded-md shadow-sm'
+                                placeholder="Add Language"
+                                className="w-full h-10 border border-gray-300 px-3 rounded-md shadow-sm"
                             />
                             {formik.touched.language && formik.errors.language && (
                                 <div className="text-red-500 text-xs mt-1">{formik.errors.language}</div>
@@ -235,7 +252,7 @@ const JobPost = () => {
 
                         <div className="flex items-start pt-6">
                             <div className="relative w-full flex flex-col">
-                                <p className='text-xs font-medium px-1 py-1'>SKILLS</p>
+                                <p className="text-xs font-medium px-1 py-1">SKILLS</p>
                                 <div className="flex">
                                     <input
                                         type="text"
@@ -254,7 +271,7 @@ const JobPost = () => {
                                 </div>
                                 {formik.values.skills.length > 0 && (
                                     <div className="mt-2 flex flex-wrap gap-2">
-                                        {formik.values.skills.map((skill: string, index: number) => (
+                                        {formik.values.skills.map((skill, index) => (
                                             <div key={index} className="bg-gray-200 px-2 py-1 rounded-md flex items-center">
                                                 <span>{skill}</span>
                                                 <button
@@ -273,10 +290,11 @@ const JobPost = () => {
                                 )}
                             </div>
                         </div>
-                        <div className='w-full flex justify-center pl-10 px-5'>
+
+                        <div className="w-full flex justify-center pl-10 px-5">
                             <button
                                 type="submit"
-                                className='px-4 py-2 bg-[#1AA803] text-white shadow-sm rounded-md'
+                                className="px-4 py-2 bg-[#1AA803] text-white shadow-sm rounded-md"
                             >
                                 Post Job
                             </button>
@@ -285,6 +303,7 @@ const JobPost = () => {
                 </form>
             </div>
         </div>
+
     );
 };
 

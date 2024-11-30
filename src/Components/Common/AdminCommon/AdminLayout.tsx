@@ -7,7 +7,7 @@ import { RootState } from '../../../Redux/store'
 
 const Layout = () => {
   const admin = useSelector((state:RootState)=>state.admin)
-  console.log(admin,'1234567890')
+
 
   useEffect(()=>{
     console.log('Cookies after login:', document.cookie)

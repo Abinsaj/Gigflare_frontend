@@ -17,6 +17,7 @@ export default function JobLists() {
         }
         fetchData()
     }, [])
+    console.log(jobData,'this is the job data')
 
     return (
         <div className="p-6">
@@ -34,26 +35,43 @@ export default function JobLists() {
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Budget</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Deadline</th>
-                            <th></th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
+                            {/* <th></th> */}
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                         {jobData.map((job) => (
+                        
                             <tr key={job.id}>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{job.title}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{job.category}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${job.budget}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">₹{job.budget}</td>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${job.status === 'open' ? 'bg-green-100 text-green-800' :
-                                        job.status === 'closed' ? 'bg-red-100 text-red-800' :
-                                            'bg-yellow-100 text-yellow-800'
-                                        }`}>
-                                        {job.status}
+                                    {job.isActive ?(
+                                        <span
+                                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${job.isActive === true ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                            }`}
+                                    >
+                                        active
                                     </span>
+                                    ):(
+                                        <span
+                                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${job.isActive === true ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                            }`}
+                                    >
+                                        inactive
+                                    </span>
+                                    )}
+                                    <span
+                                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${job.isActive === true ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                            }`}
+                                    >
+                                        
+                                    </span>
+
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(job.deadLine).toLocaleDateString()}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{(job.duration)}</td>
                                 <td className="">
                                     <button
                                         className="px-4 py-2 border rounded-md bg-[#003F62] text-white"
@@ -62,9 +80,9 @@ export default function JobLists() {
                                         View Details
                                     </button>
                                 </td>
-                                <td>
+                                {/* <td>
                                     <button className="bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-3 rounded">block</button>
-                                </td>
+                                </td> */}
                                 {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <select
                     className="mt-1 w-4/5 py-2 px-3 bg-gray-50 rounded-2xl shadow-sm focus:outline-none"

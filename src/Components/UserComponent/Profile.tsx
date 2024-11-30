@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { UserCircleIcon, MapPinIcon, ClockIcon } from 'lucide-react'
+import { UserCircleIcon, MapPinIcon, ClockIcon,Camera } from 'lucide-react'
 import { RootState } from '../../Redux/store'
 import UserDetails from './UserDetails'
 import JobPost from './JobPost'
 import BlockChecker from '../../Services/userServices/blockChecker'
 import UserChangePass from './UserChangePass'
+import Jobs from './Jobs'
 
 
 const ProfileContent = () => {
@@ -32,9 +33,7 @@ export default function Profile() {
   const menuItems = [
     { name: 'Profile', Component: ProfileContent },
     { name: 'Personal Info', Component: UserDetails },
-    { name: 'Add Job', Component: JobPost },
     { name: 'Wallet' },
-    { name: 'Contract'},
     {name: "Change Password",Component: UserChangePass},
     { name: 'Logout',Component: Logout},
   ]
@@ -46,8 +45,22 @@ export default function Profile() {
   }
 
   const data: any = useSelector((state: RootState) => state.user.userInfo)
+  console.log(data, 'we are getting _id in the frontend ')
 
   const activeComponent = menuItems.find(item => item.name === activeItem)?.Component;
+
+  const [selectedImage, setSelectedImage] = useState<File | null>(null)
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0]
+        if (file) {
+            setSelectedImage(file)
+        }
+    }
+
+    const handleClick = () => {
+        document.getElementById('fileInput')?.click()
+    }
 
   return (
     <div className='w-full  pb-10 flex flex-col bg-gray-100'>
@@ -59,7 +72,31 @@ export default function Profile() {
         <div className="absolute bottom-[-40px] left-0 right-0 flex justify-center">
           <div className="relative bg-white rounded-lg shadow-lg p-6 w-11/12 max-w-4xl overflow-hidden">
             <div className="relative flex items-center">
-              <UserCircleIcon className="h-24 w-24 text-gray-300" aria-hidden="true" />
+            <div className='relative'>
+            <UserCircleIcon className="h-24 w-24 text-gray-300" aria-hidden="true" />
+            {selectedImage && (
+                <img
+                    src={URL.createObjectURL(selectedImage)}
+                    alt="Selected preview"
+                    className="h-24 w-24 rounded-full object-cover absolute top-0 left-0"
+                />
+            )}
+            <button
+                type="button"
+                onClick={handleClick}
+                className="absolute bottom-0 right-0 bg-white rounded-full p-1 shadow"
+            >
+                <Camera className="w-4 h-4" />
+            </button>
+            <input
+                id="fileInput"
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                style={{ display: 'none' }} // Hide the actual file input
+            />
+        </div>
+              
               <div className="ml-4">
                 <h1 className="text-xl font-bold">{data.name}</h1>
                 <p className='text-sm text-gray-400'>{data.email}</p>
@@ -80,7 +117,7 @@ export default function Profile() {
       </div>
 
       <div className='flex flex-col md:flex-row mt-24 px-8'>
-        <div className="w-full md:w-1/4 mb-8 md:mb-0">
+        <div className="w-full md:w-1/5 mb-8 md:mb-0">
           <div className="bg-white  rounded-md shadow-md p-4">
             {menuItems.map((item, index) => (
               <button
@@ -96,7 +133,7 @@ export default function Profile() {
           </div>
         </div>
 
-        <div className="w-full md:w-3/4 md:pl-8">
+        <div className="w-full md:w-4/5 md:pl-8">
           
         {activeComponent ? React.createElement(activeComponent) : <div>No component found</div>}
        

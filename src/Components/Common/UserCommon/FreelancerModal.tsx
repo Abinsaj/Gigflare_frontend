@@ -1,5 +1,3 @@
-"use client"
-
 import React from 'react'
 import { X, MapPin, Clock, Camera, Star } from 'lucide-react'
 
@@ -8,7 +6,10 @@ interface FreelancerModalProps {
   onClose: () => void
 }
 
+
+
 export default function FreelancerModal({ freelancer, onClose }: FreelancerModalProps) {
+  console.log(freelancer, 'this is the freelancer data in porposa profile')
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-white rounded-lg w-3/4 h-3/4 overflow-y-auto">
@@ -23,17 +24,17 @@ export default function FreelancerModal({ freelancer, onClose }: FreelancerModal
           {/* Profile Header */}
           <div className="flex items-start space-x-4">
             <div className="relative">
-              <img src={freelancer.profile} alt={freelancer.firstName} className="w-24 h-24 rounded-full" />
+              <img src={freelancer.photo}  className="w-24 h-24 rounded-full" />
               <button className="absolute bottom-0 right-0 bg-white rounded-full p-1 shadow">
-                <Camera className="w-4 h-4" />
+                {/* <Camera className="w-4 h-4" /> */}
               </button>
             </div>
             <div>
               <h1 className="text-2xl font-bold">{freelancer.firstName} {freelancer.lastName}</h1>
               <p className="text-gray-600">{freelancer.email}</p>
               <div className="flex items-center mt-2">
-                <MapPin className="w-4 h-4 mr-2 text-gray-500" />
-                <span className="text-gray-600">Kozhikode, India</span>
+                {/* <MapPin className="w-4 h-4 mr-2 text-gray-500" /> */}
+                {/* <span className="text-gray-600">Kozhikode, India</span> */}
               </div>
               <div className="flex items-center mt-1">
                 <Clock className="w-4 h-4 mr-2 text-gray-500" />
@@ -107,7 +108,7 @@ export default function FreelancerModal({ freelancer, onClose }: FreelancerModal
 
         <div className="sticky bottom-0 bg-white border-t p-4 flex justify-between items-center">
           <div>
-            <span className="text-2xl font-bold">RS:1000/hr</span>
+            {/* <span className="text-2xl font-bold">₹:1000/hr</span> */}
           </div>
           {freelancer.isTopRated && (
             <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-full">
@@ -115,9 +116,9 @@ export default function FreelancerModal({ freelancer, onClose }: FreelancerModal
               <span className="text-sm font-semibold text-yellow-800">TOP RATED</span>
             </div>
           )}
-          <button className="px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
+          {/* <button className="px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
             Hire Freelancer
-          </button>
+          </button> */}
         </div>
       </div>
     </div>

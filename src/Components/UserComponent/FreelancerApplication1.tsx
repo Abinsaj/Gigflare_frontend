@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { UserCircleIcon, TrashIcon } from '@heroicons/react/24/solid'
 import { useFormik } from 'formik'
 import { toast } from 'sonner'
@@ -8,6 +8,8 @@ import { useSelector } from 'react-redux'
 import { RootState } from '../../Redux/store'
 import axiosInstance from '../../config/userInstance'
 import BlockChecker from '../../Services/userServices/blockChecker'
+import { getcategories } from '../../Services/userServices/userAxiosCalls'
+import { userApplication } from '../../Services/userServices/userAxiosCalls'
 
 interface FreelanceData {
     firstName: string;
@@ -15,11 +17,11 @@ interface FreelanceData {
     photo?: File;
     description: string;
     language: string[];
-    experience: Array<{
+    experience: {
         expertise: string;
         fromYear: number;
         toYear: number;
-    }>;
+    };
     skills: string[];
     education?: Array<{
         collageName: string;
@@ -44,6 +46,7 @@ export default function Application() {
     const navigate = useNavigate()
     const [imagePreview, setImagePreview] = useState<string | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
+    const [category, setCategory] = useState<any[]>()
 
     const [educations, setEducations] = useState<FreelanceData['education']>([])
     const [newEducation, setNewEducation] = useState<{ collageName: string; title: string; year: number }>({
@@ -60,6 +63,15 @@ export default function Application() {
     const [skills, setSkills] = useState<string[]>([])
     const [newSkill, setNewSkill] = useState('')
 
+    useEffect(() => {
+        const fetchData = async () => {
+            const result = await getcategories()
+            console.log(result, 'this is the result we got in the applicatio form')
+            setCategory(result)
+        }
+        fetchData()
+    }, [])
+
     const validationSchema = Yup.object({
         firstName: Yup.string()
             .matches(/^[A-Z][a-zA-Z]*$/, "First letter should be capital")
@@ -73,7 +85,7 @@ export default function Application() {
         // language: Yup.array()
         //     .of(Yup.string().required('Language is required'))
         //     .min(1, "At least one language must be selected"),
-        experience: Yup.array().of(
+        experience: 
             Yup.object().shape({
                 expertise: Yup.string()
                     .required('Expertise is required'),
@@ -85,8 +97,8 @@ export default function Application() {
                     .required('To year is required')
                     .min(Yup.ref('fromYear'), 'To year must be greater than or equal to from year')
                     .max(new Date().getFullYear(), 'Year cannot be in the future')
-            })
-        ),
+            }),
+        
         skills: Yup.array()
             .of(Yup.string().required('Skill is required'))
             .min(1, 'At least one skill is required'),
@@ -115,13 +127,13 @@ export default function Application() {
                     .max(new Date().getFullYear(), 'Year cannot be in the future'),
             })
         ),
-       
+
         email: Yup.string()
             .required('Email is required')
             .email('Must be a valid email address'),
         phone: Yup.string()
-            .transform((value)=>value.trim())
-            .matches(/^[0-9]{10}$/,"Phone number must be 10 digits")
+            .transform((value) => value.trim())
+            .matches(/^[0-9]{10}$/, "Phone number must be 10 digits")
             .required("Phone number is required"),
     })
 
@@ -134,13 +146,13 @@ export default function Application() {
             photo: undefined,
             description: '',
             language: [],
-            experience: [
-                {
-                    expertise: '',
-                    fromYear: 0,
-                    toYear: 0
-                }
-            ],
+            experience:
+            {
+                expertise: '',
+                fromYear: 0,
+                toYear: 0
+            }
+            ,
             skills: [],
             education: [],
             certification: [],
@@ -148,7 +160,7 @@ export default function Application() {
             email: '',
             phone: ''
         },
-        validationSchema:validationSchema,
+        validationSchema: validationSchema,
         onSubmit: async (values, { setSubmitting }) => {
             if (formik.isValid) {
                 try {
@@ -178,14 +190,9 @@ export default function Application() {
                             formData.append(`certification`, cert.file)
                         }
                     })
-                  
 
-                    const response = await axiosInstance.post(`/freelancer/application/${data.userId}`, formData, {
-                        headers: {
-                            'Content-Type': 'multipart/form-data',
-                        },
-                    })
-                    toast.success(response.data.message)
+                    const response = await userApplication(data._id,formData)
+                    toast.success(response.message)
                     navigate('/freelancer/home')
                 } catch (error: any) {
                     console.error('Error submitting freelancer application:', error);
@@ -204,10 +211,16 @@ export default function Application() {
         }
     })
 
+    const handleSubmitClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        
+        e.preventDefault()
+        formik.handleSubmit();
+    };
+
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
             const file = e.target.files[0]
-            if (file.size > 5000000) { 
+            if (file.size > 5000000) {
                 formik.setFieldError('photo', 'File too large')
             } else {
                 formik.setFieldValue('photo', file)
@@ -220,7 +233,7 @@ export default function Application() {
     const handleCertificateFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
             const file = e.target.files[0]
-            if (file.size > 5000000) { 
+            if (file.size > 5000000) {
                 toast.error('Certificate file is too large. Maximum size is 5MB.')
             } else {
                 setNewCertification({ ...newCertification, file })
@@ -313,7 +326,7 @@ export default function Application() {
                                             value={formik.values.firstName}
                                             onChange={formik.handleChange}
                                             onBlur={formik.handleBlur}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-none focus:ring-[#1AA803]"
                                         />
                                         {formik.touched.firstName && formik.errors.firstName && (
                                             <div className="text-red-500 text-sm mt-1">{formik.errors.firstName}</div>
@@ -329,7 +342,7 @@ export default function Application() {
                                             value={formik.values.lastName}
                                             onChange={formik.handleChange}
                                             onBlur={formik.handleBlur}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-none focus:ring-[#1AA803]"
                                         />
                                         {formik.touched.lastName && formik.errors.lastName && (
                                             <div className="text-red-500 text-sm mt-1">{formik.errors.lastName}</div>
@@ -341,7 +354,7 @@ export default function Application() {
                             {/* Photo */}
                             <div className="flex items-start">
                                 <label htmlFor="photo" className="block text-sm py-3 font-medium leading-6 text-gray-900 w-1/4">
-                                    
+
                                     Photo
                                 </label>
                                 <div className="flex items-center gap-x-3 w-3/4">
@@ -364,7 +377,7 @@ export default function Application() {
                                     <button
                                         type="button"
                                         onClick={() => fileInputRef.current?.click()}
-                                        className="px-3 py-2 text-sm font-semibold text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2"
+                                        className="px-3 py-2 text-sm font-semibold text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-none"
                                     >
                                         Add
                                     </button>
@@ -383,12 +396,12 @@ export default function Application() {
                                     <textarea
                                         id="description"
                                         name="description"
-                                        
+
                                         placeholder="Describe yourself..."
                                         value={formik.values.description}
                                         onChange={formik.handleChange}
                                         onBlur={formik.handleBlur}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-none focus:ring-[#1AA803]"
                                     />
                                     {formik.touched.description && formik.errors.description && (
                                         <div className="text-red-500 text-sm mt-1">{formik.errors.description}</div>
@@ -408,7 +421,7 @@ export default function Application() {
                                         value={formik.values.language}
                                         onChange={formik.handleChange}
                                         onBlur={formik.handleBlur}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-none focus:ring-[#1AA803]"
                                     >
                                         <option value="">Select Language</option>
                                         <option value="English">English</option>
@@ -437,50 +450,47 @@ export default function Application() {
                                     Experience
                                 </label>
                                 <div className="flex space-x-2 w-3/4">
-                                    <input
-                                        type="text"
-                                        placeholder="Expertise In"
-                                        value={formik.values.experience[0].expertise}
-                                        onChange={(e) => formik.setFieldValue('experience[0].expertise', e.target.value)}
+                                    <select
+                                        value={formik.values.experience.expertise}
+                                        onChange={(e) => formik.setFieldValue('experience.expertise', e.target.value)}
                                         onBlur={formik.handleBlur}
-                                        className="w-1/3 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
-                                    />
+                                        className="w-1/3 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-none focus:ring-[#1AA803]"
+                                    >
+                                        <option value="" label="Select expertise" />
+                                        {category?.map((data) => (
+                                            <option key={data.id} value={data.name}>
+                                                {data.name}
+                                            </option>
+                                        ))}
+                                    </select>
                                     <input
                                         type="number"
                                         placeholder="From(Year)"
-                                        value={formik.values.experience[0].fromYear}
-                                        onChange={(e) => formik.setFieldValue('experience[0].fromYear', e.target.value)}
+                                        value={formik.values.experience.fromYear}
+                                        onChange={(e) => formik.setFieldValue('experience.fromYear', e.target.value)}
                                         onBlur={formik.handleBlur}
-                                        className="w-1/3 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
+                                        className="w-1/3 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-none focus:ring-[#1AA803]"
                                     />
                                     <input
                                         type="number"
                                         placeholder="To(Year)"
-                                        value={formik.values.experience[0].toYear}
-                                        onChange={(e) => formik.setFieldValue('experience[0].toYear', e.target.value)}
+                                        value={formik.values.experience.toYear}
+                                        onChange={(e) => formik.setFieldValue('experience.toYear', e.target.value)}
                                         onBlur={formik.handleBlur}
                                         className="w-1/3 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1  focus:ring-gray-600 focus:border-gray-600 ring-0"
                                     />
                                 </div>
                             </div>
                             {formik.touched.experience && formik.errors.experience && (
-                              <div className="text-red-500 text-sm mt-1">
-                                {Array.isArray(formik.errors.experience) 
-                                  ? formik.errors.experience.map((error, index) => (
-                                      <div key={index}>
-                                        {typeof error === 'string' 
-                                          ? error 
-                                          : Object.values(error).map((err, i) => (
-                                              <div key={i}>{err}</div>
-                                            ))
-                                        }
-                                      </div>
-                                    ))
-                                  : typeof formik.errors.experience === 'string' 
-                                    ? formik.errors.experience
-                                    : 'Invalid experience data'
-                                }
-                              </div>
+                                <div className="text-red-500 text-sm mt-1">
+                                    {typeof formik.errors.experience === 'object' && !Array.isArray(formik.errors.experience) ? (
+                                        Object.values(formik.errors.experience).map((err, index) => (
+                                            <div key={index}>{err}</div>
+                                        ))
+                                    ) : (
+                                        <div>{formik.errors.experience}</div>
+                                    )}
+                                </div>
                             )}
 
                             {/* Skills */}
@@ -497,11 +507,11 @@ export default function Application() {
                                             value={newSkill}
                                             onChange={(e) => setNewSkill(e.target.value)}
                                             onBlur={formik.handleBlur}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-none focus:ring-[#1AA803]"
                                         />
                                         <button
                                             type="button"
-                                            className="ml-2 px-4 py-2 text-sm font-medium text-white bg-black rounded-md hover:bg-[#1AA803] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1AA803]"
+                                            className="ml-2 px-4 py-2 text-sm font-medium text-white bg-black rounded-md hover:bg-[#1AA803] focus:outline-none focus:ring-2 focus:border-none focus:ring-[#1AA803]"
                                             onClick={addSkill}
                                         >
                                             Add
@@ -642,7 +652,7 @@ export default function Application() {
                                         onChange={formik.handleChange}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus: focus:ring-gray-600 focus:border-gray-600 ring-0"
                                     />
-                                   
+
                                 </div>
                             </div>
                         </div>
@@ -666,7 +676,7 @@ export default function Application() {
                                     value={formik.values.email}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-none focus:ring-[#1AA803]"
                                 />
                                 <label htmlFor="email" className="ml-2 block text-sm font-medium leading-6 text-gray-900">
                                     Verified
@@ -686,7 +696,7 @@ export default function Application() {
                                     value={formik.values.phone}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-none focus:ring-[#1AA803]"
                                 />
                                 <p className="ml-6 text-gray-500 text-sm">We will never share your phone number.</p>
                             </div>
@@ -704,6 +714,7 @@ export default function Application() {
                     </button>
                     <button
                         type="submit"
+                        onClick={handleSubmitClick}
                         className="bg-black hover:bg-[#1AA803] px-3 py-2 text-sm font-semibold text-white shadow-sm rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
                     >
                         Save
@@ -716,22 +727,22 @@ export default function Application() {
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
                     <div className="bg-white w-3/5 p-5 rounded shadow-lg z-60">
                         <h2 className="text-lg font-bold mb-4">Add New Education</h2>
-                                                <input
+                        <input
                             type="text"
                             placeholder="College/University Name"
                             value={newEducation.collageName}
                             onChange={(e) => setNewEducation({ ...newEducation, collageName: e.target.value })}
-                            className="w-full mb-2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
+                            className="w-full mb-2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-none focus:ring-[#1AA803]"
                         />
                         <input
                             type="text"
                             placeholder="Title"
                             value={newEducation.title}
                             onChange={(e) => setNewEducation({ ...newEducation, title: e.target.value })}
-                            className="w-full mb-2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
+                            className="w-full mb-2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-none focus:ring-[#1AA803]"
                         />
                         <select
-                            className="w-full mb-2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
+                            className="w-full mb-2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-none focus:ring-[#1AA803]"
                             onChange={(e) => setNewEducation({ ...newEducation, year: parseInt(e.target.value) })}
                             value={newEducation.year}
                         >
@@ -744,13 +755,13 @@ export default function Application() {
                         </select>
                         <div className="flex justify-end space-x-2 mt-4">
                             <button
-                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600"
+                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:border-none focus:ring-gray-600"
                                 onClick={() => setIsEducationModalOpen(false)}
                             >
                                 Cancel
                             </button>
                             <button
-                                className="px-4 py-2 text-sm font-medium text-white bg-black border border-transparent rounded-md hover:bg-[#1AA803] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1AA803]"
+                                className="px-4 py-2 text-sm font-medium text-white bg-black border border-transparent rounded-md hover:bg-[#1AA803] focus:outline-none focus:ring-2 focus:border-none focus:ring-[#1AA803]"
                                 onClick={addEducation}
                             >
                                 Save
@@ -769,10 +780,10 @@ export default function Application() {
                             placeholder="Certificate or Award"
                             value={newCertification.name}
                             onChange={(e) => setNewCertification({ ...newCertification, name: e.target.value })}
-                            className="w-full mb-2 px-3 py-2 border border-gray-300 rounded-md  shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
+                            className="w-full mb-2 px-3 py-2 border border-gray-300 rounded-md  shadow-sm focus:outline-none focus:ring-2 focus:border-none focus:ring-[#1AA803]"
                         />
                         <select
-                            className="w-full mb-2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
+                            className="w-full mb-2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-none focus:ring-[#1AA803]"
                             onChange={(e) => setNewCertification({ ...newCertification, year: e.target.value })}
                             value={newCertification.year}
                         >
@@ -786,17 +797,17 @@ export default function Application() {
                         <input
                             type="file"
                             onChange={handleCertificateFileChange}
-                            className="w-full mb-2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ring-0"
+                            className="w-full mb-2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-none focus:ring-[#1AA803]"
                         />
                         <div className="flex justify-end space-x-2 mt-4">
                             <button
-                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600"
+                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:border-none focus:ring-gray-600"
                                 onClick={() => setIsCertificationModalOpen(false)}
                             >
                                 Cancel
                             </button>
                             <button
-                                className="px-4 py-2 text-sm font-medium text-white bg-black border border-transparent rounded-md hover:bg-[#1AA803] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1AA803]"
+                                className="px-4 py-2 text-sm font-medium text-white bg-black border border-transparent rounded-md hover:bg-[#1AA803] focus:outline-none focus:ring-2 focus:border-none focus:ring-[#1AA803]"
                                 onClick={addCertification}
                             >
                                 Save

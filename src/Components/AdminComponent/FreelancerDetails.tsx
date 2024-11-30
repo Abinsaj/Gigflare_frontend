@@ -9,53 +9,87 @@ import { AppDispatch } from '../../Redux/store'
 
 // Mock data for the freelancer
 
+interface IFreelancer {
+  userId: string;
+  applicationId: string;
+  firstName: string;
+  lastName: string;
+  description: string;
+  email: string;
+  phone: string;
+  portfolio?: string;
+  profileImg: string;
+  certImage: string;
+  status: 'accepted' | 'rejected';
+  skills: string[];
+  experience: {
+    expertise: string;
+    fromYear: number;
+    toYear: number;
+  };
+  education: {
+    title: string;
+    collageName: string;
+    year: number;
+  }[];
+  certification: {
+    name: string;
+    year: number;
+  }[];
+  language: string;
+}
 
 export default function FreelancerDetails() {
 
-    const navigate = useNavigate()
-    const location = useLocation()
-    const dispatch = useDispatch<AppDispatch>()
-    const data = location.state?.freelancer;
+  const navigate = useNavigate()
+  const location = useLocation()
+  const dispatch = useDispatch<AppDispatch>()
+  // const data = location.state?.freelancer;
+  const [data, setData] = useState<IFreelancer | null>(location.state?.freelancer || null)
 
-    const [freelancerData, setFreelancerData] = useState<any>()
-    const [profileImg, setProfileImg] = useState<string>()
-    const [certImage, setCertImage] = useState<string>()
-    const [ isOpen, setIsOpen ] = useState<boolean>(false)
-    const [currentCertImage, setCurrentCertImage] = useState<string | undefined>('')
+  const [freelancerData, setFreelancerData] = useState<any>()
+  const [profileImg, setProfileImg] = useState<string>()
+  const [certImage, setCertImage] = useState<string>()
+  const [isOpen, setIsOpen] = useState<boolean>(false)
+  const [currentCertImage, setCurrentCertImage] = useState<string | undefined>('')
 
-    const handleclick = (certImage: string | undefined)=>{
-        setCurrentCertImage(certImage)
-        setIsOpen(true)
+
+  const handleclick = (certImage: string | undefined) => {
+    setCurrentCertImage(certImage)
+    setIsOpen(true)
+  }
+
+  const handleClose = () => {
+    setIsOpen(false)
+    setCurrentCertImage('')
+  }
+
+  useEffect(() => {
+    const fetchData = async () => {
+      let response: any = await getFreelancerDetails(data?.userId)
+      console.log(response?.freelancerData, ' this is the actual response we got from the backend')
+      setFreelancerData(response?.freelancerData)
+      setProfileImg(response?.profileImg)
+      setCertImage(response?.certImage)
     }
+    fetchData()
+  }, [data])
 
-    const handleClose = ()=>{
-        setIsOpen(false)
-        setCurrentCertImage('')
-    }
 
-    useEffect(()=>{
-        const fetchData = async()=>{
-            let response: any = await getFreelancerDetails(data.userId)
-            console.log(response?.freelancerData,' this is the actual response we got from the backend')
-            setFreelancerData(response?.freelancerData)
-            setProfileImg(response?.profileImg)
-            setCertImage(response?.certImage)
-        }
-        fetchData()
-    },[])
-
-    const handleStatusChange = async (applicationId: string, newStatus: 'accepted' | 'rejected') => {
-      try {
-        const response =  await dispatch(updateApplication({applicationId, newStatus}))
-        if(response.payload.success){
-          toast.success(response.payload.message)
-        }
-      } catch (error:any) {
-        toast.error('Error updating freelancer status:', error)
+  const handleStatusChange = async (applicationId: string, newStatus: 'accepted' | 'rejected') => {
+    try {
+      const response = await dispatch(updateApplication({ applicationId, newStatus }))
+      if (response.payload.success) {
+        toast.success(response.payload.message)
+        setData(prev=>prev?({...prev, newStatus:'accepted'}):prev)
       }
+    } catch (error: any) {
+      toast.error('Error updating freelancer status:', error)
     }
-    
-    
+  }
+
+  console.log(freelancerData, 'this is the freelancerData we got')
+
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
@@ -64,18 +98,25 @@ export default function FreelancerDetails() {
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <button className="mr-2 p-2 rounded-full hover:bg-gray-100">
-                <ChevronLeft onClick={()=>navigate('/admin/applications')} className="h-6 w-6" />
+                <ChevronLeft onClick={() => navigate('/admin/applications')} className="h-6 w-6" />
               </button>
               <h1 className="text-2xl font-semibold text-gray-900">Freelancer Details</h1>
             </div>
-            <div className="flex space-x-2">
-              <button onClick={()=>handleStatusChange(data.applicationId,"rejected")} className="px-4 py-2 border bg-red-500 rounded-md text-white hover:bg-rose-600">
-                Reject
-              </button>
-              <button onClick={()=>handleStatusChange(data.applicationId,"accepted")} className="px-4 py-2 bg-[#003F62] text-white rounded-md hover:bg-[#002E62]">
-                Approve
-              </button>
-            </div>
+            {freelancerData?.status == 'accepted' ? (
+              <div>
+                <span className='px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800'>Accepted</span>
+              </div>
+            ) : (
+              <div className="flex space-x-2">
+                <button onClick={() => handleStatusChange(data!.applicationId, "rejected")} className="px-4 py-2 border bg-red-500 rounded-md text-white hover:bg-rose-600">
+                  Reject
+                </button>
+                <button onClick={() => handleStatusChange(data!.applicationId, "accepted")} className="px-4 py-2 bg-[#003F62] text-white rounded-md hover:bg-[#002E62]">
+                  Approve
+                </button>
+              </div>
+            )}
+
           </div>
         </div>
       </header>
@@ -99,7 +140,7 @@ export default function FreelancerDetails() {
                     </div>
                     <div className='space-y-2'>
                       <h2 className="text-xl font-semibold">{freelancerData?.firstName} {freelancerData?.lastName}</h2>
-                      <p className="text-gray-500">{freelancerData?.experience[0].expertise} </p>
+                      <p className="text-gray-500">{freelancerData?.experience.expertise} </p>
                     </div>
                   </div>
                 </div>
@@ -131,8 +172,8 @@ export default function FreelancerDetails() {
                 <div className="px-6 py-4">
                   <h3 className="text-lg font-semibold mb-2">Skills</h3>
                   <div className="flex flex-wrap gap-2">
-                   {freelancerData?.skills.map((skill:any,index:any)=>(
-                      <span  key={index} className="px-3 py-1 bg-gray-200 text-gray-700 rounded-full text-sm">
+                    {freelancerData?.skills.map((skill: any, index: any) => (
+                      <span key={index} className="px-3 py-1 bg-gray-200 text-gray-700 rounded-full text-sm">
                         {skill}
                       </span>
                     ))}
@@ -144,17 +185,17 @@ export default function FreelancerDetails() {
                 <div className="px-6 py-4">
                   <h3 className="text-lg font-semibold mb-2">Experience</h3>
                   <ul className="space-y-4">
-                    {freelancerData?.experience.map((exp:any,index:any)=>(
-                      <li key={index} className="flex justify-between items-start">
-                        <div>
-                          <p className="font-semibold">{exp.expertise}</p>
-                          <p className="text-sm text-gray-500">{exp.fromYear} - {exp.toYear}</p>
-                        </div>
-                        <span className="px-3 py-1 bg-gray-200 text-gray-700 rounded-full text-sm">
-                        {exp.toYear - exp.fromYear} years
-                        </span>
-                      </li>
-                    ))}
+
+                    <li className="flex justify-between items-start">
+                      <div>
+                        <p className="font-semibold">{freelancerData?.experience?.expertise}</p>
+                        <p className="text-sm text-gray-500">{freelancerData?.experience?.fromYear} - {freelancerData?.experience?.toYear}</p>
+                      </div>
+                      <span className="px-3 py-1 bg-gray-200 text-gray-700 rounded-full text-sm">
+                        {freelancerData?.experience?.toYear - freelancerData?.experience?.fromYear} years
+                      </span>
+                    </li>
+
                   </ul>
                 </div>
               </div>
@@ -163,7 +204,7 @@ export default function FreelancerDetails() {
                 <div className="px-6 py-4">
                   <h3 className="text-lg font-semibold mb-2">Education</h3>
                   <ul className="space-y-4">
-                    {freelancerData?.education.map((edu: any, index: any)=>(
+                    {freelancerData?.education.map((edu: any, index: any) => (
                       <li key={index}>
                         <p className="font-semibold">{edu.title}</p>
                         <p className="text-sm text-gray-500">{edu.collageName}, {edu.year}</p>
@@ -177,16 +218,16 @@ export default function FreelancerDetails() {
                 <div className="px-6 py-4">
                   <h3 className="text-lg font-semibold mb-2">Certifications</h3>
                   <ul className="space-y-2">
-                    {freelancerData?.certification.map((cert: any,index: any)=>(
+                    {freelancerData?.certification.map((cert: any, index: any) => (
                       <li key={index} className="flex flex-col items-start space-x-2">
                         {/* <Check className="h-4 w-4 text-green-500" /> */}
                         <span className='px-2'>{cert.name} {cert.year}</span>
                         <img
-                         className="cursor-pointer w-48 pt-4"
-                         onClick={()=>handleclick(certImage)}
-                         src={certImage} 
-                         alt="" 
-                         />
+                          className="cursor-pointer w-48 pt-4"
+                          onClick={() => handleclick(certImage)}
+                          src={certImage}
+                          alt=""
+                        />
                       </li>
                     ))}
                   </ul>
@@ -197,10 +238,10 @@ export default function FreelancerDetails() {
                 <div className="px-6 py-4">
                   <h3 className="text-lg font-semibold mb-2">Languages</h3>
                   <div className="flex flex-wrap gap-2">
-                    
-                      <span className="px-3 py-1 border border-gray-300 text-gray-700 rounded-full text-sm">
-                        {freelancerData?.language}
-                      </span>
+
+                    <span className="px-3 py-1 border border-gray-300 text-gray-700 rounded-full text-sm">
+                      {freelancerData?.language}
+                    </span>
 
                   </div>
                 </div>
@@ -212,16 +253,16 @@ export default function FreelancerDetails() {
 
       {isOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
-        <div
+          <div
             className="absolute inset-0 bg-black opacity-70"
             onClick={handleClose}
-        />
-        <img
-            src={currentCertImage} 
+          />
+          <img
+            src={currentCertImage}
             alt="certificate Image"
             className="max-w-[90%] max-h-[90%] rounded-lg z-10 border-none"
-        />
-    </div>
+          />
+        </div>
       )}
 
     </div>

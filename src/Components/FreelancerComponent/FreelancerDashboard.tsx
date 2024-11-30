@@ -1,53 +1,27 @@
-import React from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Home, Folder, FileText, BarChart2, UserCircle } from 'lucide-react'
 import BlockChecker from '../../Services/userServices/blockChecker'
+import { useLocation } from 'react-router-dom'
+import { useFreelancer } from '../../context/FreelancerContext/FreelancerData'
 
-export default function Component() {
+export default function Dashboard() {
 
   BlockChecker()
+  const location = useLocation()
+  const [freelancerData, setFreelancerData] = useState<any>()
+
+  const {freelancer} = useFreelancer()
+  console.log(freelancer,' this is the freelancer data in dashboard')
+  useEffect(()=>{
+    
+    setFreelancerData(freelancer)
+  },[freelancer])
 
   return (
     <div className="flex h-screen bg-gray-50">
-      {/* Fixed Sidebar */}
-      <div className="w-80 h-screen flex-shrink-0 overflow-y-auto bg-gray-200">
-        <div className="sticky top-0 p-5 h-full flex flex-col">
-          <div className="mb-8">
-            <div className="pl-20 mb-6">
-              <UserCircle className="h-24 w-24 text-gray-600" aria-hidden="true" />
-            </div> 
-            <h2 className="text-gray-700 text-center text-xl font-semibold mb-4">Abinsaj</h2>
-            <p className="text-gray-500 text-center">abinsaj39045@gmail.com</p>
-          </div>
-
-          <div className="bg-white shadow-md w-full items-baseline rounded-md p-6 flex-grow flex flex-col">
-            <nav className="space-y-4 w-5/6 justify-center items-center">
-              {[
-                { name: 'Dashboard', icon: Home, current: true },
-                { name: 'Projects', icon: Folder },
-                { name: 'Proposals', icon: FileText },
-                { name: 'Job Application', icon: FileText },
-                { name: 'Earnings', icon: BarChart2 },
-              ].map((item) => (
-                <a
-                  key={item.name}
-                  href="#"
-                  className={`flex items-center px-4 py-3 text-base w-5/6 font-medium rounded-md ${
-                    item.current
-                      ? 'bg-gray-900  text-white'
-                      : 'text-black hover:bg-gray-800 hover:text-white'
-                  }`}
-                >
-                  <item.icon className="mr-4 h-5 w-5" aria-hidden="true" />
-                  {item.name}
-                </a>
-              ))}
-            </nav>
-          </div>
-        </div>
-      </div>
-
+      
       {/* Main content */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto scrollbar-hidden">
         <div className="p-5">
           <div className="relative mb-20">
             <div
@@ -57,7 +31,7 @@ export default function Component() {
             <div className="absolute bottom-[-70px] left-0 right-0 flex flex-col justify-center items-center">
               <div className="flex justify-between items-center mb-6">
                 <h1 className="text-3xl font-bold text-gray-900">
-                  Welcome back, <span className="text-gray-50">Abinsaj</span>
+                  Welcome back, <span className="text-gray-50"> {freelancerData?.firstName}</span>
                 </h1>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 w-4/5 gap-6 mb-6">
@@ -83,7 +57,7 @@ export default function Component() {
               </div>
             </div>
           </div>
-          
+
           {/* Additional content */}
           <div className="mt-24 bg-white p-6 rounded-lg shadow-sm">
             <h2 className="text-2xl font-bold mb-4">Recent Projects</h2>

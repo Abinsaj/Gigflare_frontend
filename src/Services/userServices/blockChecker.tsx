@@ -12,7 +12,7 @@ const BlockChecker=() => {
         
     useEffect(()=>{
         const fetch = async()=>{
-            let udata = await getUserInfo(data?.userId)
+            let udata = await getUserInfo(data?._id)
             console.log(udata,'this is the udata')
             if(udata.data?.isBlocked === true){
                 localStorage.removeItem('userInfo')

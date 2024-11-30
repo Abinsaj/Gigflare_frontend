@@ -129,7 +129,7 @@ const CategoryList = () => {
                         <thead className="bg-gray-50">
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                 <th className="px-6 py-3 text-right text-xs font-medium items-end text-gray-500 uppercase tracking-wider">Action</th>
                             </tr>
@@ -141,7 +141,7 @@ const CategoryList = () => {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{category.description}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         {!category.isBlocked ? (
-                                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-500 text-black">
+                                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-200 text-gray-700">
                                                 Active
                                             </span>
                                         ) : (

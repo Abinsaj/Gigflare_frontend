@@ -7,22 +7,29 @@ import { Provider } from 'react-redux';
 import App from './App.tsx';
 import { Toaster } from 'sonner';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { SocketProvider } from './context/SocketContext.tsx';
+import FreelancerProvider from './context/FreelancerContext/FreelancerData.tsx';
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID
-console.log(process.env,'this is the client id')
+console.log(process.env, 'this is the client id')
 
 root.render(
+
   <Provider store={store}>
     <PersistGate loading={null} persistor={persistor}>
       <React.StrictMode>
-        <GoogleOAuthProvider clientId = {clientId} >
-          <>
-            <Toaster richColors position="top-center" />
-            <App />
-          </>
+        <GoogleOAuthProvider clientId={clientId} >
+          <FreelancerProvider>
+            <SocketProvider>
+              <>
+                <Toaster richColors position="top-center" />
+                <App />
+              </>
+            </SocketProvider>
+          </FreelancerProvider>
         </GoogleOAuthProvider>
       </React.StrictMode>
     </PersistGate>

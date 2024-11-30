@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { ChevronLeft, ChevronRight, Calendar, X } from 'lucide-react'
 import axios from 'axios'
 import axiosInstance from '../../config/userInstance'
+import { useNavigate } from 'react-router-dom'
 
 const url = 'http://localhost:7070'
 
@@ -19,18 +20,13 @@ export default function Freelancers() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedFreelancer, setSelectedFreelancer] = useState<Freelancer | null>(null)
   const [modalType, setModalType] = useState<'status' | 'block'>('status')
+  const navigate = useNavigate()
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axiosInstance.get(`/admin/getFreelancers`)
         console.log(response,'this is the response we get after fetching the freelancer')
-        // let data: any = []
-        // response.data.users.map((user:any)=>{
-        //   if(user.isFreelancer == true){
-        //     data.push(user)
-        //   }
-        // })
         setFreelancers(response.data)
       } catch (error) {
         console.error('Error fetching freelancers:', error)
@@ -79,7 +75,7 @@ export default function Freelancers() {
       <p className="text-sm text-gray-600 mb-4">Home &gt; Freelancers</p>
       <div className="flex justify-end items-center mb-4">
         <Calendar className="w-4 h-4 mr-2 text-gray-600" />
-        <span className="text-sm text-gray-600">Oct 11,2023 - Nov 11,2022</span>
+        <span className="text-sm text-gray-600">{new Date().toLocaleDateString()}</span>
       </div>
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
         <table className="min-w-full">
@@ -102,13 +98,13 @@ export default function Freelancers() {
                     <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-500 text-black">
                       Blocked
                     </span> : 
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-500 text-black">
+                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full  bg-green-200 text-gray-600">
                       Active
                     </span>
                   }
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button  className="bg-[#003F62] hover:bg-[#002E62] text-white font-bold py-1 px-3 rounded mr-2">
+                  <button onClick={()=>navigate(`/admin/freelancerdetails`,{state:{freelancer}})} className="bg-[#003F62] hover:bg-[#002E62] text-white font-bold py-1 px-3 rounded mr-2">
                     View Details
                   </button>
                 </td>

@@ -72,9 +72,7 @@ const LoginForm = () => {
         }
     })
 
-    // const handleGoogleAuth = ()=>{
-    //     googleAuth()
-    // }
+    
 
     return (
         <>
@@ -174,7 +172,7 @@ const LoginForm = () => {
                             <button
                                 type="button"
                                 className="flex h-12 w-full justify-center border border-black rounded-md bg-[#f5f5f5] px-3 py-2 text-sm font-semibold mt-5 leading-6 text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-black"
-                                onClick={handleGoogleAuth} // Call the function directly
+                                onClick={handleGoogleAuth}
                             >
                                 <div className="flex justify-center gap-1 pb-4">
                                     <FcGoogle size={30} />

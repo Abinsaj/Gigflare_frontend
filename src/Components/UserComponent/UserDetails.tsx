@@ -4,6 +4,7 @@ import { RootState } from '../../Redux/store'
 import axiosInstance from '../../config/userInstance'
 import { toast } from 'sonner'
 import BlockChecker from '../../Services/userServices/blockChecker'
+import { addAddress } from '../../Services/userServices/userAxiosCalls'
 
 interface address{
     address: string
@@ -24,26 +25,37 @@ const UserDetails = () => {
     const [state,setState] = useState('')
     const [city, setCity] = useState('')
     const [pincode, setPincode] = useState('')
+    const [errors, setErrors] = useState<{ [key: string]: string }>({})
 
-    const [fromData,setFormData] = useState<address | null>(null)
+    
 
     const handleAddress = async(e:React.FormEvent<HTMLFormElement>)=>{
+        e.preventDefault()
+        
+        // Validation
+        const newErrors: { [key: string]: string } = {}
+
+        if (!address) newErrors.address = 'Address is required'
+        if (!country) newErrors.country = 'Country is required'
+        if (!state) newErrors.state = 'State is required'
+        if (!city) newErrors.city = 'City is required'
+        if (!pincode) {
+            newErrors.pincode = 'Pincode is required'
+        } else if (!/^\d{5,6}$/.test(pincode)) {
+            newErrors.pincode = 'Pincode must be a 5 or 6-digit number'
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors)
+            return
+        }
         try {
-            e.preventDefault()
-            const value = {
-                address,
-                country,
-                state,
-                city,
-                pincode
-            }
-            setFormData(value)
-            
-            const response = await axiosInstance.post(`/addAddress/${data?.userId}`,fromData)
-            if(response.data.success){
-                toast.success(response.data.message)
+            const formData = { address, country, state, city, pincode }
+            const response = await addAddress(data?.userId,formData)
+            if(response.success){
+                toast.success(response.message)
             }else{
-                toast.error(response.data.message)
+                toast.error(response.message)
             }
         } catch (error: any) {
             if(error.response && error.response.data && error.response.data.message){
@@ -116,10 +128,11 @@ const UserDetails = () => {
                                 </label>
                                 <textarea
                                     placeholder='Address'
-                                    value={fromData?.address}
+                                    value={address}
                                     onChange={(e)=>setAddress(e.target.value)}
                                     className='w-full h-10 border border-gray-300 px-3 py-2 rounded-md mb-4  '
                                 />
+                                {errors.address && <p className="text-red-500 text-xs">{errors.address}</p>}
                             </div>
                             <div className='space-y-1 flex flex-col'>
                                 <div className='flex space-x-6'>
@@ -129,11 +142,12 @@ const UserDetails = () => {
                                         </label>
                                         <input
                                             type="Country"
-                                            value={fromData?.country}
+                                            value={country}
                                             onChange={(e)=>setCountry(e.target.value)}
                                             placeholder='country'
                                             className='h-10 border border-gray-300 px-3 shadow-sm mt-1 rounded-md mb-4'
                                         />
+                                        {errors.country && <p className="text-red-500 text-xs">{errors.country}</p>}
                                     </div>
 
                                     <div className='flex flex-col w-1/2'>
@@ -142,11 +156,12 @@ const UserDetails = () => {
                                         </label>
                                         <input
                                             type="State"
-                                            value={fromData?.state}
+                                            value={state}
                                             onChange={(e)=>setState(e.target.value)}
                                             placeholder='state'
                                             className='h-10 border border-gray-300 px-3 shadow-sm mt-1 rounded-md mb-4'
                                         />
+                                        {errors.state && <p className="text-red-500 text-xs">{errors.state}</p>}
                                     </div>
                                 </div>
                             </div>
@@ -159,11 +174,12 @@ const UserDetails = () => {
                                         </label>
                                         <input
                                             type="City"
-                                            value={fromData?.city}
+                                            value={city}
                                             onChange={(e)=>setCity(e.target.value)}
                                             placeholder='city'
                                             className='h-10 border border-gray-300 px-3 shadow-sm mt-1 rounded-md mb-4'
                                         />
+                                        {errors.city && <p className="text-red-500 text-xs">{errors.city}</p>}
                                     </div>
 
                                     <div className='flex flex-col w-1/2'>
@@ -172,11 +188,12 @@ const UserDetails = () => {
                                         </label>
                                         <input
                                             type="pincode"
-                                            value={fromData?.pincode}
+                                            value={pincode}
                                             onChange={(e)=>setPincode(e.target.value)}
                                             placeholder='Pincode'
                                             className='h-10 border border-gray-300 px-3 shadow-sm mt-1 rounded-md mb-4'
                                         />
+                                        {errors.pincode && <p className="text-red-500 text-xs">{errors.pincode}</p>}
                                     </div>
                                 </div>
                             </div>

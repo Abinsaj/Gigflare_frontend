@@ -1,297 +1,268 @@
+import React, { useEffect, useState } from 'react';
+import { Camera, Trash2, Plus } from 'lucide-react';
+import { Button, Input, Textarea } from '@nextui-org/react';
+import { useLocation } from 'react-router-dom';
 
+const EditFreelancerProfileTemplate: React.FC = () => {
+  const location = useLocation();
+  const freelancer = location.state?.freelancerData;
 
-import React, { useState, useRef } from 'react'
-import { Formik, Form, Field, FieldArray, ErrorMessage } from 'formik'
-import * as Yup from 'yup'
-import { UserCircle, Trash2, Plus, Upload } from 'lucide-react'
-import { useLocation } from 'react-router-dom'
+  const [initialState, setInitialState] = useState<any>(null);
 
-const validationSchema = Yup.object().shape({
-  firstName: Yup.string().matches(/^[A-Z][a-zA-Z]*$/, "First letter should be capital").required("First name is required"),
-  lastName: Yup.string().matches(/^[A-Z][a-zA-Z]*$/, "First letter should be capital").required("Last name is required"),
-  description: Yup.string().min(50, "Minimum 50 characters required").required("Description is required"),
-  language: Yup.array().of(Yup.string().required('Language is required')).min(1, "At least one language must be selected"),
-  experience: Yup.array().of(
-    Yup.object().shape({
-      expertise: Yup.string().required('Expertise is required'),
-      fromYear: Yup.number().required('From year is required').min(2010, 'Year must be after 2010').max(new Date().getFullYear(), 'Year cannot be in the future'),
-      toYear: Yup.number().required('To year is required').min(Yup.ref('fromYear'), 'To year must be greater than or equal to from year').max(new Date().getFullYear(), 'Year cannot be in the future')
-    })
-  ),
-  skills: Yup.array().of(Yup.string().required('Skill is required')).min(1, 'At least one skill is required'),
-  education: Yup.array().of(
-    Yup.object().shape({
-      collageName: Yup.string().required('College/University name is required').min(2, 'College name must be at least 2 characters'),
-      title: Yup.string().required('Title is required').min(2, 'Title must be at least 2 characters'),
-      year: Yup.number().required('Year is required').min(1950, 'Year must be after 1950').max(new Date().getFullYear(), 'Year cannot be in the future')
-    })
-  ),
-  certification: Yup.array().of(
-    Yup.object().shape({
-      name: Yup.string().required('Certification name is required').min(2, 'Certification name must be at least 2 characters'),
-      year: Yup.number().required('Year is required').min(1950, 'Year must be after 1950').max(new Date().getFullYear(), 'Year cannot be in the future'),
-    })
-  ),
-  email: Yup.string().required('Email is required').email('Must be a valid email address'),
-  phone: Yup.string().matches(/^[0-9]{10}$/, "Phone number must be 10 digits").required("Phone number is required"),
-})
-
-export default function EditProfile() {
-
-    const location = useLocation()
-    const freelancerData = location.state || {}
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const [initialValues, setInititalValues] = useState<any>()
-
-  setInititalValues(freelancerData)
- console.log(initialValues,'this is the initial value')
-  // setImagePreview(freelancerData.profile)
-  const handleSubmit = (values: any, { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }) => {
-    console.log(values)
-    // Here you would typically send the form data to your backend
-    setSubmitting(false)
-  }
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>, setFieldValue: (field: string, value: any) => void) => {
-    const file = event.currentTarget.files?.[0]
-    if (file) {
-      if (file.size > 5000000) {
-        alert('File too large')
-      } else {
-        setFieldValue('photo', file)
-        const reader = new FileReader()
-        reader.onloadend = () => {
-          setImagePreview(reader.result as string)
-        }
-        reader.readAsDataURL(file)
-      }
+  useEffect(() => {
+    if (freelancer) {
+      setInitialState(freelancer);
     }
+  }, [freelancer]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, field: string) => {
+    const value = e.target.value;
+    setInitialState((prevState: any) => ({
+      ...prevState,
+      [field]: value,
+    }));
+  };
+
+  const handleArrayChange = (e: React.ChangeEvent<HTMLInputElement>, index: number, field: string, arrayName: string) => {
+    const updatedArray = [...initialState[arrayName]];
+    updatedArray[index][field] = e.target.value;
+    setInitialState((prevState: any) => ({
+      ...prevState,
+      [arrayName]: updatedArray,
+    }));
+  };
+
+  const handleAddToArray = (arrayName: string, newItem: any) => {
+    setInitialState((prevState: any) => ({
+      ...prevState,
+      [arrayName]: [...prevState[arrayName], newItem],
+    }));
+  };
+
+  const handleRemoveFromArray = (arrayName: string, index: number) => {
+    const updatedArray = initialState[arrayName].filter((_: any, i: number) => i !== index);
+    setInitialState((prevState: any) => ({
+      ...prevState,
+      [arrayName]: updatedArray,
+    }));
+  };
+
+  if (!initialState) {
+    return <div>Loading...</div>;
   }
 
   return (
-    <div className="max-w-full pl-20 pr-20 mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h1 className="text-3xl font-bold mb-6">Edit Your Profile</h1>
-      <Formik
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        onSubmit={handleSubmit}
-      >
-        {({ values, errors, touched, setFieldValue, isSubmitting }) => (
-          <Form className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="firstName" className="block text-sm h-10 font-medium text-gray-700">First Name</label>
-                <Field name="firstName" placeholder={freelancerData.firstName} type="text" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm h-10 " />
-                <ErrorMessage name="firstName" component="div" className="text-red-500 text-sm mt-1" />
-              </div>
-              <div>
-                <label htmlFor="lastName" className="block text-sm h-10 font-medium text-gray-700">Last Name</label>
-                <Field name="lastName" type="text" placeholder={freelancerData.lastName} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm h-10 " />
-                <ErrorMessage name="lastName" component="div" className="text-red-500 text-sm mt-1" />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="photo" className="block text-sm font-medium text-gray-700">Profile Photo</label>
-              <div className="mt-1 flex items-center space-x-4">
-                {freelancerData ? (
-                  <img src={freelancerData.profile} alt="Profile preview" className="w-24 h-24 rounded-full object-cover" />
-                ) : (
-                  <UserCircle className="w-24 h-24 text-gray-300" />
-                )}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  onChange={(event) => handleFileChange(event, setFieldValue)}
-                  className="hidden"
-                  accept="image/*"
-                />
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-                >
-                  Upload New Photo
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
-              <Field name="description" as="textarea" rows={4} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm h-10 " />
-              <ErrorMessage name="description" component="div" className="text-red-500 text-sm mt-1" />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Languages</label>
-              <FieldArray name="language">
-                {({ push, remove }) => (
+    <div className="space-y-10 p-8">
+      <form>
+        {/* Profile Header */}
+        <div className="relative">
+          <div
+            className="h-60 bg-cover bg-center rounded-lg"
+            style={{
+              backgroundImage: `url('https://images.pexels.com/photos/3584994/pexels-photo-3584994.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')`,
+            }}
+          ></div>
+          <div className="absolute bottom-[-40px] left-0 right-0 flex justify-center">
+            <div className="relative bg-white rounded-lg shadow-lg p-6 w-11/12 max-w-4xl overflow-hidden">
+              <div className="relative flex items-center">
+                <div className="relative">
+                  <img
+                    src={initialState.profile || '/placeholder.svg?height=112&width=112'}
+                    alt="Profile"
+                    className="w-28 h-28 rounded-full object-cover"
+                  />
+                  <Button isIconOnly className="absolute bottom-0 right-0 bg-white rounded-full p-1 shadow">
+                    <Camera className="w-4 h-4" />
+                  </Button>
+                </div>
+                <div className="ml-4 space-y-4 flex-grow">
                   <div>
-                 
-                      <div className="flex items-center space-x-2 mt-2">
-                        <Field name= 'language' type="text" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm h-10 " />
-                      
-                          <button type="button" className="text-red-500">
-                            <Trash2 className="h-5 w-5" />
-                          </button>
-                      
-                      </div>
-                 
-                    <button type="button" className="mt-2 inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-green-500 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                      <Plus className="h-5 w-5 mr-1" /> Add Language
-                    </button>
+                    <label className="text-sm font-medium text-gray-700 mb-1 block" htmlFor="firstName">
+                      Change Your first name
+                    </label>
+                    <Input
+                      id="firstName"
+                      value={initialState.firstName}
+                      onChange={(e) => handleChange(e, 'firstName')}
+                    />
                   </div>
-                )}
-              </FieldArray>
-              <ErrorMessage name="language" component="div" className="text-red-500 text-sm mt-1" />
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-1 block" htmlFor="lastName">
+                      Change Your last name
+                    </label>
+                    <Input
+                      id="lastName"
+                      value={initialState.lastName}
+                      onChange={(e) => handleChange(e, 'lastName')}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Editable Sections */}
+        <div className="grid grid-cols-1 md:grid-cols-3 mt-16 rounded-lg shadow-md bg-white gap-8">
+          {/* Left Section: Languages, Education */}
+          <div className="space-y-10 p-6 md:border-r-4 border-gray-100">
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Languages</h3>
+              {initialState.language && (
+                <div className="flex items-center space-x-2 mb-2">
+                  <Input
+                    value={initialState.language}
+                    onChange={(e) => handleChange(e, 'language')}
+                    placeholder="Enter language"
+                  />
+                  <Button isIconOnly color="danger" aria-label="Delete language">
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+              <Button
+                color="primary"
+                className="mt-2"
+                onClick={() => handleAddToArray('languages', '')}
+              >
+                <Plus className="h-4 w-4 mr-2" /> Add Language
+              </Button>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Experience</label>
-              <FieldArray name="experience">
-                {({ push, remove }) => (
+              <h3 className="text-lg font-semibold mb-4">Education</h3>
+              {initialState.education?.map((edu: any, index: number) => (
+                <div key={edu._id} className="space-y-4 mb-4">
                   <div>
+
+                  <label className="text-md font-semibold text-gray-700 mb-1 block" htmlFor="firstName">
+                      Change Your first name
+                    </label>
+                  <Input
+                    value={edu.title}
+                    onChange={(e) => handleArrayChange(e, index, 'title', 'education')}
+                    placeholder="Enter degree title"
+                  />
+                  </div>
+                  <div>
+
+                  <label className="text-md font-semibold text-gray-700 mb-1 block" htmlFor="firstName">
+                      College/University
+                    </label>
+                  <Input
+                
+                    value={edu.collageName}
+                    onChange={(e) => handleArrayChange(e, index, 'collageName', 'education')}
+                    placeholder="Enter institution name"
+                  />
+                  </div>
+                  <div>
+
+                  <label className="text-md font-semibold text-gray-700 mb-1 block" htmlFor="firstName">
+                      Year of Graduation
+                    </label>
+                  <Input
                     
-                      <div  className="grid grid-cols-3 gap-4 mt-2">
-                        <Field type="text" placeholder="Expertise" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm h-10 " />
-                        <Field  type="number" placeholder="From Year" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm h-10 " />
-                        <Field type="number" placeholder="To Year" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm h-10 " />
-            
-                          <button type="button"  className="text-red-500">
-                            <Trash2 className="h-5 w-5" />
-                          </button>
-              
-                      </div>
-     
-                    <button type="button" className="mt-2 inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-green-500 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                      <Plus className="h-5 w-5 mr-1" /> Add Experience
-                    </button>
+                    value={edu.year}
+                    onChange={(e) => handleArrayChange(e, index, 'year', 'education')}
+                    placeholder="Enter graduation year"
+                    type="number"
+                  />
+                  <Button
+                    color="danger"
+                    onClick={() => handleRemoveFromArray('education', index)}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" /> Remove Education
+                  </Button>
                   </div>
-                )}
-              </FieldArray>
-              <ErrorMessage name="experience" component="div" className="text-red-500 text-sm mt-1" />
+                </div>
+              ))}
+              <Button
+                color="primary"
+                onClick={() => handleAddToArray('education', { title: '', collageName: '', year: '' })}
+              >
+                <Plus className="h-4 w-4 mr-2" /> Add Education
+              </Button>
+            </div>
+          </div>
+
+          {/* Right Section: Description, Certifications, Skills */}
+          <div className="col-span-1 md:col-span-2 p-6 space-y-8">
+            {/* Description */}
+            <div className="border-b-2 pb-6">
+              <h2 className="text-2xl font-bold mb-4">Description</h2>
+              <Textarea
+                label="Description"
+                value={initialState.description}
+                onChange={(e) => handleChange(e, 'description')}
+                placeholder="Describe your professional experience and skills"
+                rows={4}
+              />
             </div>
 
+            {/* Certificates */}
+            <div className="border-b-2 pb-6">
+              <h3 className="text-xl font-bold mb-4">Certificates</h3>
+              {initialState.certification?.map((cert: any, index: number) => (
+                <div key={cert._id} className="flex items-center space-x-2 mb-2">
+                  <Input
+                    value={cert.name}
+                    onChange={(e) => handleArrayChange(e, index, 'name', 'certification')}
+                    placeholder="Enter certificate name"
+                  />
+                  <Button isIconOnly color="danger" aria-label="Delete certificate">
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+              <Button
+                color="primary"
+                onClick={() => handleAddToArray('certification', { name: '', year: '' })}
+              >
+                <Plus className="h-4 w-4 mr-2" /> Add Certification
+              </Button>
+            </div>
+
+            {/* Skills */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">Skills</label>
-              <FieldArray name="skills">
-                {({ push, remove }) => (
-                  <div>
-                 
-                      <div className="flex items-center space-x-2 mt-2">
-                        <Field  type="text" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm h-10 " />
-                       
-                          <button type="button"  className="text-red-500">
-                            <Trash2 className="h-5 w-5" />
-                          </button>
-                   
-                      </div>
-                   
-                    <button type="button" className="mt-2 inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-green-500 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                      <Plus className="h-5 w-5 mr-1" /> Add Skill
-                    </button>
+              <h3 className="text-xl font-bold mb-4">Skills</h3>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {initialState.skills?.map((skill: string, index: number) => (
+                  <div key={index} className="flex items-center space-x-2 mb-2">
+                    <Input
+                      value={skill}
+                      onChange={(e) => handleArrayChange(e, index, 'skill', 'skills')}
+                      placeholder="Enter skill"
+                    />
+                    <Button
+                      isIconOnly
+                      color="danger"
+                      aria-label="Delete skill"
+                      onClick={() => handleRemoveFromArray('skills', index)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
-                )}
-              </FieldArray>
-              <ErrorMessage name="skills" component="div" className="text-red-500 text-sm mt-1" />
+                ))}
+              </div>
+              <Button
+                color="primary"
+                onClick={() => handleAddToArray('skills', '')}
+              >
+                <Plus className="h-4 w-4 mr-2" /> Add Skill
+              </Button>
             </div>
+          </div>
+        </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Education</label>
-              <FieldArray name="education">
-                {({ push, remove }) => (
-                  <div>
-                   
-                      <div  className="grid grid-cols-3 gap-4 mt-2">
-                        <Field type="text" placeholder="College/University Name" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm h-10 " />
-                        <Field type="text" placeholder="Title" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm h-10 " />
-                        <Field type="number" placeholder="Year" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm h-10 " />
-      
-                          <button type="button" className="text-red-500">
-                            <Trash2 className="h-5 w-5" />
-                          </button>
-         
-                      </div>
-
-                    <button type="button" className="mt-2 inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-green-500 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                      <Plus className="h-5 w-5 mr-1" /> Add Education
-                    </button>
-                  </div>
-                )}
-              </FieldArray>
-              <ErrorMessage name="education" component="div" className="text-red-500  text-sm mt-1" />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Certification</label>
-              <FieldArray name="certification">
-                {({ push, remove }) => (
-                  <div>
-                 
-                      <div  className="grid grid-cols-3 gap-4 mt-2">
-                        <Field  type="text" placeholder="Certificate Name" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm h-10 " />
-                        <Field  type="number" placeholder="Year" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm h-10 " />
-                        <div className="flex items-center space-x-2">
-                          <input
-                            type="file"
-                            // onChange={(event) => {
-                            //   const file = event.currentTarget.files?.[0]
-                            //   if (file) {
-                            //     setFieldValue(`certification.${index}.file`, file)
-                            //   }
-                            // }}
-                            className="hidden"
-                            // id={`certification-file-${index}`}
-                          />
-                          <label  className="cursor-pointer inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                            <Upload className="h-5 w-5 mr-2" /> Upload
-                          </label>
-                         
-                            <button type="button"  className="text-red-500">
-                              <Trash2 className="h-5 w-5" />
-                            </button>
-                     
-                        </div>
-                      </div>
-            
-                    <button type="button"  className="mt-2 inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-green-500 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                      <Plus className="h-5 w-5 mr-1" /> Add Certification
-                    </button>
-                  </div>
-                )}
-              </FieldArray>
-              <ErrorMessage name="certification" component="div" className="text-red-500 text-sm mt-1" />
-            </div>
-
-            <div>
-              <label htmlFor="portfolio" className="block text-sm font-medium text-gray-700">Portfolio URL</label>
-              <Field name="portfolio" type="url" placeholder="https://your-portfolio.com" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm h-10 " />
-            </div>
-
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
-              <Field name="email" type="email" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm h-10 " />
-              <ErrorMessage name="email" component="div" className="text-red-500 text-sm mt-1" />
-            </div>
-
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">Phone</label>
-              <Field name="phone" type="tel" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm h-10 " />
-              <ErrorMessage name="phone" component="div" className="text-red-500 text-sm mt-1" />
-            </div>
-
-            <div className="flex justify-end space-x-3">
-              <button type="button" className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                Cancel
-              </button>
-              <button type="submit" disabled={isSubmitting} className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-500 hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                {isSubmitting ? 'Saving...' : 'Save Profile'}
-              </button>
-            </div>
-          </Form>
-        )}
-      </Formik>
+        {/* Buttons for Save and Cancel */}
+        <div className="mt-8 flex justify-end space-x-4">
+          <Button color="default">Cancel</Button>
+          <Button color="primary">Save Changes</Button>
+        </div>
+      </form>
     </div>
-  )
-}
+  );
+};
+
+export default EditFreelancerProfileTemplate;

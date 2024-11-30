@@ -1,9 +1,9 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { verifyLogin } from "../actions/userActions";
-import { updateApplication } from "../actions/adminAction";
 
 
 interface User {
+    _id: string,
     userId: string;
     name: string;
     email: string;
@@ -46,7 +46,7 @@ const userSlice = createSlice({
             state.loading = action.payload
         },
         setError(state,action){
-            state.error = action.payload
+            state.error = action.payload    
         }
     },
     extraReducers: (builder) =>{

@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux'
 import { RootState } from '../../Redux/store'
 import { getUserInfo } from '../../Services/userServices/userAxiosCalls'
 import { User } from '../../Types/userInterface'
+import Footer from '../../Components/Common/UserCommon/Footer'
 
 const FreelancerHomePage = ()=> {
 
@@ -13,7 +14,7 @@ const FreelancerHomePage = ()=> {
 
     useEffect(()=>{
         const fetch = async()=>{
-            let response = await getUserInfo(data?.userId)
+            let response = await getUserInfo(data?._id)
             setUserData(response.data)
         }
     
@@ -24,6 +25,7 @@ const FreelancerHomePage = ()=> {
     <>
     <Navbar />
     <FreelancerHome data = {userData}/>
+    <Footer/>
     </>
   )
 }

@@ -1,12 +1,17 @@
-import axios from "axios";
-import { FreelancerData } from "../../Types/freelancerInterface";
+
+import { FreelanceData } from "../../Types/freelancerInterface";
+import axiosInstance from "../../config/userInstance";
 
 const url = 'http://localhost:7070/freelancer';
 
-export const freelancerApplication = async(freelancerData: FreelancerData)=>{
+export const freelancerApplication = async(freelancerData: FreelanceData,id: string)=>{
     try {
         console.log('the data of the freelancer is ',freelancerData)
-        const response = await axios.post(`${url}/application`,freelancerData)
+        const response = await axiosInstance.post(`${url}/application/${id}`,freelancerData,{
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        })
         if(response){
             return true
         }

@@ -6,6 +6,7 @@ import ProfileDropdown from '../Common/ProfileDropdown'
 import { User } from '../../Types/userInterface'
 import { getUserInfo } from '../../Services/userServices/userAxiosCalls'
 import { useNavigate } from 'react-router-dom'
+import { Mail } from 'lucide-react'
 
 const Navbar = () => {
 
@@ -15,14 +16,19 @@ const Navbar = () => {
     const [ userData, setUserData] = useState<User | null>(null)
     const data: any = useSelector((state:RootState)=>state.user.userInfo)
 
-    // useEffect(()=>{
-    //     const fetch = async()=>{
-    //         let response = await getUserInfo(data?.userId)
-    //         setUserData(response.data)
-    //     }
-    
-    //    fetch()
-    // },[]) 
+    useEffect(()=>{
+        const fetch = async()=>{
+            let response = await getUserInfo(data?._id)
+            console.log(response,' response in the header is error')
+            setUserData(response.data)
+        }
+        if(data !== null){
+
+            fetch()
+        }
+    },[data]) 
+
+    console.log(userData,'this is the userData')
 
     return (
         <>
@@ -35,11 +41,18 @@ const Navbar = () => {
                         onClick={()=>navigate('/freelancer/home')}
                     />
                 </div>
-
-                <div className='flex justify-center space-x-5 pl-14 text-gray-300'>
-                    <p onClick={()=>navigate('/freelancer/dashboard')} className='text-sm'>DASHBOARD</p>
-                    <p onClick={()=>navigate('/freelancer/joblist')} className='text-sm'>FIND WORK</p>
+                {userData?.isFreelancer == true ? (
+                    <div className='flex justify-center space-x-5 pl-14 text-gray-300'>
+                    <p onClick={()=>navigate('/freelancer/dashboard')} className='text-sm font-semibold hover:text-green-500'>DASHBOARD</p>
+                    <p onClick={()=>navigate('/freelancer/joblist')} className='text-sm font-semibold hover:text-green-500'>FIND WORK</p>
                 </div>
+                ):(
+                    <div className='flex justify-center space-x-5 pl-14 text-gray-300'>
+                    {/* <p className='text-sm font-semibold hover:text-green-500'>DASHBOARD</p>
+                    <p className='text-sm font-semibold hover:text-green-500'>FIND WORK</p> */}
+                </div>
+                )}
+                
                 {/* Menu Button (Visible on Small Screens) */}
                 <button
                     className="lg:hidden p-2 text-gray-500 hover:text-gray-700 focus:outline-none"
@@ -68,6 +81,13 @@ const Navbar = () => {
                         <span className="sr-only">View notifications</span>
                         <BellIcon className="h-6 w-6" aria-hidden="true" />
                     </button>
+                    <button
+                    type="button"
+                    className="relative rounded-full bg-black p-1 text-gray-400"
+                  >
+                    <span className="sr-only">View messages</span>
+                    <Mail onClick={()=>navigate('/freelancer/freelancermessage')} className="h-6 w-6" aria-hidden="true" />
+                  </button>
 
                     {/* Profile Icon */}
                     {/* <button
@@ -77,7 +97,7 @@ const Navbar = () => {
                         <span className="sr-only">View profile</span>
                         <UserCircleIcon className="h-6 w-6" aria-hidden="true" />
                     </button> */}
-                    <ProfileDropdown userData = {data}/>
+                    <ProfileDropdown userData = {userData}/>
                 </div>
             </nav>
         </>

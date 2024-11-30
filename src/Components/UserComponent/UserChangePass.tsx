@@ -10,7 +10,7 @@ const UserChangePass = () => {
     const [confirmPassword, setConfirmPassword] = useState<string>('');
 
     const userData = useSelector((state: RootState) => state.user.userInfo);
-    const id: string | undefined = userData?.userId;
+    const id: string | undefined = userData?._id;
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         try {

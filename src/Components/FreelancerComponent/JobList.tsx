@@ -2,21 +2,37 @@ import React, { useEffect, useState } from 'react'
 import { Search, ChevronDown, ChevronUp, Heart, MoreHorizontal, CheckCircle, MapPin } from 'lucide-react'
 import { getJobList } from '../../Services/freelancerService/freelancerAxiosCalls'
 import { useNavigate } from 'react-router-dom'
+import { useFreelancer } from '../../context/FreelancerContext/FreelancerData'
+import LoadingSpinner from '../Common/LoadinSpinner'
+
 
 export default function JobListing() {
 
     const [data,setData] = useState<any[]>([])
+    const [loading, setLoading] = useState<boolean>(true)
     const navigate = useNavigate()
+    const {freelancer} =  useFreelancer()
+    const id = freelancer?.userId
 
 useEffect(()=>{
     const fetchData = async()=>{
-        const jobData = await getJobList()
+      if(!id)return
+      try {
+        const jobData = await getJobList(id)
         setData(jobData)
+      } catch (error) {
+        console.error('Error fetching job data:', error);
+      }finally{
+        setLoading(false)
+      }
     }
     fetchData()
-},[])
+},[id])
 
-console.log(data,'this the job data we got here')
+if(!id || loading){
+  return <LoadingSpinner/>
+}
+
 
   return (
     <div className="flex pl-10 bg-white">

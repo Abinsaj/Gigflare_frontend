@@ -2,6 +2,8 @@ import { Card, CardHeader, Image } from "@nextui-org/react";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { toast } from "sonner";
+import { useSelector } from "react-redux";
+import { RootState } from "../../Redux/store";
 
 const FreelancerHome = ({data}: any) => {
     const navigate = useNavigate()
@@ -14,6 +16,7 @@ const FreelancerHome = ({data}: any) => {
         }
     },[data])
     
+    console.log(data,'this is the data ')
 
     const products = [
         {
@@ -96,7 +99,7 @@ const FreelancerHome = ({data}: any) => {
                             You bring the skill. We'll make earning easy.
                         </p>
                         {data?.isFreelancer ? (
-                            <a href='/freelancer/dashboard' className="inline-flex justify-center items-center py-2 sm:py-3 px-4 sm:px-5 text-sm sm:text-base font-medium text-green-500 rounded-md bg-gray-600 bg-opacity-70 hover:bg-gray-700/80  ">
+                            <a onClick={()=>navigate('/freelancer/dashboard',{state:data})} className="inline-flex justify-center items-center py-2 sm:py-3 px-4 sm:px-5 text-sm sm:text-base font-medium text-green-500 rounded-md bg-gray-600 bg-opacity-70 hover:bg-gray-700/80  ">
                             Dashboard
                         </a>
                         ):(

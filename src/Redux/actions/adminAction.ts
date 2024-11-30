@@ -19,7 +19,7 @@ export const verifyAdmin = createAsyncThunk(
 
 export const updateApplication = createAsyncThunk(
     'user/updateApplcation',
-    async({applicationId,newStatus}:{applicationId: any, newStatus: any},thunkAPI)=>{
+    async({applicationId,newStatus}:{applicationId: string | undefined, newStatus: any},thunkAPI)=>{
        try {
         console.log(applicationId,'thish',newStatus)
             const response =  await axiosInstance.put(`/admin/updatefreelancerstatus/${applicationId}`, { status: newStatus })
