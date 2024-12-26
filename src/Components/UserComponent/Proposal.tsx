@@ -3,9 +3,10 @@ import { Heart, Star, ChevronLeft, ChevronRight, MessageCircle, ArrowLeft } from
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../Redux/store'
-import { getProposals } from '../../Services/userServices/userAxiosCalls'
+import { getProposals, getWorkHistory } from '../../Services/userServices/userAxiosCalls'
 import FreelancerModal from '../Common/UserCommon/FreelancerModal'
 import ProposalModal from '../Common/UserCommon/ProposalModal'
+import { viewedNotification } from '../../Services/userServices/userAxiosCalls'
 
 
 const Proposal = () => {
@@ -26,24 +27,24 @@ const Proposal = () => {
     useEffect(() => {
         const fetchData = async () => {
             const response = await getProposals(jobData._id)
-            console.log(response.data, 'this is the response we got here')
             setData(response.data)
-            console.log(data, 'this is the data of the proposal')
+
+            const result = await viewedNotification(userData?._id,'proposal')
+            console.log(result,'this is the result')
+            
         }
         fetchData()
     }, [])
 
-
-
     const openProfileModal = (data: any) => {
         setIsProfileModalOpen(true)
-        setIsProposalModalOpen(false)  // Close proposal modal if it's open
+        setIsProposalModalOpen(false)  
         setProfileData(data)
     }
 
     const openProposalModal = (data: any) => {
         setIsProposalModalOpen(true)
-        setIsProfileModalOpen(false)  // Close profile modal if it's open
+        setIsProfileModalOpen(false)  
         setProposalData(data)
     }
 
@@ -58,13 +59,14 @@ const Proposal = () => {
         setStatus(status)
     }
 
-   
-
+    console.log(jobData,'this is the proposal data')
     
     return (
         <div className="max-w-7xl mx-auto px-4 min-h-screen py-8">
             {/* Tabs */}
-
+            <div className="relative flex-1">
+                    <h1 className="text-3xl font-semibold">Proposals</h1>
+                </div>
             <div className="border-b border-gray-200 mb-6">
                 <div className="flex gap-8">
                     <button
@@ -90,9 +92,7 @@ const Proposal = () => {
 
             {/* Search and Filters */}
             <div className="flex gap-4 mb-8">
-                <div className="relative flex-1">
-                    <h1 className="text-3xl font-semibold">Proposals</h1>
-                </div>
+                
                 {/* <button className="px-4 py-2 border border-gray-300 rounded-md flex items-center gap-2">
           <SlidersHorizontal className="h-4 w-4" />
           Filters
@@ -167,10 +167,10 @@ const Proposal = () => {
                                         </button>
                                  
 
-                                    <button onClick={()=>navigate(`/message/${proposal.userId}`)} className="w-32 px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                    {/* <button onClick={()=>navigate(`/message/${proposal.userId}`)} className="w-32 px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                                         <MessageCircle onClick={()=>navigate('/message')} className="w-4 h-4 inline-block mr-2" />
                                         Message
-                                    </button>
+                                    </button> */}
                                 </div>
                             </div>
                         </div>

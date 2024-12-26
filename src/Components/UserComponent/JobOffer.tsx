@@ -7,7 +7,7 @@ import { toast } from 'sonner'
 export interface OfferData {
   jobId?: string
   freelancerId?: string
-  proposalId?:string
+  proposalId?: string
   budget: number
   fromDate: string
   toDate: string
@@ -16,7 +16,9 @@ export interface OfferData {
   upfrontAmount: number
   completionAmount: number
   platformFeeAmount: number
-  termsAccepted?:boolean 
+  termsAccepted?: boolean
+  attachment?: File | null 
+
 }
 
 interface FormErrors {
@@ -40,7 +42,8 @@ export default function JobOffer() {
     description: job.description,
     upfrontAmount: 0,
     completionAmount: 0,
-    platformFeeAmount: 0
+    platformFeeAmount: 0,
+    attachment: null,
   })
 
   const [errors, setErrors] = useState<FormErrors>({
@@ -49,8 +52,8 @@ export default function JobOffer() {
     toDate: ''
   })
 
-  const [upfrontPercentage, setUpfrontPercentage] = useState(25) 
-  const [completionPercentage, setCompletionPercentage] = useState(75) 
+  const [upfrontPercentage, setUpfrontPercentage] = useState(25)
+  const [completionPercentage, setCompletionPercentage] = useState(75)
 
   useEffect(() => {
     const upfrontAmount = (offerData.budget * upfrontPercentage) / 100
@@ -64,6 +67,18 @@ export default function JobOffer() {
       platformFeeAmount
     }))
   }, [offerData.budget, upfrontPercentage, completionPercentage])
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null
+    if (file && file.type !== 'application/pdf') {
+      setErrors(prev => ({ ...prev, attachment: 'Only PDF files are allowed.' }))
+    } else {
+      setOfferData(prev => ({ ...prev, attachment: file }))
+      setErrors(prev => ({ ...prev, attachment: '' }))
+    }
+  }
+
+  
 
   const handleChange = (field: keyof OfferData, value: any) => {
     setOfferData((prev) => ({ ...prev, [field]: value }))
@@ -101,14 +116,24 @@ export default function JobOffer() {
     return Object.values(newErrors).every((error) => !error)
   }
 
-
-  const handleSubmit = async(e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (validateForm()) {
-      
-    console.log("offdata",offerData)
-      const response = await sendOffer(offerData, data.freelancer._id, job._id,job.createdBy)
-      if(response.success === true){
+      const formData = new FormData()
+      formData.append('budget', offerData.budget.toString())
+      formData.append('fromDate', offerData.fromDate)
+      formData.append('toDate', offerData.toDate)
+      formData.append('jobTitle', offerData.jobTitle)
+      formData.append('description', offerData.description)
+      formData.append('upfrontAmount', offerData.upfrontAmount.toString())
+      formData.append('completionAmount', offerData.completionAmount.toString())
+      formData.append('platformFeeAmount', offerData.platformFeeAmount.toString())
+      if (offerData.attachment) {
+        formData.append('attachment', offerData.attachment)
+      }
+
+      const response = await sendOffer(formData, data.freelancer._id, job._id, job.createdBy)
+      if (response.success === true) {
         toast.success(response.message)
         window.history.back()
       }
@@ -213,6 +238,18 @@ export default function JobOffer() {
                   {errors.toDate && <p className="text-red-500 text-xs mt-1">{errors.toDate}</p>}
                 </div>
               </div>
+              <div>
+                <div className='mt-5'>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Upload Attachment (PDF only)</label>
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    onChange={handleFileChange}
+                    className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer focus:outline-none"
+                  />
+                  {/* {errors.attachment && <p className="text-red-500 text-xs mt-1">{errors.attachment}</p>} */}
+                </div>
+              </div>
             </div>
 
             {/* Payment Schedule */}
@@ -254,20 +291,20 @@ export default function JobOffer() {
         </div>
 
         {/* Terms Agreement */}
-       
+
         {/* Action Buttons */}
         <div className="flex justify-end gap-4">
-          <button
+          {/* <button
             type="button"
             className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
           >
             Cancel
-          </button>
+          </button> */}
           <button
             type="submit"
             className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Continue
+            Send
           </button>
         </div>
       </form>

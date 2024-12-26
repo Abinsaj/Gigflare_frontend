@@ -6,12 +6,16 @@ import { getUserJobs } from '../../Services/userServices/userAxiosCalls'
 import JobPost from './JobPost'
 import JobPostForm from './JobPostApplication'
 import { useNavigate } from 'react-router-dom'
+import useNotification from '../../zustand/useNotification'
+import useGetNotification from '../../hooks/useGetNotification'
 
 const Jobs = () => {
     const data = useSelector((state:RootState)=>state.user.userInfo)
     const [job,setJob] = useState<any[]>([])
     const [openModal, setOpenModal] = useState<boolean>(false)
     const [searchQuery, setSearchQuery] = useState('')
+    const {notifications} = useGetNotification()
+    console.log(notifications,'here we got the notfications')
 
     const navigate = useNavigate()
 
@@ -50,32 +54,13 @@ const Jobs = () => {
     return (
         <div className="max-w-7xl mx-auto px-4 h-screen py-8">
             {/* Tabs */}
-            <div className="border-b border-gray-200 mb-6">
-                <div className="flex gap-8">
-                    <button className="pb-4 border-b-2 border-green-600 text-green-600">
-                        All job posts
-                    </button>
-                    
-                    <button onClick={()=>navigate('/contracts')} className="pb-4 text-gray-500">
-                        All contracts
-                    </button>
-                </div>
-            </div>
+            <h1 className="text-3xl font-semibold pb-5">All job posts</h1>
+            
 
-            {/* Header */}
-            <div className="flex justify-between items-center mb-8">
-                <h1 className="text-3xl font-semibold">All job posts</h1>
-                <button 
-                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-                    onClick={modalOpen}
-                >
-                    Add Job
-                </button>
-            </div>
 
             {/* Search and Filters */}
-            <div className="flex gap-4 mb-8">
-                <div className="relative flex-1">
+            <div className="flex gap-4 mb-8 justify-end">
+                {/* <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                     <input
                         type="text"
@@ -88,35 +73,56 @@ const Jobs = () => {
                 <button className="px-4 py-2 border border-gray-300 rounded-md flex items-center gap-2">
                     <SlidersHorizontal className="h-4 w-4" />
                     Filters
+                </button> */}
+                <button 
+                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                    onClick={modalOpen}
+                >
+                    Add Job
                 </button>
             </div>
 
             {/* Job Posts List */}
             <div className="space-y-4">
-                {job?.map((val: any) => (
-                    <div key={val._id} className="bg-gray-50 p-6 rounded-lg flex items-center justify-between">
-                        <div>
-                            <h2 className="text-xl font-semibold mb-2">{val.title}</h2>
-                            <div className="text-gray-500">
-                                Fixed-price - {val.experienceLevel} - Est. Budget: {val.budget}
+                {job?.map((val: any) => {
+                    // Count proposals for this job
+                    const proposalCount = notifications.filter(
+                        (notif: any) => notif.type === 'proposal' && notif.data?.jobId === val._id
+                    ).length
+
+                    return (
+                        <div key={val._id} className="bg-gray-50 p-6 rounded-lg flex items-center justify-between">
+                            <div>
+                                <h2 className="text-xl font-semibold mb-2">{val.title}</h2>
+                                <div className="text-gray-500">
+                                    Fixed-price - {val.experienceLevel} - Est. Budget: {val.budget}
+                                </div>
+                                <div className="text-gray-500">
+                                    {val.description.substring(0, 100)}...
+                                </div>
                             </div>
-                            <div className="text-gray-500">
-                                {val.description.substring(0, 100)}...
+                            <div className="flex items-center gap-4">
+                                <button
+                                    onClick={() => navigate(`/proposals`, { state: val })}
+                                    className="relative px-4 py-2 border border-green-600 text-green-600 rounded-md hover:bg-green-50"
+                                >
+                                    Proposals
+                                    {proposalCount > 0 && (
+                                        <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-white text-xs">
+                                            {proposalCount}
+                                        </span>
+                                    )}
+                                </button>
+                                {/* <button className="px-4 py-2 border border-green-600 text-green-600 rounded-md hover:bg-green-50">
+                                    Edit
+                                </button> */}
+                                {/* <button className="p-2 rounded-full hover:bg-gray-200">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                </button> */}
                             </div>
                         </div>
-                        <div className="flex items-center gap-4">
-                            <button onClick={()=>navigate(`/proposals`,{state: val})} className="px-4 py-2 border border-green-600 text-green-600 rounded-md hover:bg-green-50">
-                                Proposals
-                            </button>
-                            <button className="px-4 py-2 border border-green-600 text-green-600 rounded-md hover:bg-green-50">
-                                Edit
-                            </button>
-                            <button className="p-2 rounded-full hover:bg-gray-200">
-                                <MoreHorizontal className="h-4 w-4" />
-                            </button>
-                        </div>
-                    </div>
-                ))}
+                    )
+                })}
             </div>
 
             {/* Pagination */}

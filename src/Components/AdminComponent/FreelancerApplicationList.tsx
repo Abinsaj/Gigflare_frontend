@@ -7,6 +7,7 @@ import { useDispatch } from 'react-redux'
 import { AppDispatch } from '../../Redux/store'
 import { toast } from 'sonner'
 import { useNavigate } from 'react-router-dom'
+import { posted } from '../../config/timeAgo'
 
 const url = 'http://localhost:7070'
 
@@ -27,19 +28,29 @@ export default function FreelancerApplications() {
 
   const dispatch = useDispatch<AppDispatch>()
   const [freelancers, setFreelancers] = useState<Freelancer[]>([])
+  const [pageSize] = useState(5)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPage, setTotalPage] = useState(1)
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(`${url}/admin/getfreelancerapplications`, { withCredentials: true })
-        console.log(response.data.data)
-        setFreelancers(response.data.data)
-      } catch (error) {
-        console.error('Error fetching freelancer applications:', error)
-      }
+  const fetchData = async (page = 1) => {
+    try {
+      const response = await axios.get(`${url}/admin/getfreelancerapplications`, { withCredentials: true })
+      console.log(response.data.data)
+      setFreelancers(response.data.data)
+    } catch (error) {
+      console.error('Error fetching freelancer applications:', error)
     }
+  }
+  useEffect(() => {
     fetchData()
   }, [])
+
+  const handleChangePage = (currentPage: number)=>{
+    if(currentPage > 0 && currentPage <= totalPage){
+      setCurrentPage(currentPage)
+      fetchData(currentPage)
+    }
+  }
 
   const handleStatusChange = async (applicationId: string, newStatus: 'pending' | 'accepted' | 'rejected') => {
     try {
@@ -59,7 +70,7 @@ export default function FreelancerApplications() {
       <p className="text-sm text-gray-600 mb-4">Home &gt; Freelancer Applications</p>
       <div className="flex justify-end items-center mb-4">
         <Calendar className="w-4 h-4 mr-2 text-gray-600" />
-        <span className="text-sm text-gray-600">{new Date().toLocaleDateString()}</span>
+        <span className="text-sm text-gray-600">{posted(new Date())}</span>
       </div>
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
         <table className="min-w-full">
@@ -108,12 +119,16 @@ export default function FreelancerApplications() {
         </table>
       </div>
       <div className="flex justify-between items-center mt-4">
-        <button className="flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+        <button
+          onClick={()=>handleChangePage(currentPage + 1)}
+          className="flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
           <ChevronLeft className="w-5 h-5 mr-2" />
           Previous
         </button>
         <span className="text-sm text-gray-700">Page 1 of 1</span>
-        <button className="flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[#003F62] hover:bg-[#002E62]">
+        <button 
+          onClick={()=>handleChangePage(currentPage - 1)}
+          className="flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[#003F62] hover:bg-[#002E62]">
           Next
           <ChevronRight className="w-5 h-5 ml-2" />
         </button>

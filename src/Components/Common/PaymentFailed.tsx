@@ -19,9 +19,9 @@ export default function PaymentFailed() {
           </p>
         </CardBody>
         <CardFooter className="flex justify-center gap-2">
-          <Link to={'/'}>
+          <Link to={'/contracts'}>
             <Button color="primary">
-              Home
+              GO BACK
             </Button>
           </Link>
           {/* <Link to={}> */}

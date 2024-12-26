@@ -66,7 +66,7 @@ console.log(category,'this is the category we got in add job post')
                 >
                     <option value="" disabled className="text-gray-400">Add Category</option>
                     {category.map((data) => (
-                        <option key={data._id} value={data.name}>{data.name}</option>
+                        <option key={data._id} value={data._id}>{data.name}</option>
                     ))}
                 </select>
             </div>

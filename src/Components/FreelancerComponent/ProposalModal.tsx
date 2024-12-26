@@ -42,10 +42,9 @@ export default function SendProposal({ onClose, data }: SendProposalProps) {
 
     console.log('Proposal submitted', Object.fromEntries(formData))
     
-    const jobId = data._id
     
     try {
-      const response = await createProposal(proposal, userId, jobId, freelancer?._id)
+      const response = await createProposal(proposal, userId, data._id, freelancer?._id)
       if (response.success === true) {
         toast.success(response.message)
         onClose()

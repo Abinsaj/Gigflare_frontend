@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { Card, CardBody, CardHeader, Button, Badge, Chip } from "@nextui-org/react"
-import { CalendarDays, DollarSign, IndianRupee,SlidersHorizontal, Search } from 'lucide-react'
+import { Card, CardBody, CardHeader, Button, Badge } from "@nextui-org/react"
+import { CalendarDays, IndianRupee } from 'lucide-react'
 import LoadingSpinner from '../Common/LoadinSpinner'
 import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../Redux/store'
 import { getContractList } from '../../Services/userServices/userAxiosCalls'
+import { posted } from '../../config/timeAgo'
 
 
 export default function ContractList() {
@@ -42,7 +43,7 @@ export default function ContractList() {
     }
     
     return (
-        <div className="max-w-7xl mx-auto px-4 h-screen py-8">
+        <div className="max-w-6xl mx-auto px-4 h-screen py-8">
             <div className="max-w-7xl mx-auto">
                 <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">All Contracts</h1>
                 {/* <p className="text-gray-500 mt-1">Manage your active and past contracts</p> */}
@@ -78,14 +79,14 @@ export default function ContractList() {
                                 <CalendarDays className="h-4 w-4 text-gray-500" />
                                 <div className="text-sm ">
                                     <p className="text-gray-500">Duration</p>
-                                    <p>{new Date(value.startDate).toLocaleDateString()} </p>
+                                    <p>{posted(value.startDate)} </p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
                                 <CalendarDays className="h-4 w-4 text-gray-500" />
                                 <div className="text-sm ">
                                     <p className="text-gray-500">Duration</p>
-                                    <p> {new Date(value.endDate).toLocaleDateString()}</p>
+                                    <p> {posted(value.endDate)}</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
@@ -99,7 +100,7 @@ export default function ContractList() {
                         </div>
                         <div className="flex items-center pt-6 sm:col-span-2 md:col-span-1 md:justify-end">
                                 <Button 
-                                    onClick={()=>navigate('/contract',{state:{contractData:value,userId:id}})}
+                                    onClick={()=>navigate('/contract',{state:{contract:value,userId:id}})}
                                     className='border bg-[#1AA803] text-white rounded-md'
                                     color="primary"
                                     variant="bordered"

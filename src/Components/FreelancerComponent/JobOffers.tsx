@@ -4,6 +4,9 @@ import { useFreelancer } from '../../context/FreelancerContext/FreelancerData'
 import { getJobOffers } from '../../Services/freelancerService/freelancerAxiosCalls'
 import ViewOffer from './ViewOffer'
 import { OfferData } from '../UserComponent/JobOffer'
+import { viewedNotification } from '../../Services/userServices/userAxiosCalls'
+import { useSelector } from 'react-redux'
+import { RootState } from '../../Redux/store'
 
 
 export default function JobOffers() {
@@ -12,12 +15,16 @@ export default function JobOffers() {
     const [offers,setOffers] = useState<OfferData[]>([])
     const [modalData, setModalData] = useState<any>(null)
     const [modalOpen, setModalOpen] = useState<boolean>(false)
+    const user = useSelector((state: RootState)=> state.user.userInfo)
 
     useEffect(()=>{
         
         const fetchData = async()=>{
             const response = await getJobOffers(freelancer?._id)
             setOffers(response)
+
+            const result = await viewedNotification(user?._id, 'offer')
+            console.log(result,' this is the result')
         }
         if(freelancer !== null){
             fetchData()
@@ -50,7 +57,7 @@ export default function JobOffers() {
                 </div>
 
                 {/* Search and Sort */}
-                <div className="flex flex-col sm:flex-row justify-between mb-4 sm:mb-6 gap-4">
+                {/* <div className="flex flex-col sm:flex-row justify-between mb-4 sm:mb-6 gap-4">
                 
                     <div className="flex items-center gap-2">
                         <span className="text-gray-600 text-sm">Sort by</span>
@@ -59,12 +66,12 @@ export default function JobOffers() {
                             <ChevronDown className="h-4 w-4 text-gray-500" />
                         </button>
                     </div>
-                </div>
+                </div> */}
 
                 {/* Table */}
                 <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                     <div className="overflow-x-auto">
-                        <table className="w-full">
+                        <table className="w-full"> 
                             <thead className="bg-gray-50">
                                 <tr className="text-xs sm:text-sm text-gray-500">
                                    

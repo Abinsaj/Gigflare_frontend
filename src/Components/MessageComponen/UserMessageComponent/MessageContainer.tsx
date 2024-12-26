@@ -5,6 +5,7 @@ import useConversation from '../../../zustand/useConverstation'
 import Message from './Message'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../../Redux/store'
+import { viewedNotification } from '../../../Services/userServices/userAxiosCalls'
 
 interface Message {
     id: string
@@ -29,6 +30,7 @@ const MessageContainer=()=> {
   const userId = user?._id
 
   useEffect(()=>{
+    
     return ()=> setSelectedConversation(null)
   },[])
 

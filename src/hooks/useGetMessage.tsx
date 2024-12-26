@@ -33,31 +33,5 @@ const useGetMessage = () => {
     return {messages,loading}
 }
 
-const useGetFreelancerMessage = () => {
-    const [loading, setLoading] = useState<boolean>(false)
-    const {messages, setMessages, selectedConversation} = useConversation()
-    const {freelancer} = useFreelancer()
 
-    useEffect(()=>{
-        const getMessage = async()=>{
-            setLoading(true)
-            try {
-                const userId =  selectedConversation.sender._id
-                const freelancerId = freelancer?._id
-                const data = await axiosInstance.post(`/chat/freelancermessage`,{freelancerId,userId})
-                console.log(data,'we got he message like this')
-                setMessages(data.data)
-            } catch (error: any) {
-                toast.error(error.message)
-            }finally{
-                setLoading(false)
-            }
-        }
-
-        if(selectedConversation?._id)getMessage()
-    },[selectedConversation?._id, setMessages])
-
-    return {messages,loading}
-}
-
-export { useGetMessage, useGetFreelancerMessage }
+export { useGetMessage }

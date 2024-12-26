@@ -1,6 +1,5 @@
 import { ChevronLeft, ChevronRight, X, Plus } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { useFormik } from 'formik'
 import axiosInstance from '../../config/userInstance'
 import { toast } from 'sonner'
 import { removeCategory } from '../../Services/adminServices/adminAxiosCall'

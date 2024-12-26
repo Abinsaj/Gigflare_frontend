@@ -6,10 +6,11 @@ import { useNavigate } from 'react-router-dom'
 import * as Yup from 'yup'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../Redux/store'
-import axiosInstance from '../../config/userInstance'
 import BlockChecker from '../../Services/userServices/blockChecker'
-import { getcategories } from '../../Services/userServices/userAxiosCalls'
+import { getcategories, getUserSkills } from '../../Services/userServices/userAxiosCalls'
 import { userApplication } from '../../Services/userServices/userAxiosCalls'
+import Select from 'react-select';
+import LoadingSpinner from '../Common/LoadinSpinner'
 
 interface FreelanceData {
     firstName: string;
@@ -47,6 +48,8 @@ export default function Application() {
     const [imagePreview, setImagePreview] = useState<string | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
     const [category, setCategory] = useState<any[]>()
+    const [loading, setLoading] = useState<boolean>(false);
+
 
     const [educations, setEducations] = useState<FreelanceData['education']>([])
     const [newEducation, setNewEducation] = useState<{ collageName: string; title: string; year: number }>({
@@ -61,16 +64,58 @@ export default function Application() {
     const [isCertificationModalOpen, setIsCertificationModalOpen] = useState(false)
 
     const [skills, setSkills] = useState<string[]>([])
+    const [filteredSkills, setFilteredSkills] = useState<any[]>([]);
+    const [selectedSkills, setSelectedSkills] = useState<any[]>([]);
     const [newSkill, setNewSkill] = useState('')
 
     useEffect(() => {
         const fetchData = async () => {
             const result = await getcategories()
             console.log(result, 'this is the result we got in the applicatio form')
+            const skills = await getUserSkills()
             setCategory(result)
+            setSkills(skills.data)
         }
         fetchData()
     }, [])
+
+    const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const selectedCategory = e.target.value;
+        console.log(selectedCategory, 'this is the selected category,value  we have to fins')
+        formik.setFieldValue('experience.expertise', selectedCategory)
+        console.log(skills, 'this is the skills list list list lsit lsit')
+        const filtered = skills.filter((value: any) => value.category.name == selectedCategory)
+        console.log(filtered, 'this is the filteres and filtered and filtered')
+        setFilteredSkills(filtered.map((skill: any) => ({ value: skill._id, label: skill.name })))
+
+        setSelectedSkills([]);
+        formik.setFieldValue('skills', []);
+    }
+
+    const handleSkillClick = (skill: any) => {
+        if (!formik.values.skills.includes(skill.value)) {
+            const updatedSkills = [...formik.values.skills, skill.value];
+            setSelectedSkills([...selectedSkills, skill]);
+            formik.setFieldValue('skills', updatedSkills);
+        }
+    };
+
+
+    // const handleSkillsChange = (skill: any) => {
+    //     const isSkillSelected = selectedSkills.some((selected) => selected.value === skill.value);
+
+    //     if (isSkillSelected) {
+    //         // Remove the skill if it's already selected
+    //         setSelectedSkills(selectedSkills.filter((selected) => selected.value !== skill.value));
+    //         formik.setFieldValue('skills', selectedSkills.filter((selected) => selected.value !== skill.value).map((s) => s.value));
+    //     } else {
+    //         // Add the skill to the selected list
+    //         const updatedSelectedSkills = [...selectedSkills, skill];
+    //         setSelectedSkills(updatedSelectedSkills);
+    //         formik.setFieldValue('skills', updatedSelectedSkills.map((s) => s.value));
+    //     }
+    // }
+
 
     const validationSchema = Yup.object({
         firstName: Yup.string()
@@ -85,7 +130,7 @@ export default function Application() {
         // language: Yup.array()
         //     .of(Yup.string().required('Language is required'))
         //     .min(1, "At least one language must be selected"),
-        experience: 
+        experience:
             Yup.object().shape({
                 expertise: Yup.string()
                     .required('Expertise is required'),
@@ -98,7 +143,7 @@ export default function Application() {
                     .min(Yup.ref('fromYear'), 'To year must be greater than or equal to from year')
                     .max(new Date().getFullYear(), 'Year cannot be in the future')
             }),
-        
+
         skills: Yup.array()
             .of(Yup.string().required('Skill is required'))
             .min(1, 'At least one skill is required'),
@@ -163,7 +208,9 @@ export default function Application() {
         validationSchema: validationSchema,
         onSubmit: async (values, { setSubmitting }) => {
             if (formik.isValid) {
+                setLoading(true);
                 try {
+                    console.log(values.skills, 'This is the skills')
                     const formData = new FormData()
 
                     formData.append('firstName', values.firstName)
@@ -174,7 +221,7 @@ export default function Application() {
                     formData.append('portfolio', values.portfolio || '')
 
                     formData.append('language', JSON.stringify(values.language))
-                    formData.append('skills', JSON.stringify(values.skills))
+                    formData.append('skills', JSON.stringify(skills))
 
                     formData.append('experience', JSON.stringify(values.experience))
                     formData.append('education', JSON.stringify(values.education))
@@ -191,7 +238,12 @@ export default function Application() {
                         }
                     })
 
-                    const response = await userApplication(data._id,formData)
+                    for (const [key, value] of formData.entries()) {
+                        console.log(key, value);
+                    }
+
+
+                    const response = await userApplication(data._id, formData)
                     toast.success(response.message)
                     navigate('/freelancer/home')
                 } catch (error: any) {
@@ -202,6 +254,7 @@ export default function Application() {
                         toast.error('An error occurred during the submission');
                     }
                 } finally {
+                    setLoading(false);
                     setSubmitting(false);
                 }
             } else {
@@ -212,7 +265,7 @@ export default function Application() {
     })
 
     const handleSubmitClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-        
+
         e.preventDefault()
         formik.handleSubmit();
     };
@@ -273,6 +326,7 @@ export default function Application() {
 
     const addSkill = () => {
         if (newSkill.trim()) {
+            console.log(skills, 'this is the new Skill')
             const updatedSkills = [...formik.values.skills, newSkill.trim()]
             setSkills(updatedSkills)
             formik.setFieldValue("skills", updatedSkills);
@@ -298,16 +352,45 @@ export default function Application() {
         formik.setFieldValue('skills', updatedSkills)
     }
 
+    const languageOptions = [
+        { value: 'English', label: 'English' },
+        { value: 'Spanish', label: 'Spanish' },
+        { value: 'French', label: 'French' },
+        { value: 'German', label: 'German' },
+        { value: 'Chinese', label: 'Chinese' },
+        { value: 'Japanese', label: 'Japanese' },
+    ];
+    const customStyles = {
+        control: (styles: any, { isFocused, isHovered }: any) => ({
+            ...styles,
+            backgroundColor: '#fff',
+            borderColor: isFocused || isHovered ? '#1AA803' : '#ccc',
+            '&:hover': {
+                borderColor: '#1AA803',
+            },
+            boxShadow: isFocused ? '0 0 0 2px rgba(26, 168, 3, 0.3)' : 'none',
+        }),
+    };
+
+    if (loading) {
+        return (
+            <LoadingSpinner />
+        )
+    }
+
     return (
-        <div className='container mx-auto px-4 sm:px-6 lg:px-8'>
+        <div className="max-w-6xl  mx-auto  min-h-screen pr-8 pl-8">
             <form onSubmit={formik.handleSubmit} encType="multipart/form-data">
-                <div className="space-y-28 pt-16">
+
+                <div className="shadow-md rounded-md space-y-14 pt-4 p-2">
                     {/* Personal Info Section */}
                     <div className="border-b border-gray-900/10 pb-12">
-                        <h2 className="text-3xl font-semibold leading-7 text-gray-900">Personal Info</h2>
-                        <p className="mt-1 text-sm leading-6 text-gray-600">
-                            This information will be displayed publicly so be careful what you share.
-                        </p>
+                        <div className='bg-[#1AA803] p-2 rounded-md'>
+                            <h2 className="text-2xl font-semibold leading-7 text-white">Personal Info</h2>
+                            <p className="mt-1 text-sm leading-6 text-gray-200">
+                                This information will be displayed publicly so be careful what you share.
+                            </p>
+                        </div>
 
                         <div className="mt-10 space-y-8">
                             {/* Full Name */}
@@ -412,22 +495,25 @@ export default function Application() {
                             {/* Select Language */}
                             <div className="flex items-start">
                                 <label htmlFor="language" className="block py-3 text-sm font-medium leading-6 text-gray-900 w-1/4">
-                                    Select Language
+                                    Languages
                                 </label>
                                 <div className="w-3/4">
-                                    <select
+                                    <Select
                                         id="language"
-                                        name="language"
-                                        value={formik.values.language}
-                                        onChange={formik.handleChange}
-                                        onBlur={formik.handleBlur}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-none focus:ring-[#1AA803]"
-                                    >
-                                        <option value="">Select Language</option>
-                                        <option value="English">English</option>
-                                        <option value="Spanish">Spanish</option>
-                                        <option value="French">French</option>
-                                    </select>
+                                        isMulti
+                                        options={languageOptions}
+                                        value={languageOptions.filter(option =>
+                                            formik.values.language.includes(option.value)
+                                        )}
+                                        onChange={(selectedOptions) => {
+                                            const selectedLanguages = selectedOptions.map(option => option.value);
+                                            formik.setFieldValue('language', selectedLanguages);
+                                        }}
+                                        placeholder="Select languages"
+                                        className="basic-multi-select focus:outline-none focus:ring-2 focus:border-none focus:ring-[#1AA803]"
+                                        classNamePrefix="select"
+                                        styles={customStyles}
+                                    />
                                     {formik.touched.language && formik.errors.language && (
                                         <div className="text-red-500 text-sm mt-1">{formik.errors.language}</div>
                                     )}
@@ -438,10 +524,12 @@ export default function Application() {
 
                     {/* Professional Information Section */}
                     <div className="border-b border-gray-900/10 pb-12">
-                        <h2 className="text-3xl font-semibold leading-7 text-gray-900">Professional Information</h2>
-                        <p className="mt-1 text-sm leading-6 text-gray-600">
-                            This is your time to shine. Let potential buyers know what you do best and how you gained your skills, certifications and experience.
-                        </p>
+                        <div className='bg-[#1AA803] p-2 rounded-md'>
+                            <h2 className="text-2xl font-semibold leading-7 text-white">Professional Information</h2>
+                            <p className="mt-1 text-sm leading-6 text-gray-200">
+                                This is your time to shine. Let potential buyers know what you do best and how you gained your skills, certifications and experience.
+                            </p>
+                        </div>
 
                         <div className="mt-10 space-y-16">
                             {/* Experience */}
@@ -450,13 +538,8 @@ export default function Application() {
                                     Experience
                                 </label>
                                 <div className="flex space-x-2 w-3/4">
-                                    <select
-                                        value={formik.values.experience.expertise}
-                                        onChange={(e) => formik.setFieldValue('experience.expertise', e.target.value)}
-                                        onBlur={formik.handleBlur}
-                                        className="w-1/3 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-none focus:ring-[#1AA803]"
-                                    >
-                                        <option value="" label="Select expertise" />
+                                    <select onChange={handleCategoryChange} value={formik.values.experience.expertise}>
+                                        <option value="">Select Category</option>
                                         {category?.map((data) => (
                                             <option key={data.id} value={data.name}>
                                                 {data.name}
@@ -493,48 +576,78 @@ export default function Application() {
                                 </div>
                             )}
 
-                            {/* Skills */}
+
                             <div className="flex items-start mt-10">
                                 <label htmlFor="skills" className="block text-sm font-medium leading-6 py-3 text-gray-900 w-1/4">
                                     Skills
                                 </label>
-                                <div className="relative w-3/4 flex flex-col">
-                                    <div className="flex">
+                                <div className="relative w-3/4">
+                                    {/* Input box displaying selected skills */}
+                                    <div
+                                        className="flex items-center flex-wrap px-3 py-2 border border-gray-300 rounded-md shadow-sm focus-within:ring-2 focus-within:border-none focus-within:ring-[#1AA803] cursor-text"
+                                        onClick={() => document.getElementById("new-skill-input")?.focus()}
+                                    >
+
+                                        {formik.values.skills.map((skill, index) => (
+                                            <div
+                                                key={index}
+                                                className="flex items-center px-2 py-1 bg-gray-200 rounded-md shadow-sm text-gray-800 m-1"
+                                            >
+                                                <span>{skill}</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => deleteSkill(skill)}
+                                                    className="ml-1 text-gray-500 hover:text-gray-700 focus:outline-none"
+                                                >
+                                                    &times;
+                                                </button>
+                                            </div>
+                                        ))}
+
                                         <input
                                             type="text"
-                                            id="skills"
-                                            placeholder={formik.values.skills.join(', ')}
+                                            id="new-skill-input"
                                             value={newSkill}
                                             onChange={(e) => setNewSkill(e.target.value)}
-                                            onBlur={formik.handleBlur}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-none focus:ring-[#1AA803]"
+                                            className="flex-grow outline-none text-sm px-2 py-1"
+                                        // onKeyDown={(e) => {
+                                        //     if (e.key === 'Enter' && newSkill.trim()) {
+                                        //         e.preventDefault();
+                                        //         addSkill();
+                                        //     }
+                                        // }}
                                         />
-                                        <button
-                                            type="button"
-                                            className="ml-2 px-4 py-2 text-sm font-medium text-white bg-black rounded-md hover:bg-[#1AA803] focus:outline-none focus:ring-2 focus:border-none focus:ring-[#1AA803]"
-                                            onClick={addSkill}
-                                        >
-                                            Add
-                                        </button>
                                     </div>
-                                    {formik.values.skills.length > 0 && (
-                                        <div className="mt-2 flex flex-wrap gap-2">
-                                            {formik.values.skills.map((skill: string, index: number) => (
-                                                <div key={index} className="bg-gray-200 px-2 py-1 rounded-md flex items-center">
-                                                    <span>{skill}</span>
+
+                                    <div className="mt-4">
+                                        <h4 className="text-sm font-medium text-gray-700 mb-2">Available Skills:</h4>
+                                        {filteredSkills.length > 0 ? (
+                                            <div className="flex flex-wrap gap-2">
+                                                {filteredSkills.map((skill, index) => (
                                                     <button
+                                                        key={index}
                                                         type="button"
-                                                        onClick={() => deleteSkill(skill)}
-                                                        className="ml-2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                                                        onClick={() => {
+                                                            if (!formik.values.skills.includes(skill.label)) {
+                                                                setSkills([...formik.values.skills, skill.label]);
+                                                                const updatedSkill = [...formik.values.skills, skill.label]
+                                                                formik.setFieldValue("skills", updatedSkill);
+                                                            }
+                                                        }}
+                                                        className="px-3 py-1 bg-green-100 text-green-700 rounded-md hover:bg-green-200"
                                                     >
-                                                        <TrashIcon className="h-4 w-4" />
+                                                        {skill.label}
                                                     </button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <p className="text-sm font-medium text-gray-700 mb-2">No skills for this category</p>
+                                        )}
+
+                                    </div>
                                 </div>
                             </div>
+
                             {formik.touched.skills && formik.errors.skills && (
                                 <div className="text-red-500 text-sm mt-1">{formik.errors.skills}</div>
                             )}
@@ -659,11 +772,13 @@ export default function Application() {
                     </div>
 
                     {/* Account Security Section */}
-                    <div className="border-b border-gray-900/10 pb-12">
-                        <h2 className="text-3xl font-semibold leading-7 text-gray-900">Account Security</h2>
-                        <p className="mt-1 text-sm leading-6 text-gray-600">
-                            We'll always let you know about important changes, but you pick what else you want to hear about.
-                        </p>
+                    <div className="border-gray-900/10 pb-12">
+                        <div className='bg-[#1AA803] p-2 rounded-md'>
+                            <h2 className="text-2xl font-semibold leading-7 text-white">Account Security</h2>
+                            <p className="mt-1 text-sm leading-6 text-gray-200">
+                                We'll always let you know about important changes, but you pick what else you want to hear about.
+                            </p>
+                        </div>
 
                         <div className="mt-10 space-y-8">
                             {/* Email */}

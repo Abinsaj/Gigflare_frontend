@@ -20,9 +20,9 @@ export default function PaymentSuccess() {
           </p>
         </CardBody>
         <CardFooter className="flex justify-center">
-          <Link to={'/proposal'}>
+          <Link to={'/contracts'}>
             <Button color="primary">
-              Go to Dashboard
+              GO BACK
             </Button>
           </Link>
         </CardFooter>

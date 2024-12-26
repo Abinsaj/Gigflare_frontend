@@ -1,11 +1,11 @@
-import { freelancerSignContract } from '../../Services/freelancerService/freelancerAxiosCalls'
 import React, { useState } from 'react'
 import { Card, CardBody, CardHeader, Divider, Button, Avatar, Progress } from "@nextui-org/react"
-import { CalendarDays, DollarSign, FileText, User, Briefcase, Mail, Phone, MapPin, CheckCircle, Clock } from 'lucide-react'
+import { DollarSign, FileText, User, Briefcase, Mail, CheckCircle, Clock } from 'lucide-react'
 import { useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
 import { clientSignContract, initialPayment } from '../../Services/userServices/userAxiosCalls'
 import {loadStripe} from '@stripe/stripe-js'
+import { posted } from '../../config/timeAgo'
 
 
 const stripePublicKey = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY
@@ -13,9 +13,10 @@ const stripePublicKey = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY
 export default function Contract() {
 
     const location = useLocation();
-    const { contractData, userId } = location.state;
+    const { contract, userId } = location.state;
     const [clientSign, setClietnSign] = useState<boolean>(false)
     const [signature, setSignature] = useState<string>('')
+    const [contractData, setContractData] = useState<any>(contract)
 
     const signContract = async () => {
         const data = await clientSignContract(contractData.contractHash, contractData._id, userId)
@@ -23,6 +24,11 @@ export default function Contract() {
             toast.success(data.message)
             setClietnSign(true)
             setSignature(data.signature)
+            setContractData((prevData: any)=>({
+                ...prevData,
+                signedByClient: {...prevData.signedByClient, signed: true},
+                status: 'initial_payment'
+            }))
         } else {
             toast.error(data.message)
         }
@@ -42,7 +48,6 @@ export default function Contract() {
         const result = stripe?.redirectToCheckout({
             sessionId: response.id
         })
-        console.log(result,'this is what we got here as the response for the payment')
         if((await result)?.error)console.error()
     }
 
@@ -112,8 +117,8 @@ export default function Contract() {
                                     <Clock className="mr-2" /> Project Timeline
                                 </h4>
                                 <div className="flex justify-between text-sm text-gray-600 mb-2">
-                                    <span>Start: {new Date(contractData.startDate).toLocaleDateString()}</span>
-                                    <span>End: {new Date(contractData.endDate).toLocaleDateString()}</span>
+                                    <span>Start: {posted(contractData.startDate)}</span>
+                                    <span>End: {posted(contractData.endDate)}</span>
                                 </div>
                                 <Progress className="h-2" color="success" />
                             </div>
@@ -179,7 +184,7 @@ export default function Contract() {
                                     hardware, and services.
                                 </p>
                                 <p className="text-gray-600">
-                                    This contract shall be governed under the laws of the State of California in United States.
+                                    This contract shall be governed under the laws of the State of Goa in India.
                                 </p>
                             </div>
                         </CardBody>

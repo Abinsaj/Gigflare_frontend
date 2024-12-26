@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, Calendar, X } from 'lucide-react'
 import axios from 'axios'
 import axiosInstance from '../../config/userInstance'
 import { useNavigate } from 'react-router-dom'
+import { posted } from '../../config/timeAgo'
 
 const url = 'http://localhost:7070'
 
@@ -75,7 +76,7 @@ export default function Freelancers() {
       <p className="text-sm text-gray-600 mb-4">Home &gt; Freelancers</p>
       <div className="flex justify-end items-center mb-4">
         <Calendar className="w-4 h-4 mr-2 text-gray-600" />
-        <span className="text-sm text-gray-600">{new Date().toLocaleDateString()}</span>
+        <span className="text-sm text-gray-600">{posted(new Date())}</span>
       </div>
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
         <table className="min-w-full">

@@ -5,7 +5,14 @@ import { io as socket, Socket } from "socket.io-client";
 import { RootState } from "../Redux/store";
 import { useFreelancer } from "./FreelancerContext/FreelancerData";
 
-type SocketContextType = { socket: Socket | null; currentSocketId: string | null };
+type SocketContextType = {
+  socket: Socket | null;
+  currentSocketId: string | null;
+  onlineUser?: any;
+  notifications?: any;
+  offerNotification?: any;
+};
+
 
 const SocketContext = createContext<SocketContextType>({ socket: null, currentSocketId: null });
 
@@ -21,6 +28,8 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     const [socketIo, setsocketIo] = useState<Socket | null>(null);
     const [currentSocketId, setSocketId] = useState<string | null>(null);
     const [onlineUser, setOnlineUser] = useState()
+    const [notifications, setNotifications] = useState<any>()
+    const [offerNotification, setOfferNotification] = useState<any>()
     const usersId = useSelector((state: RootState)=>state.user.userInfo?._id)
     const {freelancer} = useFreelancer()
     const freelancerId = freelancer?._id
@@ -42,6 +51,15 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
           socketIo?.on('getOnlineUsers',(users)=>{
             setOnlineUser(users)
           })
+
+          socketIo?.on('notifications',(data)=>{
+            console.log(data,'notification data we got in socket io configuration in frontend')
+            setNotifications(data)
+          })
+
+          socketIo?.on('offer',(data)=>{
+            setOfferNotification(data)
+          })
   
           newSocket.on("connect", () => {
               if (newSocket.id) { 
@@ -61,7 +79,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
         
     }, [usersId, freelancerId]);
 
-    const socketMemo = useMemo(() => ({ socket: socketIo, currentSocketId, onlineUser }), [socketIo, currentSocketId, onlineUser]);
+    const socketMemo = useMemo(() => ({ socket: socketIo, currentSocketId, onlineUser, offerNotification, notifications }), [socketIo, currentSocketId, onlineUser, offerNotification, notifications]);
 
     return (
         <SocketContext.Provider value={socketMemo}>

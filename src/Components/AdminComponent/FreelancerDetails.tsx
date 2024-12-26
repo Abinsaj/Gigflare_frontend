@@ -21,7 +21,7 @@ interface IFreelancer {
   profileImg: string;
   certImage: string;
   status: 'accepted' | 'rejected';
-  skills: string[];
+  skills: any[];
   experience: {
     expertise: string;
     fromYear: number;
@@ -140,7 +140,7 @@ export default function FreelancerDetails() {
                     </div>
                     <div className='space-y-2'>
                       <h2 className="text-xl font-semibold">{freelancerData?.firstName} {freelancerData?.lastName}</h2>
-                      <p className="text-gray-500">{freelancerData?.experience.expertise} </p>
+                      <p className="text-gray-500">{freelancerData?.experience.expertise}</p>
                     </div>
                   </div>
                 </div>
@@ -174,7 +174,7 @@ export default function FreelancerDetails() {
                   <div className="flex flex-wrap gap-2">
                     {freelancerData?.skills.map((skill: any, index: any) => (
                       <span key={index} className="px-3 py-1 bg-gray-200 text-gray-700 rounded-full text-sm">
-                        {skill}
+                        {skill.name}
                       </span>
                     ))}
                   </div>

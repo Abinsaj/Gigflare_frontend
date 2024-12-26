@@ -1,59 +1,114 @@
 import React, { useEffect, useState } from 'react';
 import { Camera, Trash2, Plus } from 'lucide-react';
 import { Button, Input, Textarea } from '@nextui-org/react';
-import { useLocation } from 'react-router-dom';
+import Select from 'react-select';
+import { useFormik } from 'formik';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { updateFreelancerProfile } from '../../Services/freelancerService/freelancerAxiosCalls';
+import { toast } from 'sonner';
+import { compressImage } from '../Common/CompressImage';
+import { getSkillsByCategory } from '../../Services/freelancerService/freelancerAxiosCalls';
 
-const EditFreelancerProfileTemplate: React.FC = () => {
-  const location = useLocation();
-  const freelancer = location.state?.freelancerData;
+const EditFreelancerProfile = () => {
+  const location = useLocation()
+  const { freelancerData } = location.state
+  console.log(freelancerData, 'Freelancer data to be edited')
+  const [imagePreview, setImagePreview] = useState(freelancerData?.photo || '');
+  const navigate = useNavigate()
+  const [skills, setSkills] = useState<any[]>([])
+  const [newSkills, setNewSkills] = useState<any[]>([])
 
-  const [initialState, setInitialState] = useState<any>(null);
+  const languageOptions = [
+    { value: 'English', label: 'English' },
+    { value: 'Spanish', label: 'Spanish' },
+    { value: 'French', label: 'French' },
+    { value: 'German', label: 'German' },
+    { value: 'Chinese', label: 'Chinese' },
+    { value: 'Japanese', label: 'Japanese' },
+  ];
+
+  let freelancerSkills = null
+
+  if(freelancerData.skills && freelancerData.skills.length > 0){
+     freelancerSkills = freelancerData.skills.map((value: any)=>value.name)
+  }
+
+  const formik = useFormik({
+    initialValues: {
+      firstName: freelancerData?.firstName || '',
+      lastName: freelancerData?.lastName || '',
+      photo: freelancerData?.profile || '',
+      phone: freelancerData?.phone || '',
+      language: freelancerData?.language || [],
+      skills: freelancerSkills || [],
+      newSkill: '',
+      description: freelancerData?.description || '',
+    },
+    onSubmit: async (values) => {
+      console.log('Updated values:', values);
+      const formData = new FormData()
+      formData.append('firstName', values.firstName)
+      formData.append('lastName', values.lastName)
+      formData.append('phone', values.phone)
+      formData.append('language', JSON.stringify(values.language))
+      formData.append('skills', JSON.stringify(values.skills))
+      formData.append('description', values.description)
+
+      if (values.photo instanceof File) {
+        formData.append('photo', values.photo)
+      }
+
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}:`, value, 'yeah hooooooo');
+      }
+      const response = await updateFreelancerProfile(freelancerData._id, formData)
+      if (response.success == true) {
+        toast.success(response.message)
+        setTimeout(() => {
+
+          navigate('/freelancer/freelancerprofile')
+        }, 1000);
+      } else {
+        toast.error(response.message)
+      }
+    },
+  });
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      if (file) {
+        const compressedBlob = await compressImage(file);
+        console.log('Compressed Blob:', compressedBlob);
+
+        const compressedFile = new File([compressedBlob], file.name, { type: file.type, lastModified: Date.now() });
+        console.log('Compressed File:', compressedFile);
+        console.log(compressedFile, ' this is the file we got')
+        formik.setFieldValue('photo', compressedFile);
+
+        const reader = new FileReader();
+        reader.onload = () => {
+          setImagePreview(reader.result as string);
+        };
+        reader.readAsDataURL(compressedFile);
+      }
+    }
+  };
 
   useEffect(() => {
-    if (freelancer) {
-      setInitialState(freelancer);
+    const fetchData = async () => {
+      const data = await getSkillsByCategory(freelancerData.experience.categoryId)
+      console.log(data, 'The response')
+      setSkills(data.data)
     }
-  }, [freelancer]);
+    fetchData()
+  }, [freelancerData])
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, field: string) => {
-    const value = e.target.value;
-    setInitialState((prevState: any) => ({
-      ...prevState,
-      [field]: value,
-    }));
-  };
-
-  const handleArrayChange = (e: React.ChangeEvent<HTMLInputElement>, index: number, field: string, arrayName: string) => {
-    const updatedArray = [...initialState[arrayName]];
-    updatedArray[index][field] = e.target.value;
-    setInitialState((prevState: any) => ({
-      ...prevState,
-      [arrayName]: updatedArray,
-    }));
-  };
-
-  const handleAddToArray = (arrayName: string, newItem: any) => {
-    setInitialState((prevState: any) => ({
-      ...prevState,
-      [arrayName]: [...prevState[arrayName], newItem],
-    }));
-  };
-
-  const handleRemoveFromArray = (arrayName: string, index: number) => {
-    const updatedArray = initialState[arrayName].filter((_: any, i: number) => i !== index);
-    setInitialState((prevState: any) => ({
-      ...prevState,
-      [arrayName]: updatedArray,
-    }));
-  };
-
-  if (!initialState) {
-    return <div>Loading...</div>;
-  }
+  console.log(skills, 'the Skill list')
 
   return (
     <div className="space-y-10 p-8">
-      <form>
+      <form onSubmit={formik.handleSubmit}>
         {/* Profile Header */}
         <div className="relative">
           <div
@@ -66,34 +121,54 @@ const EditFreelancerProfileTemplate: React.FC = () => {
             <div className="relative bg-white rounded-lg shadow-lg p-6 w-11/12 max-w-4xl overflow-hidden">
               <div className="relative flex items-center">
                 <div className="relative">
+
                   <img
-                    src={initialState.profile || '/placeholder.svg?height=112&width=112'}
+                    src={imagePreview || formik.values.photo || 'default-image-url'}
                     alt="Profile"
                     className="w-28 h-28 rounded-full object-cover"
                   />
-                  <Button isIconOnly className="absolute bottom-0 right-0 bg-white rounded-full p-1 shadow">
+                  <label className="absolute bottom-0 right-0 bg-white rounded-full p-1 shadow cursor-pointer">
                     <Camera className="w-4 h-4" />
-                  </Button>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleImageChange}
+                    />
+                  </label>
                 </div>
                 <div className="ml-4 space-y-4 flex-grow">
                   <div>
                     <label className="text-sm font-medium text-gray-700 mb-1 block" htmlFor="firstName">
-                      Change Your first name
+                      First Name
                     </label>
                     <Input
                       id="firstName"
-                      value={initialState.firstName}
-                      onChange={(e) => handleChange(e, 'firstName')}
+                      value={formik.values.firstName}
+                      onChange={formik.handleChange}
+                      placeholder="First Name"
                     />
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-700 mb-1 block" htmlFor="lastName">
-                      Change Your last name
+                      Last Name
                     </label>
                     <Input
                       id="lastName"
-                      value={initialState.lastName}
-                      onChange={(e) => handleChange(e, 'lastName')}
+                      value={formik.values.lastName}
+                      onChange={formik.handleChange}
+                      placeholder="Last Name"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-1 block" htmlFor="phone">
+                      Phone
+                    </label>
+                    <Input
+                      id="phone"
+                      value={formik.values.phone}
+                      onChange={formik.handleChange}
+                      placeholder="Phone Number"
                     />
                   </div>
                 </div>
@@ -104,165 +179,101 @@ const EditFreelancerProfileTemplate: React.FC = () => {
 
         {/* Editable Sections */}
         <div className="grid grid-cols-1 md:grid-cols-3 mt-16 rounded-lg shadow-md bg-white gap-8">
-          {/* Left Section: Languages, Education */}
+          {/* Left Section: Languages and Skills */}
           <div className="space-y-10 p-6 md:border-r-4 border-gray-100">
+            {/* Languages */}
             <div>
               <h3 className="text-lg font-semibold mb-4">Languages</h3>
-              {initialState.language && (
-                <div className="flex items-center space-x-2 mb-2">
-                  <Input
-                    value={initialState.language}
-                    onChange={(e) => handleChange(e, 'language')}
-                    placeholder="Enter language"
-                  />
-                  <Button isIconOnly color="danger" aria-label="Delete language">
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-              <Button
-                color="primary"
-                className="mt-2"
-                onClick={() => handleAddToArray('languages', '')}
-              >
-                <Plus className="h-4 w-4 mr-2" /> Add Language
-              </Button>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Education</h3>
-              {initialState.education?.map((edu: any, index: number) => (
-                <div key={edu._id} className="space-y-4 mb-4">
-                  <div>
-
-                  <label className="text-md font-semibold text-gray-700 mb-1 block" htmlFor="firstName">
-                      Change Your first name
-                    </label>
-                  <Input
-                    value={edu.title}
-                    onChange={(e) => handleArrayChange(e, index, 'title', 'education')}
-                    placeholder="Enter degree title"
-                  />
-                  </div>
-                  <div>
-
-                  <label className="text-md font-semibold text-gray-700 mb-1 block" htmlFor="firstName">
-                      College/University
-                    </label>
-                  <Input
-                
-                    value={edu.collageName}
-                    onChange={(e) => handleArrayChange(e, index, 'collageName', 'education')}
-                    placeholder="Enter institution name"
-                  />
-                  </div>
-                  <div>
-
-                  <label className="text-md font-semibold text-gray-700 mb-1 block" htmlFor="firstName">
-                      Year of Graduation
-                    </label>
-                  <Input
-                    
-                    value={edu.year}
-                    onChange={(e) => handleArrayChange(e, index, 'year', 'education')}
-                    placeholder="Enter graduation year"
-                    type="number"
-                  />
-                  <Button
-                    color="danger"
-                    onClick={() => handleRemoveFromArray('education', index)}
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" /> Remove Education
-                  </Button>
-                  </div>
-                </div>
-              ))}
-              <Button
-                color="primary"
-                onClick={() => handleAddToArray('education', { title: '', collageName: '', year: '' })}
-              >
-                <Plus className="h-4 w-4 mr-2" /> Add Education
-              </Button>
+              <Select
+                id="language"
+                isMulti
+                options={languageOptions}
+                value={languageOptions.filter(option =>
+                  formik.values.language.includes(option.value)
+                )}
+                onChange={(selectedOptions) => {
+                  const selectedLanguages = selectedOptions.map(option => option.value);
+                  formik.setFieldValue('language', selectedLanguages);
+                }}
+                placeholder="Select languages"
+              />
             </div>
           </div>
 
-          {/* Right Section: Description, Certifications, Skills */}
+          {/* Right Section: Description */}
           <div className="col-span-1 md:col-span-2 p-6 space-y-8">
-            {/* Description */}
             <div className="border-b-2 pb-6">
               <h2 className="text-2xl font-bold mb-4">Description</h2>
               <Textarea
-                label="Description"
-                value={initialState.description}
-                onChange={(e) => handleChange(e, 'description')}
+                id="description"
+                value={formik.values.description}
+                onChange={formik.handleChange}
                 placeholder="Describe your professional experience and skills"
                 rows={4}
               />
             </div>
 
-            {/* Certificates */}
-            <div className="border-b-2 pb-6">
-              <h3 className="text-xl font-bold mb-4">Certificates</h3>
-              {initialState.certification?.map((cert: any, index: number) => (
-                <div key={cert._id} className="flex items-center space-x-2 mb-2">
-                  <Input
-                    value={cert.name}
-                    onChange={(e) => handleArrayChange(e, index, 'name', 'certification')}
-                    placeholder="Enter certificate name"
-                  />
-                  <Button isIconOnly color="danger" aria-label="Delete certificate">
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Skills</h3>
+
+              {/* Show Freelancer's Current Skills */}
+              <div className="space-y-2">
+                <Input
+                  id="skillsInput"
+                  readOnly
+                  value={formik.values.skills.join(', ')} // Show as comma-separated list
+                  placeholder="User's current skills will appear here"
+                />
+              </div>
+
+              <div className="mt-4">
+                <h4 className="text-md font-medium mb-2">Add More Skills:</h4>
+                <div className="flex flex-wrap gap-4">
+                  {skills.map((skill: any, index: number) => (
+                    <button
+                      key={index}
+                      type='button'
+                      className="bg-gray-200 text-gray-800 rounded-md px-3 py-1 hover:bg-gray-300 focus:outline-none"
+                      onClick={() => {
+          
+                        if (!formik.values.skills.includes(skill.name)) {
+                          formik.setFieldValue('skills', [...formik.values.skills, skill.name]);
+                        } else {
+                          toast.error(`${skill.name} is already added!`);
+                        }
+                      }}
+                    >
+                      {skill.name}
+                    </button>
+                  ))}
                 </div>
-              ))}
-              <Button
-                color="primary"
-                onClick={() => handleAddToArray('certification', { name: '', year: '' })}
-              >
-                <Plus className="h-4 w-4 mr-2" /> Add Certification
-              </Button>
+              </div>
             </div>
 
-            {/* Skills */}
-            <div>
-              <h3 className="text-xl font-bold mb-4">Skills</h3>
-              <div className="flex flex-wrap gap-2 mb-2">
-                {initialState.skills?.map((skill: string, index: number) => (
-                  <div key={index} className="flex items-center space-x-2 mb-2">
-                    <Input
-                      value={skill}
-                      onChange={(e) => handleArrayChange(e, index, 'skill', 'skills')}
-                      placeholder="Enter skill"
-                    />
-                    <Button
-                      isIconOnly
-                      color="danger"
-                      aria-label="Delete skill"
-                      onClick={() => handleRemoveFromArray('skills', index)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-              <Button
-                color="primary"
-                onClick={() => handleAddToArray('skills', '')}
-              >
-                <Plus className="h-4 w-4 mr-2" /> Add Skill
-              </Button>
-            </div>
+
+            {/* Experience */}
+            {/* <div className="border-b-2 pb-6">
+              <h3 className="text-xl font-bold mb-4">Experience</h3>
+              {formik.values.experience.map((exp, index) => (
+                <div key={index} className="space-y-1">
+                  <div><strong>Expertise:</strong> {exp.expertise}</div>
+                  <div><strong>From:</strong> {exp.fromYear} <strong>To:</strong> {exp.toYear}</div>
+                </div>
+              ))}
+            </div> */}
           </div>
         </div>
 
         {/* Buttons for Save and Cancel */}
         <div className="mt-8 flex justify-end space-x-4">
-          <Button color="default">Cancel</Button>
-          <Button color="primary">Save Changes</Button>
+          <Button className="bg-gray-300 text-black rounded-md">Cancel</Button>
+          <Button className="bg-[#1AA803] text-white rounded-md" type="submit">
+            Save Changes
+          </Button>
         </div>
       </form>
     </div>
   );
 };
 
-export default EditFreelancerProfileTemplate;
+export default EditFreelancerProfile;

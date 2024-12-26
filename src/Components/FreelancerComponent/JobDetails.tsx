@@ -1,8 +1,10 @@
 import React, { useState } from 'react'
 import { ArrowLeft, Clock, CheckCircle, Heart, DollarSign, MapPin } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import timeAgo from '../../config/timeAgo';
+import { timeAgo, posted } from '../../config/timeAgo';
 import SendProposal from './ProposalModal';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../Redux/store';
 
 export default function ViewJobDetails() {
 
@@ -10,6 +12,7 @@ export default function ViewJobDetails() {
     const location = useLocation();
     const { data } = location.state || {};
     const [modalOpen, setModalOpen] = useState<boolean>(false)
+    const userId = useSelector((state: RootState)=>state.user.userInfo?._id)
 
     const openModal = () => {
         setModalOpen(true)
@@ -19,7 +22,6 @@ export default function ViewJobDetails() {
         setModalOpen(false)
     }
 
-    console.log(data, 'this is the data we got in the job detail page')
 
     return (
         <div className="max-w-7xl mx-auto pt-8 pb-8 bg-white">
@@ -66,68 +68,40 @@ export default function ViewJobDetails() {
                 <div>
                     <p className="font-semibold mb-2">Skills</p>
                     <div className="flex flex-wrap gap-2">
-                        {data?.skillsRequired.map((skill: any, index: any) => (
-                            <span key={index} className="px-3 py-1 bg-gray-200 rounded-full text-sm">{skill}</span>
-                        ))}
+                        {data.skillsRequired && data.skillsRequired.length > 0 ? (
+                            data?.skillsRequired.map((skill: any, index: any) => (
+                                <span key={index} className="px-3 py-1 bg-gray-200 rounded-full text-sm">{skill.name}</span>
+                            ))
+                        ):(
+                            <p>No skill added</p>
+                        )}
                     </div>
                 </div>
-                {/* <div>
-                    <p className="font-semibold mb-2">Full Stack Development Languages</p>
-                    <div className="flex flex-wrap gap-2">
-                        <span className="px-3 py-1 bg-gray-200 rounded-full text-sm">JavaScript</span>
-                        <span className="px-3 py-1 bg-gray-200 rounded-full text-sm">CSS</span>
-                    </div>
-                </div>
-                <div>
-                    <p className="font-semibold mb-2">Databases</p>
-                    <div className="flex flex-wrap gap-2">
-                        <span className="px-3 py-1 bg-gray-200 rounded-full text-sm">MongoDB</span>
-                    </div>
-                </div>
-                <div>
-                    <p className="font-semibold mb-2">Other</p>
-                    <div className="flex flex-wrap gap-2">
-                        <span className="px-3 py-1 bg-gray-200 rounded-full text-sm">React</span>
-                        <span className="px-3 py-1 bg-gray-200 rounded-full text-sm">Full Stack Development</span>
-                    </div>
-                </div> */}
+                
             </div>
-
-            
-            
-
-            {/* <div className="mb-6">
-                <p className="text-sm text-gray-500">Upgrade your membership to see the bid range <span className="text-green-600">?</span></p>
-            </div> */}
 
             <div className="mb-6">
                 <h2 className="text-lg font-semibold mb-4">About the client</h2>
                 <div className="space-y-2">
                     <p className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2" /> Payment method verified</p>
-                    <div className="flex items-center">
+                    {/* <div className="flex items-center">
                         {[...Array(5)].map((_, i) => (
                             <svg key={i} className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 24 24">
                                 <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
                             </svg>
                         ))}
                         <span className="ml-2 text-sm">5</span>
-                    </div>
-                    <p className="text-sm text-gray-500">5.00 of 1,429 reviews</p>
-                    {/* <p className="flex items-center text-sm text-gray-500"><MapPin className="w-4 h-4 mr-2" /> United Kingdom</p> */}
-                    {/* <p className="text-sm text-gray-500">Dogmersfield 7:34 PM</p> */}
-                    <p className="text-sm text-gray-500">1,029 jobs posted</p>
-                    {/* <p className="text-sm text-gray-500">94% hire rate, 69 open jobs</p> */}
-                    <p className="text-sm text-gray-500">₹32K total spent</p>
-                    {/* <p className="text-sm text-gray-500">1,551 hires, 37 active</p> */}
-                    {/* <p className="text-sm text-gray-500">$7.35 /hr avg hourly rate paid</p> */}
-                    {/* <p className="text-sm text-gray-500">767 hours</p>
-                    <p className="text-sm text-gray-500">Tech & IT</p> */}
-                    <p className="text-sm text-gray-500">Individual client</p>
-                    <p className="text-sm text-gray-500">Member since Jun 04, 2023</p>
+                    </div> */}
+                    <p className="text-sm text-gray-500">Name: {data.createdBy.name}</p>
+                    <p className="text-sm text-gray-500">Email: {data.createdBy.email}</p>
+                    {/* <p className="text-sm text-gray-500">1 jobs posted</p> */}
+                    {/* <p className="text-sm text-gray-500">₹32K total spent</p> */}
+                    {/* <p className="text-sm text-gray-500">Individual client</p> */}
+                    <p className="text-sm text-gray-500">Member since: {posted(data.createdAt)}</p>
                 </div>
             </div>
-
-            <div className="flex gap-4">
+            {data.proposals.includes(userId) ? (
+                <div className="flex gap-4">
                 <button onClick={openModal} className="flex-1 bg-green-500 text-white py-3 rounded-md hover:bg-green-600 transition-colors">
                     Sent a Proposal
                 </button>
@@ -136,6 +110,14 @@ export default function ViewJobDetails() {
                     Save job
                 </button>
             </div>
+            ):(
+                <div className="flex gap-4">
+                    <button className="flex-1 bg-green-500 text-white py-3 rounded-md hover:bg-green-600 transition-colors">
+                    Already sent the proposal
+                </button>
+                </div>
+            )}
+            
 
             {modalOpen && (
                 <SendProposal onClose={closeModal} data={data} />

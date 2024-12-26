@@ -13,6 +13,8 @@ import MessageLayout from "../Components/MessageComponen/UserMessageComponent/Me
 import JobOffers from "../Components/FreelancerComponent/JobOffers";
 import ContractList from "../Components/FreelancerComponent/FreelancerContractList";
 import ContractPage from "../Components/FreelancerComponent/Contract";
+import WorkHistory from "../Components/FreelancerComponent/WorkList";
+import TransactionsList from "../Components/FreelancerComponent/TransactionList";
 
 const FreelancerRoutes = () => {
     return (
@@ -33,8 +35,9 @@ const FreelancerRoutes = () => {
                     <Route path="proposal" element={<ProposalsList />} /> 
                     <Route path="offers" element={<JobOffers />} /> 
                     <Route path="contractlist" element={<ContractList/>} />
+                    <Route path="worklist" element={<WorkHistory/>}/>
+                    <Route path="transactions" element={<TransactionsList />} />
                     {/* <Route path="projects" element={} */}
-                    {/* <Route path="payment" element={<EditProfilePage />} /> */}
                 </Route>
 
 

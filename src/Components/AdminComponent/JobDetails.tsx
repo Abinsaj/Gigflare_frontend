@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Calendar, DollarSign, Globe, Tag, Users, Clock, ChevronLeft, IndianRupeeIcon } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { blockUnblockJob } from '../../Services/adminServices/adminAxiosCall'
-import timeAgo from '../../config/timeAgo'
+import {posted, timeAgo} from '../../config/timeAgo'
 import { activatejob } from '../../Services/adminServices/adminAxiosCall'
 import { toast } from 'sonner'
 
@@ -10,9 +10,9 @@ interface JobDetailsProps {
   _id: string
   title: string
   description: string
-  skillsRequired: string[]
+  skillsRequired: any[]
   budget: number
-  category: string
+  category: any
   deadLine: string
   status: 'open' | 'closed' | 'in-progress'
   isActive?: boolean
@@ -55,7 +55,7 @@ export default function JobDetails() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-6">
           <button
@@ -69,7 +69,7 @@ export default function JobDetails() {
             <div className="flex justify-between items-start">
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 mb-2">{job?.title}</h1>
-                <p className="text-sm text-gray-500"> {timeAgo(job?.createdAt)}</p>
+                <p className="text-sm text-gray-500"> {posted(job?.createdAt)}</p>
               </div>
               {/* <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
                 job.status === 'open' ? 'bg-green-100 text-green-800' :
@@ -110,7 +110,7 @@ export default function JobDetails() {
                   key={index}
                   className="px-3 py-1 bg-green-100 text-gray-500 rounded-full text-sm"
                 >
-                  {skill}
+                  {skill.name}
                 </span>
               ))}
             </div>
@@ -134,7 +134,7 @@ export default function JobDetails() {
                 <Tag className="w-5 h-5 text-gray-400 mr-3" />
                 <div>
                   <p className="text-sm text-gray-500">Category</p>
-                  <p className="font-medium">{job?.category}</p>
+                  <p className="font-medium">{job?.category.name}</p>
                 </div>
               </div>
 

@@ -6,6 +6,7 @@ import { User } from '../../Types/userInterface'
 import { toast } from 'sonner'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../Redux/store'
+import { posted } from '../../config/timeAgo'
 
 const url = 'http://localhost:7070'
 
@@ -73,7 +74,7 @@ const UsersList = () => {
       <p className="text-sm text-gray-600 mb-4">Home &gt; Users</p>
       <div className="flex justify-end items-center mb-4">
         <Calendar className="w-4 h-4 mr-2 text-gray-600" />
-        <span className="text-sm text-gray-600">Oct 11,2023 - Nov 11,2022</span>
+        <span className="text-sm text-gray-600">{posted(new Date())}</span>
       </div>
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
         <table className="min-w-full">
@@ -89,9 +90,9 @@ const UsersList = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {userData?.map((user) => (
+            {userData?.map((user,index) => (
               <tr key={user.userId}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"></td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{index+1}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.name}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.phone}</td>

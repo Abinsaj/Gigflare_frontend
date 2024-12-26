@@ -20,7 +20,6 @@ root.render(
 
   <Provider store={store}>
     <PersistGate loading={null} persistor={persistor}>
-      <React.StrictMode>
         <GoogleOAuthProvider clientId={clientId} >
           <FreelancerProvider>
             <SocketProvider>
@@ -31,7 +30,6 @@ root.render(
             </SocketProvider>
           </FreelancerProvider>
         </GoogleOAuthProvider>
-      </React.StrictMode>
     </PersistGate>
   </Provider>
 );

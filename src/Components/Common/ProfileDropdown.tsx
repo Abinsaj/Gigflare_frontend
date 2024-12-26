@@ -23,7 +23,7 @@ const ProfileDropdown = ({userData}: any) => {
 
             <Menu as="div" className="relative z-50">
                 <div>
-                    <MenuButton className="flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
+                    <MenuButton className="flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-1 focus:ring-white focus:ring-offset-1 focus:ring-offset-gray-800">
                         <span className="sr-only">Open user menu</span>
                         <img
                             alt=""
@@ -34,7 +34,7 @@ const ProfileDropdown = ({userData}: any) => {
                 </div>
                 <MenuItems
                     transition
-                    className="absolute right-0 z-50 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                    className="absolute right-0 z-50 mt-2 w-48 origin-top-right rounded-sm bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
                 >
                     <MenuItem>
                         <a href="/freelancer/Freelancerprofile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">

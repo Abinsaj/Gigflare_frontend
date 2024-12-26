@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
 import { getJobList } from '../../Services/adminServices/adminAxiosCall'
 import { useNavigate } from 'react-router-dom'
+import { posted } from '../../config/timeAgo'
 
 
 export default function JobLists() {
@@ -25,7 +26,7 @@ export default function JobLists() {
             <p className="text-sm text-gray-600 mb-4">Home &gt; Job Listings</p>
             <div className="flex justify-end items-center mb-4">
                 <Calendar className="w-4 h-4 mr-2 text-gray-600" />
-                <span className="text-sm text-gray-600">{new Date().toLocaleDateString()}</span>
+                <span className="text-sm text-gray-600">{posted(new Date())}</span>
             </div>
             <div className="bg-white shadow-md rounded-lg overflow-hidden">
                 <table className="min-w-full">
@@ -44,8 +45,8 @@ export default function JobLists() {
                         {jobData.map((job) => (
                         
                             <tr key={job.id}>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{job.title}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{job.category}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{job.title.substring(0,35)}....</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{job.category.name}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">₹{job.budget}</td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     {job.isActive ?(

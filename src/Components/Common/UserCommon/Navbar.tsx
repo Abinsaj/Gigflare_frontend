@@ -1,28 +1,62 @@
-import { Disclosure, Menu } from '@headlessui/react'
-import { Menu as MenuIcon, X, Bell, Search, Mail, ChevronDown, User, LogOut, Briefcase, FileText, Users } from 'lucide-react'
+import { Menu as MenuIcon, X, TrendingUp, Search, Mail, ChevronDown, User, LogOut, Briefcase, FileText, Users, } from 'lucide-react'
+import { Disclosure, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
+import { BellIcon } from '@heroicons/react/24/outline'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../../Redux/store'
 import { Link, useNavigate } from 'react-router-dom'
 import { clearUser } from '../../../Redux/slices/userSlice'
 import { userLoggedOut } from '../../../Services/userServices/userAxiosCalls'
+import useNotification from '../../../zustand/useNotification';
+import { getUserNotification } from '../../../Services/userServices/userAxiosCalls';
+import useListenNotification from '../../../hooks/useListenNotification';
+import {timeAgo} from '../../../config/timeAgo';
+import { useEffect } from 'react';
+import useConversation from '../../../zustand/useConverstation';
+import useListenMessages from '../../../hooks/useListenMessages';
+import useGetNotification from '../../../hooks/useGetNotification';
 
 const Navbar = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
+  const { messages } = useConversation()
+
+  let message = 0
+  useGetNotification()
+  const { notifications, setNotifications } = useNotification()
+  useListenMessages()
+  useListenNotification()
+  
+  
+
   const userInfo = useSelector((state: RootState) => state.user.userInfo)
+
+  let result = messages.forEach((val: any) => {
+    if (val.sender !== userInfo?._id) {
+      message++
+    }
+  })
 
   const handleLogout = async () => {
     const id = userInfo?._id
     const response = await userLoggedOut()
-    console.log(response,'this is the response after we logout the user')
-    if(response.success){
+    if (response.success) {
       localStorage.removeItem('userInfo');
       localStorage.removeItem('accessToken');
       dispatch(clearUser())
       window.location.href = '/'
     }
-    
+  }
+
+
+
+  const goToPage = async (notification: any) => {
+    if (notification.type == 'proposal') {
+      navigate('/joblist')
+    }
+    if (notification.type == 'contract') {
+      navigate('/contracts')
+    }
   }
 
   return (
@@ -54,40 +88,7 @@ const Navbar = () => {
                 <div className='flex justify-center items-center space-x-5 pl-14 text-gray-300'>
                   <p onClick={() => navigate('/')} className='text-sm font-semibold hover:text-[#1AA803] cursor-pointer'>HOME</p>
                   <p onClick={() => navigate('/freelancerslist')} className='text-sm font-semibold hover:text-[#1AA803] cursor-pointer'>FIND TALENT</p>
-                  
-                  {/* <Menu as="div" className="relative z-50 inline-block text-left">
-                    <Menu.Button className="inline-flex items-center text-sm font-semibold hover:text-[#1AA803]">
-                      FIND TALENT
-                    </Menu.Button>
-                    <Menu.Items className="absolute left-0 mt-2 w-56 origin-top-left bg-white divide-y divide-gray-100 rounded-sm shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                      <div className="px-1 py-1">
-                        <Menu.Item>
-                          {({ active }) => (
-                            <button
-                              className={`${
-                                active ? 'bg-[#1AA803] text-white' : 'text-gray-900'
-                              } group flex rounded-md items-center w-full px-2 py-2 text-sm`}
-                              onClick={() => navigate('/freelancerslist')}
-                            >
-                              Browse Freelancers
-                            </button>
-                          )}
-                        </Menu.Item>
-                        <Menu.Item>
-                          {({ active }) => (
-                            <button
-                              className={`${
-                                active ? 'bg-[#1AA803] text-white' : 'text-gray-900'
-                              } group flex rounded-md items-center w-full px-2 py-2 text-sm`}
-                            >
-                              Post a Job
-                            </button>
-                          )}
-                        </Menu.Item>
-                      </div>
-                    </Menu.Items>
-                  </Menu> */}
-                  
+
                   <Menu as="div" className="relative z-50 inline-block text-center">
                     <Menu.Button className="inline-flex items-center text-sm font-semibold hover:text-[#1AA803]">
                       JOBS
@@ -98,10 +99,9 @@ const Navbar = () => {
                         <Menu.Item>
                           {({ active }) => (
                             <button
-                              className={`${
-                                active ? 'bg-[#1AA803] text-white' : 'text-gray-900'
-                              } group flex items-center w-full px-2 py-2 pl-4 text-sm`}
-                              onClick={()=>navigate('/joblist')}
+                              className={`${active ? 'bg-[#1AA803] text-white' : 'text-gray-900'
+                                } group flex items-center w-full px-2 py-2 pl-4 text-sm`}
+                              onClick={() => navigate('/joblist')}
                             >
                               <Briefcase className="inline-block w-4 h-4 mr-2" />
                               All Job Post
@@ -125,10 +125,9 @@ const Navbar = () => {
                         <Menu.Item>
                           {({ active }) => (
                             <button
-                              className={`${
-                                active ? 'bg-[#1AA803] text-white' : 'text-gray-900'
-                              } group flex  items-center w-full px-2 py-2 pl-4 text-sm`}
-                              onClick={()=>navigate('/contracts')}
+                              className={`${active ? 'bg-[#1AA803] text-white' : 'text-gray-900'
+                                } group flex  items-center w-full px-2 py-2 pl-4 text-sm`}
+                              onClick={() => navigate('/contracts')}
                             >
                               <FileText className="inline-block w-4 h-4 mr-2" />
                               Contracts
@@ -139,12 +138,25 @@ const Navbar = () => {
                         <Menu.Item>
                           {({ active }) => (
                             <button
-                              className={`${
-                                active ? 'bg-[#1AA803] text-white' : 'text-gray-900'
-                              } group flex items-center w-full px-2 py-2 pl-4 text-sm`}
+                              className={`${active ? 'bg-[#1AA803] text-white' : 'text-gray-900'
+                                } group flex items-center w-full px-2 py-2 pl-4 text-sm`}
+                                onClick={()=>navigate('/transactions')}
+                            >
+                              <TrendingUp className="inline-block w-4 h-4 mr-2" />
+                              Transactions
+                            </button>
+                          )}
+                        </Menu.Item>
+                        <div className=" border-gray-200 my-1"></div>
+                        <Menu.Item>
+                          {({ active }) => (
+                            <button
+                              className={`${active ? 'bg-[#1AA803] text-white' : 'text-gray-900'
+                                } group flex items-center w-full px-2 py-2 pl-4 text-sm`}
+                                onClick={()=>navigate('/worklist')}
                             >
                               <Users className="inline-block w-4 h-4 mr-2" />
-                              All Hire
+                              All Works
                             </button>
                           )}
                         </Menu.Item>
@@ -156,32 +168,60 @@ const Navbar = () => {
 
               {userInfo ? (
                 <div className="absolute inset-y-0 right-0 flex items-center space-x-4 pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-                  {/* <div className="relative hidden items-center w-80 h-8 sm:flex">
-                    <Search
-                      className="absolute left-3 h-5 w-5 text-gray-400"
-                      aria-hidden="true"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Search"
-                      className="block w-full h-full pl-10 pr-7 rounded-md border border-gray-300 bg-white text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
-                    />
-                  </div> */}
-
-                  <button
-                    type="button"
-                    className="relative rounded-full bg-black p-1 text-gray-400"
-                  >
-                    <span className="sr-only">View notifications</span>
-                    <Bell className="h-6 w-6" aria-hidden="true" />
-                  </button>
+                  <Menu as="div" className="relative">
+                    <MenuButton className="rounded-full p-1 text-gray-400 hover:text-gray-300 focus:outline-none">
+                      <BellIcon className="h-6 w-6" aria-hidden="true" />
+                      {notifications?.length > 0 && (
+                        <span className="absolute top-1 right-2 block h-2 w-2 rounded-full bg-red-500 "></span>
+                      )}
+                    </MenuButton>
+                    <MenuItems
+                      className="absolute right-0 z-50 mt-2 w-96 origin-top-right rounded-sm bg-white py-0 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                    >
+                      <div className="px-4 py-3 border-b border-gray-100">
+                        <h3 className="text-sm font-semibold text-gray-900">
+                          Notifications ({notifications?.length || 0})
+                        </h3>
+                      </div>
+                      <div className="max-h-96 overflow-y-auto">
+                        {notifications?.length > 0 ? (
+                          notifications.map((notif: any, index: number) => (
+                            <MenuItem
+                              key={index}
+                              as="div"
+                              className="group"
+                            >
+                              <div className="flex items-center px-4 py-3 hover:bg-gray-50">
+                                <div className="flex-shrink-0">
+                                  <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
+                                    <BellIcon className="h-5 w-5 text-green-600" aria-hidden="true" />
+                                  </div>
+                                </div>
+                                <div onClick={() => goToPage(notif)} className="ml-3 flex-1">
+                                  <p className="text-sm text-gray-900">{notif.message}</p>
+                                  <p className="text-xs text-gray-500 mt-1">{timeAgo(notif.createdAt)}</p>
+                                </div>
+                              </div>
+                            </MenuItem>
+                          ))
+                        ) : (
+                          <div className="px-4 py-8 text-center">
+                            <p className="text-sm text-gray-500">No new notifications</p>
+                          </div>
+                        )}
+                      </div>
+                    </MenuItems>
+                  </Menu>
 
                   <button
                     type="button"
                     className="relative rounded-full bg-black p-1 text-gray-400"
                   >
                     <span className="sr-only">View messages</span>
-                    <Mail onClick={()=>navigate('/message')} className="h-6 w-6" aria-hidden="true" />
+                    <Mail onClick={() => navigate('/message')} className="h-6 w-6" aria-hidden="true" />
+                    {message > 0 && (
+                      <span className="absolute top-1 right-1 block h-2.5 w-2.5 rounded-full bg-red-500 "></span>
+                    )}
                   </button>
 
                   <Menu as="div" className="relative z-50">
@@ -198,9 +238,8 @@ const Navbar = () => {
                         {({ active }) => (
                           <a
                             href="/profile"
-                            className={`${
-                              active ? 'bg-gray-100' : ''
-                            } block px-4 py-2 text-sm text-gray-700`}
+                            className={`${active ? 'bg-gray-100' : ''
+                              } block px-4 py-2 text-sm text-gray-700`}
                           >
                             <User className="inline-block w-4 h-4 mr-2" />
                             Your Profile
@@ -211,9 +250,8 @@ const Navbar = () => {
                         {({ active }) => (
                           <a
                             href="/freelancer/home"
-                            className={`${
-                              active ? 'bg-gray-100' : ''
-                            } block px-4 py-2 text-sm text-lime-600 font-bold`}
+                            className={`${active ? 'bg-gray-100' : ''
+                              } block px-4 py-2 text-sm text-lime-600 font-bold`}
                           >
                             {userInfo.isFreelancer ? 'Freelance home' : 'Be a Freelancer'}
                           </a>
@@ -224,9 +262,8 @@ const Navbar = () => {
                           <a
                             href="#"
                             onClick={handleLogout}
-                            className={`${
-                              active ? 'bg-gray-100' : ''
-                            } block px-4 py-2 text-sm text-gray-700`}
+                            className={`${active ? 'bg-gray-100' : ''
+                              } block px-4 py-2 text-sm text-gray-700`}
                           >
                             <LogOut className="inline-block w-4 h-4 mr-2" />
                             Sign out

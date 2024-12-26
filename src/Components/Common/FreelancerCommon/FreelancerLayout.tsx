@@ -1,12 +1,13 @@
 import React from 'react'
-import { Outlet } from 'react-router-dom'
-import { Home, Folder, FileText, UserCircle, Wallet, FileCheck ,Briefcase } from 'lucide-react'
+import { Outlet, useNavigate } from 'react-router-dom'
+import { Home, FileText, TrendingUp, ArrowLeft, FileCheck ,Briefcase } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import { useFreelancer } from '../../../context/FreelancerContext/FreelancerData'
 
 const FreelancerLayout = () => {
 
     const { freelancer } = useFreelancer()
+    const navigate = useNavigate()
     console.log(freelancer,'this is the freelancer we get in layout')
 
     const navItem = [
@@ -14,6 +15,8 @@ const FreelancerLayout = () => {
         { path: 'proposal', icon: FileText, label: 'Proposal' },
         { path: 'offers', icon: Briefcase, label: 'Offers' },
         { path: 'contractlist', icon: FileCheck, label: 'Contract' },
+        { path: 'worklist', icon: Briefcase, label: 'Works' },
+        { path: 'transactions', icon: TrendingUp, label: 'Transactions' },
     ]
 
     return (
@@ -22,7 +25,7 @@ const FreelancerLayout = () => {
                 {/* Sidebar */}
                 <div className="w-80 h-screen flex-shrink-0 overflow-y-auto bg-gray-200">
                     <div className="sticky top-0 p-5 h-full flex flex-col">
-                        {/* Profile section */}
+                    <ArrowLeft onClick={()=>navigate('/freelancer/home')}/>
                         <div className="mb-8">
                             <div className="pl-16 ml-2 mb-6">
                                 <img

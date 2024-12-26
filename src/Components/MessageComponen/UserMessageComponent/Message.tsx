@@ -4,20 +4,35 @@ import { useGetMessage } from '../../../hooks/useGetMessage'
 import Messages from './Messages'
 import useListenMessages from '../../../hooks/useListenMessages'
 import useConversation from '../../../zustand/useConverstation'
+import { viewedNotification } from '../../../Services/userServices/userAxiosCalls'
+import { useSelector } from 'react-redux'
+import { RootState } from '../../../Redux/store'
+import { viewedMessageNotification } from '../../../Services/userServices/userAxiosCalls'
 
 export default function Message() {
 
   const { messages, loading } = useGetMessage()
-  console.log(messages, 'this is the messages we got here')
   const { selectedConversation } = useConversation()
   useListenMessages();
   const messagesEndRef = useRef<HTMLDivElement>(null)
-
+  const user = useSelector((state: RootState)=> state.user.userInfo)
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
 
+  const otherId = selectedConversation?.participants.find(
+    (participant: any) => participant._id !== user?._id
+  )?._id; 
+ 
+
   useEffect(() => {
+    const viewedNotification = async()=>{
+      const data = await viewedMessageNotification(user?._id ,otherId)
+    }
+    if(user && otherId){
+      viewedNotification()
+    }
+
     scrollToBottom()
   }, [messages, selectedConversation])
 

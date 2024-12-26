@@ -16,8 +16,6 @@ const LoginForm = () => {
     const navigate = useNavigate();
     const { userInfo } = useSelector((state: any) => state.user);
 
-    console.log('something//..')
-
     const formik = useFormik({
         initialValues: {
             email: "",

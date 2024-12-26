@@ -8,7 +8,7 @@ import { RootState } from '../../Redux/store'
 import axiosInstance from '../../config/userInstance'
 import { toast } from 'sonner'
 import { createJob } from '../../Services/userServices/userAxiosCalls'
-
+import { getUserSkills } from '../../Services/userServices/userAxiosCalls'
 
 
    export interface Jobpost{
@@ -35,6 +35,8 @@ interface Category{
 
 export default function JobPostForm({ onClose, onJobAdded }: JobPostFormProps) {
   const [page, setPage] = useState(1)
+  const [ allSkill, setAllSkills] = useState<any[]>([])
+  const [filteredSkill, setFilteredSkills] = useState<any[]>([])
   const [formData, setFormData] = useState<Jobpost>({
     jobTitle: '',
     jobDescription: '',
@@ -43,7 +45,7 @@ export default function JobPostForm({ onClose, onJobAdded }: JobPostFormProps) {
     duration: '',
     projectType: '',
     budget: 0
-  
+
   })
   const [data, setData] = useState<Category[] | null>([])
 
@@ -54,6 +56,8 @@ export default function JobPostForm({ onClose, onJobAdded }: JobPostFormProps) {
             if (response.data.success) {
                 setData(response.data.data) 
             }
+            const data = await getUserSkills()
+            setAllSkills(data.data)
         } catch (error: any) {
             console.log(error)
         }
@@ -61,6 +65,15 @@ export default function JobPostForm({ onClose, onJobAdded }: JobPostFormProps) {
     fetchData()
 }, [])
 
+
+useEffect(()=>{
+  if(formData.category){
+    const matchedSkill = allSkill.filter((skill: any)=>skill.category._id == formData.category)
+    setFilteredSkills(matchedSkill)
+  }
+},[formData.category, allSkill])
+
+console.log(filteredSkill,'this is the filtered data')
 
   const userData = useSelector((state:RootState)=>state.user.userInfo)
 
@@ -82,7 +95,7 @@ export default function JobPostForm({ onClose, onJobAdded }: JobPostFormProps) {
 
   const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault()
-    const id = userData?.userId
+    const id = userData?._id
     const response = await createJob(formData, id)
     if (response.success) {
         toast.success(response.message)
@@ -119,6 +132,7 @@ export default function JobPostForm({ onClose, onJobAdded }: JobPostFormProps) {
                 formData={formData}
                 handleChange={handleChange}
                 handleSkillChange={handleSkillChange}
+                filteredSkill={filteredSkill}
               />
             )}
             {page === 3 && (

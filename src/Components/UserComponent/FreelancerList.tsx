@@ -1,22 +1,42 @@
-"use client"
-
 import React, { useEffect, useState } from 'react'
-import { ChevronDown, Star } from 'lucide-react'
+import { ChevronDown, Star, ChevronLeft, ChevronRight } from 'lucide-react'
 import { getFreelancers } from '../../Services/userServices/userAxiosCalls'
 import FreelancerModal from '../Common/UserCommon/FreelancerModal'
+import { useSelector } from 'react-redux'
+import { RootState } from '../../Redux/store'
 
 export default function FreelancerListing() {
     const [freelancers, setFreelancers] = useState<any[]>([])
     const [selectedFreelancer, setSelectedFreelancer] = useState<any>(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [pageSize]= useState(4)
+    const [currentPage, setCurrentPage] = useState<number>(1)
+    const [totalPage, setTotalPage] = useState<number>(1)
+    const userId = useSelector((state: RootState)=> state.user.userInfo?._id)
 
-    useEffect(() => {
-        const fetch = async () => {
-            const data = await getFreelancers()
+    
+    const fetchFreelancers = async (page = 1) => {
+        try {
+            const data = await getFreelancers(userId,page, pageSize)
             console.log(data, 'this is the data')
             setFreelancers(data.freelancerData)
+            setTotalPage(data.totalPage)
+        } catch (error) {
+            console.log(error)
         }
-        fetch()
+        
+    }
+    
+    const handlePageChange = (page: number)=>{
+        if(page > 0 && page <= totalPage){
+            setCurrentPage(page)
+            fetchFreelancers(page)
+        }
+    }
+
+    useEffect(() => {
+        
+        fetchFreelancers()
     }, [])
 
     const openModal = (freelancer: any) => {
@@ -29,11 +49,13 @@ export default function FreelancerListing() {
         setSelectedFreelancer(null)
     }
 
+    console.log(freelancers,'this is the selected freelancer')
+
     return (
         <div className="container mx-auto px-4 py-8 bg-white">
             <h1 className="text-2xl font-semibold mb-6">Explore some of GIGFLARE Freelancers</h1>
 
-            <div className="flex justify-between items-center mb-6">
+            {/* <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center space-x-4">
                     <span className="text-sm text-gray-600">Filters:</span>
                     <div className="relative inline-block text-left">
@@ -58,7 +80,7 @@ export default function FreelancerListing() {
                         </button>
                     </div>
                 </div>
-            </div>
+            </div> */}
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {freelancers.map((freelancer: any, index: any) => (
@@ -78,21 +100,25 @@ export default function FreelancerListing() {
                                         {freelancer.firstName} {freelancer.lastName}
                                     </h2>
                                     <p className="text-sm text-gray-600">{freelancer.language}</p>
-                                    {/* <p className="text-lg font-bold mt-2">₹:1000/hr</p> */}
+
                                 </div>
                             </div>
                             <div className="mt-4">
-                                {freelancer.skills.map((skill: any, skillIndex: any) => (
-                                    <span
-                                        key={skillIndex}
-                                        className="inline-block bg-gray-100 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2"
-                                    >
-                                        {skill}
-                                    </span>
-                                ))}
+                                {freelancer.skills && freelancer.skills.length > 0 ? (
+                                    freelancer.skills.map((skill: any, skillIndex: any) => (
+                                        <span
+                                            key={skillIndex}
+                                            className="inline-block bg-gray-100 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2"
+                                        >
+                                            {skill.name} 
+                                        </span>
+                                    ))
+                                ) : (
+                                    <p className="text-gray-500">No skills have added.</p> 
+                                )}
                             </div>
                             <div className="mt-4">
-                                <p>{freelancer.description}</p>
+                                <p>{freelancer.description.substring(0,200)}</p>
                             </div>
                         </div>
                         <div className="bg-gray-50 px-4 py-3 flex justify-between items-end">
@@ -111,6 +137,30 @@ export default function FreelancerListing() {
                         </div>
                     </div>
                 ))}
+            </div>
+            <div className="flex items-end justify-between mt-8">
+                <div className="text-sm text-gray-500">
+                    {currentPage} - {totalPage} page
+                </div>
+                <div className="flex items-center gap-2">
+                    <button
+                        
+                        className="p-2 rounded-full text-gray-400 disabled:opacity-50"
+                        disabled={currentPage === 1}
+                    >
+                        <ChevronLeft onClick={()=>handlePageChange(currentPage - 1)} className="h-4 w-4" />
+                    </button>
+                    <div className="h-8 w-8 flex items-center justify-center rounded-full bg-green-600 text-white">
+                        1
+                    </div>
+                    <button
+                        className="p-2 rounded-full text-gray-400 disabled:opacity-50"
+                        disabled={currentPage === totalPage}
+                        >
+                       
+                        <ChevronRight  onClick={()=>handlePageChange(currentPage + 1)} className="h-4 w-4" />
+                    </button>
+                </div>
             </div>
 
             {isModalOpen && selectedFreelancer && (

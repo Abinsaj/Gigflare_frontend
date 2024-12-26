@@ -10,7 +10,7 @@ function App() {
     <Router>
         <Routes>
           <Route path="/*" element={<UserRoutes />} />
-          <Route path="/admin/*" element={<AdminRoutes />} />
+          <Route path="/admin*" element={<AdminRoutes />} />
           <Route path="/freelancer/*" element={<FreelancerRoutes />} />
         </Routes>
     </Router>

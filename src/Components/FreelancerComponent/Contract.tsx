@@ -1,12 +1,12 @@
 import { freelancerSignContract } from '../../Services/freelancerService/freelancerAxiosCalls'
 import React, { useState } from 'react'
 import { Card, CardBody, CardHeader, Divider, Button, Avatar, Progress } from "@nextui-org/react"
-import { CalendarDays, DollarSign, FileText, User, Briefcase, Mail, Phone, MapPin, CheckCircle, Clock } from 'lucide-react'
+import { DollarSign, FileText, User, Briefcase, Mail, CheckCircle, Clock } from 'lucide-react'
 import { useLocation } from 'react-router-dom'
-import { generateKeyPair } from '../../config/publicPrivateKey'
 import { useFreelancer } from '../../context/FreelancerContext/FreelancerData'
 import { toast } from 'sonner'
 import { statusUpdate } from '../../Services/freelancerService/freelancerAxiosCalls'
+import { posted } from '../../config/timeAgo'
 
 
 
@@ -21,6 +21,7 @@ export default function ContractPage() {
     console.log(contractData,'this is the contract id')
     const [freelancerSign, setFreelancerSign] = useState<boolean>(false)
     const [signature, setSignature] = useState<string>('')
+    const [submitted, setSubmitted] = useState<boolean>(false)
 
     const signContract = async()=>{
         const data = await freelancerSignContract(contractData.contractHash, contractData._id, freelancerId)
@@ -38,6 +39,7 @@ export default function ContractPage() {
       const data = await statusUpdate(contractData._id, status)
       if(data.success){
         toast.success(data.message)
+        setSubmitted(true)
       }else{
         toast.error(data.message)
       }
@@ -110,8 +112,8 @@ export default function ContractPage() {
                   <Clock className="mr-2" /> Project Timeline
                 </h4>
                 <div className="flex justify-between text-sm text-gray-600 mb-2">
-                  <span>Start: {new Date(contractData.startDate).toLocaleDateString()}</span>
-                  <span>End: {new Date(contractData.endDate).toLocaleDateString()}</span>
+                  <span>Start: {posted(contractData.startDate)}</span>
+                  <span>End: {posted(contractData.endDate)}</span>
                 </div>
                 <Progress  className="h-2" color="success" />
               </div>
@@ -210,8 +212,8 @@ export default function ContractPage() {
               submit
             </Button>
           </>
-        ):contractData.status == 'submitted' ?(
-          <p className='text-[#1AA803] font-semibold'>Your have Submitted the project</p>
+        ):contractData.status == 'submitted' || submitted == true?(
+          <p className='text-[#1AA803] font-semibold'>Your have Submitted the project waiting for the client response</p>
         ):contractData.status == 'termination_requested' && contractData.terminationRequestedBy == 'freelancer'?(
           <Button  color="primary" size="lg" className="font-semibold px-12 py-6 text-lg bg-[#1AA803] text-white rounded-full shadow-lg hover:shadow-xl transition-shadow duration-300">
               Cancel Termination

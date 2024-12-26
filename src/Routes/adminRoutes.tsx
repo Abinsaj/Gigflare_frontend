@@ -12,6 +12,9 @@ import Freelancers from '../Components/AdminComponent/FreelancersList'
 import FreelancerDetails from '../Components/AdminComponent/FreelancerDetails'
 import JobLists from '../Components/AdminComponent/JobList'
 import JobDetails from '../Components/AdminComponent/JobDetails'
+import ContractList from '../Components/AdminComponent/ContractList'
+import SkillList from '../Components/AdminComponent/SkillList'
+import TransactionPayment from '../Components/AdminComponent/TransactionPayment'
 
 
 function AdminRoutes() {
@@ -29,12 +32,15 @@ function AdminRoutes() {
 
       <Route path='' element = {<AdminLoggedIn/>}>
         <Route element={<Layout/>}>
-          <Route index element={<Dashboard/>}/>
+          <Route path='/' index element={<Dashboard/>}/>
           <Route path='applications' element={<FreelancersApplication/>}/>
           <Route path='users' element={<Users/>}/>
           <Route path='freelancers' element={<Freelancers/>}/>
           <Route path='categories' element={<CategoryList/>}/>
           <Route path='jobs' element={<JobLists/>}/>
+          <Route path='contracts' element={<ContractList/>}/>
+          <Route path='skills' element={<SkillList/>}/>
+          <Route path='transactions' element={<TransactionPayment/>}/>
           <Route path='/jobdetails' element={<JobDetails/>}/>
           <Route path='/freelancerdetails' element={<FreelancerDetails/>}/>
         </Route>

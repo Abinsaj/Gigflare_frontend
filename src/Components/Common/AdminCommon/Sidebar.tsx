@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Users, UserCircle, FileText, Tags, CreditCard, Clipboard } from 'lucide-react'
+import { LayoutDashboard, Users, UserCircle,Puzzle, FileText, Tags, CreditCard, Clipboard } from 'lucide-react'
 
 const Sidebar = () => {
 
@@ -14,7 +14,8 @@ const Sidebar = () => {
     { path: "/admin/categories", icon: Tags, label: "CATEGORY" },
     { path: "/admin/jobs", icon: CreditCard, label: "JOBS" },
     { path: "/admin/contracts", icon: FileText, label: "CONTRACTS" },
-    { path: "/admin/payment", icon: CreditCard, label: "PAYMENT" },
+    { path: "/admin/skills", icon: Puzzle, label: "SKILLS" },
+    { path: "/admin/transactions", icon: CreditCard, label: "TRANSACTIONS" },
   ]
 
   return (

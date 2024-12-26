@@ -10,10 +10,18 @@ import Jobs from './Jobs'
 
 
 const ProfileContent = () => {
+
+  const user = useSelector((state: RootState)=>state.user.userInfo)
+
 return (
   <div className='bg-white w-full p-6 rounded-md shadow-md'>
     <h2 className="text-2xl font-semibold mb-4">Profile Content</h2>
-    <p>This is where the profile content would go.</p>
+    <p>
+Welcome to your profile, {user?.name}! We’re excited to have you on board as part of our community. This is where your vision meets talent, and your projects come to life.
+
+Whether you’re looking for creative designers, expert developers, skilled writers, or any other professional, this is your space to connect with top freelancers who are ready to bring your ideas to reality. Your profile is the gateway to discovering the right talent, managing your projects, and turning your ambitions into achievements.
+
+Take a moment to explore, post your job listings, and review proposals from skilled professionals. Remember, every successful project starts with the right collaboration, and we’re here to make the journey smooth and rewarding. Let’s build something extraordinary together!</p>
   </div>
 )
 }
@@ -33,7 +41,6 @@ export default function Profile() {
   const menuItems = [
     { name: 'Profile', Component: ProfileContent },
     { name: 'Personal Info', Component: UserDetails },
-    { name: 'Wallet' },
     {name: "Change Password",Component: UserChangePass},
     { name: 'Logout',Component: Logout},
   ]

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../../Redux/store'
 import useConversation from '../../../zustand/useConverstation'
@@ -10,7 +10,11 @@ const Messages = ({ chat }: { chat: any }) => {
   const user = useSelector((state: RootState)=> state.user.userInfo)
   const formattedTime = extractTime(chat.createdAt)
   const {selectedConversation} = useConversation()
+  console.log(selectedConversation,'this is selected conversation.......................')
   const fromMe = chat.sender === user?._id
+
+
+
 
   return (
     <div className={`flex ${fromMe ? "justify-end" : "justify-start"}`}>

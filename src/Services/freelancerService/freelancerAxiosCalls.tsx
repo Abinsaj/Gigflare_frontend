@@ -114,3 +114,106 @@ export const updateFreelancer = async(data: any)=>{
         console.log(error)
     }
 }
+
+export const deleteProposal = async(id: string)=>{
+    try {
+        const response = await axiosInstance.post(`/freelancer/deleteproposal/${id}`)
+        return response.data
+    } catch (error: any) {
+        if(error.response.data){
+            return error.response.data
+        }
+        console.log(error)
+    }
+}
+
+export const getFreelancerNotification = async(id: string | undefined)=>{
+    try {
+        const response = await axiosInstance.get(`/freelancer/notifications/${id}`)
+        return response.data
+    } catch (error: any) {
+        if(error.response.data){
+            return error.response.data
+        }
+        console.log(error)
+    }
+}
+
+export const updateFreelancerProfile = async(id: string, formData: any)=>{
+    try {
+        const response = await axiosInstance.post( `/freelancer/updateprofile/${id}`, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+             },
+          })
+        console.log(response)
+        return response.data
+    } catch (error: any) {
+        if(error.response.data){
+            return error.response.data
+        }
+        console.log(error)
+    }
+}
+
+export const getWorkHistory = async(id: string)=>{
+    try {
+        const response = await axiosInstance.get(`/freelancer/getworkhistory/${id}`)
+        console.log(response)
+        return response.data
+    } catch (error: any) {
+        if(error.response.data){
+            return error.response.data
+        }
+        console.log(error)
+    }
+}
+
+export const getSkillsByCategory = async(id: string)=>{
+    try {
+        const response = await axiosInstance.get(`/freelancer/getskills/${id}`)
+        return response.data
+    } catch (error: any) {
+        if(error.response.data){
+            return error.response.data
+        }
+        console.log(error)
+    }
+}
+
+export const getFilteredJobList = async(userId: string, filter: { category?: string; experience?: string; duration?: string }, query?: string)=>{
+    try {
+        const params = new URLSearchParams({userId,...filter, ...(query && {query})}).toString()
+        const response = await axiosInstance.get(`/freelancer/filteredjob?${params}`)
+        return response.data
+    } catch (error: any) {
+        if(error.response.data){
+            return error.response.data
+        }
+        console.log(error)
+    }
+}
+
+export const getFreelancerDashDetails = async(id: string | undefined)=>{
+    try {
+        const response = await axiosInstance.get(`/freelancer/dashboarddata/${id}`)
+        return response.data
+    } catch (error: any) {
+        if(error.response.data){
+            return error.response.data
+        }
+        console.log(error)
+    }
+}
+
+export const getRatingAndReview = async(id: string)=>{
+    try {
+        const response = await axiosInstance.get(`/freelancer/ratingreview/${id}`)
+        return response.data
+    } catch (error: any) {
+        if(error.response.data){
+            return error.response.data
+        }
+        console.log(error)
+    }
+}

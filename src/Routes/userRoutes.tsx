@@ -20,6 +20,9 @@ import MessageLayout from '../Components/MessageComponen/UserMessageComponent/Me
 import Contract from '../Components/UserComponent/Contract'
 import PaymentSuccess from '../Components/Common/PaymentSuccess'
 import PaymentFailed from '../Components/Common/PaymentFailed'
+import WorkListPage from '../Pages/UserPages/WorkListPage'
+import TransactionHistoryPage from '../Pages/UserPages/TransactionHistoryPage'
+import TransactionDetailsPage from '../Components/Common/TransactionDetails'
 
 
 const UserRoutes = () => {
@@ -51,6 +54,9 @@ const UserRoutes = () => {
           <Route path='/message/:id' element={<MessageLayout/>}/>
           <Route path='/success' element={<PaymentSuccess/>}/>
           <Route path='/failed' element={<PaymentFailed/>}/>
+          <Route path='/worklist' element={<WorkListPage/>}/>
+          <Route path='/transactions' element={<TransactionHistoryPage/>}/>
+          <Route path='/transactiondetail' element={<TransactionDetailsPage/>}/>
         </Route>
            
 
