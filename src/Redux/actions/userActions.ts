@@ -55,7 +55,7 @@ export const verifyLogin = createAsyncThunk<{ accessToken: string; userInfo: Use
         try {
             console.log('its hereeererrere')
             const response = await axiosInstance.post(`/login`,{email,password})
-            // console.log('this is the response we got here')
+            
             return response.data.cred
         } catch (error: any) {
             return rejectWithValue(error.response?.data || 'Login Failed')

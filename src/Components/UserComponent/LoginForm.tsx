@@ -46,7 +46,7 @@ const LoginForm = () => {
                 }
 
             } catch (error: any) {
-                toast.error(error.message || "An error occured")
+                toast.error(error.message )
             }
         }
     })
