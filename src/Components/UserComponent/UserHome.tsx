@@ -36,10 +36,14 @@ const ClientHome = () => {
         }
     };
 
-    const visibleFreelancers = freelancers.slice(
-        visibleIndex,
-        visibleIndex + itemsPerPage
-    );
+    let visibleFreelancers = []
+    if(data && data._id){
+            visibleFreelancers = freelancers.slice(
+            visibleIndex,
+            visibleIndex + itemsPerPage
+        );
+    }
+    
 
     useEffect(() => {
 
