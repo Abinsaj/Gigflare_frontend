@@ -14,7 +14,7 @@ export const registerClient = (userData:{
 }) => {
     return async () =>{
         try {
-            const response = await axios.post(`${url}/register`, userData);
+            const response = await axiosInstance.post(`${url}/register`, userData);
             console.log(response,'this is the actual reponse')
             if (response.status === 200 && response.data.success) {
                 localStorage.setItem('userEmail', userData.email);
@@ -31,7 +31,7 @@ export const verifyOtp = (otp: string) => {
     return async () => {
         try {
             const email = localStorage.getItem('userEmail');
-            const response = await axios.post(`${url}/otpVerification`, { email, otp });
+            const response = await axiosInstance.post(`${url}/otpVerification`, { email, otp });
             console.log(response);
             if (response.data.message === 'verified') {
                 localStorage.clear();
