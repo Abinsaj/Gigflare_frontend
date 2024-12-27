@@ -101,6 +101,13 @@ export default function ViewJobDetails() {
                 </div>
             </div>
             {data.proposals.includes(userId) ? (
+                
+                <div className="flex gap-4">
+                    <button className="flex-1 bg-green-500 text-white py-3 rounded-md hover:bg-green-600 transition-colors">
+                    Already sent the proposal
+                </button>
+                </div>
+            ):(
                 <div className="flex gap-4">
                 <button onClick={openModal} className="flex-1 bg-green-500 text-white py-3 rounded-md hover:bg-green-600 transition-colors">
                     Sent a Proposal
@@ -110,12 +117,6 @@ export default function ViewJobDetails() {
                     Save job
                 </button>
             </div>
-            ):(
-                <div className="flex gap-4">
-                    <button className="flex-1 bg-green-500 text-white py-3 rounded-md hover:bg-green-600 transition-colors">
-                    Already sent the proposal
-                </button>
-                </div>
             )}
             
 
