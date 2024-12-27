@@ -14,19 +14,19 @@ const ClientHome = () => {
     const itemsPerPage = 4;
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-    const scroll = (direction: 'left' | 'right') => {
-        if (scrollContainerRef.current) {
-            const scrollAmount = 300;
-            const newScrollLeft = direction === 'left'
-                ? scrollContainerRef.current.scrollLeft - scrollAmount
-                : scrollContainerRef.current.scrollLeft + scrollAmount;
+    // const scroll = (direction: 'left' | 'right') => {
+    //     if (scrollContainerRef.current) {
+    //         const scrollAmount = 300;
+    //         const newScrollLeft = direction === 'left'
+    //             ? scrollContainerRef.current.scrollLeft - scrollAmount
+    //             : scrollContainerRef.current.scrollLeft + scrollAmount;
 
-            scrollContainerRef.current.scrollTo({
-                left: newScrollLeft,
-                behavior: 'smooth'
-            });
-        }
-    };
+    //         scrollContainerRef.current.scrollTo({
+    //             left: newScrollLeft,
+    //             behavior: 'smooth'
+    //         });
+    //     }
+    // };
 
     const handleScroll = (direction: string) => {
         if (direction === "right" && visibleIndex + itemsPerPage < freelancers.length) {
@@ -48,31 +48,17 @@ const ClientHome = () => {
     useEffect(() => {
 
         const fetchFreelancers = async () => {
-            let response: any
+            let response = [];
             if (data?._id) {
                 response = await getFreelancers(data?._id)
             }
             console.log(response, 'this hte response we got in the user home page')
-            setFreelancers(response)
+            setFreelancers(Array.isArray(response) ? response : []);
         }
         fetchFreelancers()
     }, [data?._id])
 
     console.log(freelancers, 'this is the data of the freeelancers')
-
-    const links = [
-        { name: 'Open roles', href: '#' },
-        { name: 'Internship program', href: '#' },
-        { name: 'Our values', href: '#' },
-        { name: 'Meet our leadership', href: '#' },
-    ]
-    const stats = [
-        { name: 'Offices worldwide', value: '12' },
-        { name: 'Full-time colleagues', value: '300+' },
-        { name: 'Hours per week', value: '40' },
-        { name: 'Paid time off', value: 'Unlimited' },
-    ]
-
 
 
     return (
