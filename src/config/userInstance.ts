@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const url =  "http://localhost:7070"
+const url =  "www.gigflare.online"
 
 const axiosInstance = axios.create({
     baseURL: url,
