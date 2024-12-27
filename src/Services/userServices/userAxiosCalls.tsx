@@ -179,6 +179,7 @@ export const sendOffer = async (offerData: any, freelancerId: string, jobId: str
 
 export const getContractList = async (id: string | undefined) => {
   try {
+    console.log('yeahhhhhhhhhh')
     const response = await axiosInstance.get(`/getcontracts/${id}`)
     return response.data
   } catch (error: any) {

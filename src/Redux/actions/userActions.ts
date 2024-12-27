@@ -54,7 +54,7 @@ export const verifyLogin = createAsyncThunk<{ accessToken: string; userInfo: Use
     async ({email,password},{rejectWithValue})=>{
         try {
             console.log('its hereeererrere')
-            const response = await axiosInstance.post(`https://www.gigflare.online/login`,{email,password})
+            const response = await axiosInstance.post(`/login`,{email,password})
             
             return response.data.cred
         } catch (error: any) {

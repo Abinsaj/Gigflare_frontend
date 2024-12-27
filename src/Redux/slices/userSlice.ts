@@ -58,7 +58,7 @@ const userSlice = createSlice({
         .addCase(verifyLogin.fulfilled,(state, action: PayloadAction<{accessToken: string; userInfo: User}>)=>{
             const { accessToken, userInfo } = action.payload
             state.userInfo = userInfo;
-            console.log(state.userInfo,'this is the user info in slice')
+            console.log(state.accessToken,'this is the user info in slice')
             state.accessToken = accessToken;
             state.loading = false;
 
