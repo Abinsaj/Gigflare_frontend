@@ -59,7 +59,7 @@ export default function Freelancers() {
           email = freelancer.email
         })
         
-        await axios.put(`${url}/admin/blockUser/${email}`, { isBlocked: newBlockedStatus })
+        await axiosInstance.put(`/admin/blockUser/${email}`, { isBlocked: newBlockedStatus })
         setFreelancers(freelancers.map(f =>
           f.email === email ? { ...f, isBlocked: newBlockedStatus } : f
         ))

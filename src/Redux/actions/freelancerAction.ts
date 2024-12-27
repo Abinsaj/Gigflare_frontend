@@ -7,7 +7,7 @@ const url = 'http://localhost:7070/freelancer';
 export const freelancerApplication = async(freelancerData: FreelanceData,id: string)=>{
     try {
         console.log('the data of the freelancer is ',freelancerData)
-        const response = await axiosInstance.post(`${url}/application/${id}`,freelancerData,{
+        const response = await axiosInstance.post(`/application/${id}`,freelancerData,{
             headers: {
                 'Content-Type': 'multipart/form-data',
             },

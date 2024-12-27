@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { clearAdmin } from '../../../Redux/slices/adminSlice';
+import axiosInstance from '../../../config/userInstance';
 
 const url = 'http://localhost:7070/admin';
 
@@ -16,7 +17,7 @@ const Navbar = () => {
   const handleLogout = async(e:React.MouseEvent<HTMLButtonElement>)=>{
     try {
       e.preventDefault()
-      const response = await axios.post(`${url}/adminlogout`)
+      const response = await axiosInstance.post(`/adminlogout`)
       console.log(response)
       if(response.data){
         toast.success(response.data.message)

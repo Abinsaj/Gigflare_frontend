@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../Redux/store'
 import { posted } from '../../config/timeAgo'
+import axiosInstance from '../../config/userInstance'
 
 const url = 'http://localhost:7070'
 
@@ -23,7 +24,7 @@ const UsersList = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const userList = await axios.get(`${url}/admin/getUsers`,{withCredentials:true})
+        const userList = await axiosInstance.get(`/admin/getUsers`,{withCredentials:true})
         console.log(userList.data, ' this is the users list') 
         const data = userList.data
         setUserData(data)

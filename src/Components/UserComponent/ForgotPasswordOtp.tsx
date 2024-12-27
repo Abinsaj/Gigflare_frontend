@@ -6,6 +6,7 @@ import { AppDispatch } from '../../Redux/store';
 import { toast, Toaster } from 'sonner';
 import { resendOtp } from '../../Redux/actions/userActions';
 import axios from 'axios';
+import axiosInstance from '../../config/userInstance';
 
 
 const url = 'http://localhost:7070';
@@ -68,7 +69,7 @@ const ForgotPasswordOtp = () => {
         try {
             console.log('hihihihihihihih')
             // const otpVerification = await dispatch(verifyForgotOtp(otpValue));
-            const response = await axios.post(`${url}/verifyforgototp`,{otpValue})
+            const response = await axiosInstance.post(`/verifyforgototp`,{otpValue})
             console.log('The otpVerification result is:', response);
     
             if(response){

@@ -3,7 +3,7 @@ import axios from "axios";
 import {User} from '../../Types/userInterface'
 import axiosInstance from "../../config/userInstance";
 
-const url = 'http://localhost:7070';
+
 
 export const registerClient = (userData:{
     name: string;
@@ -54,7 +54,7 @@ export const verifyLogin = createAsyncThunk<{ accessToken: string; userInfo: Use
     async ({email,password},{rejectWithValue})=>{
         try {
             console.log('its hereeererrere')
-            const response = await axios.post(`https://www.gigflare.online/login`,{email,password},{withCredentials:true})
+            const response = await axiosInstance.post(`https://www.gigflare.online/login`,{email,password})
             
             return response.data.cred
         } catch (error: any) {
@@ -66,7 +66,7 @@ export const verifyLogin = createAsyncThunk<{ accessToken: string; userInfo: Use
 export const resendOtp = ()=>{
     return  async()=>{
         try {
-            const response = await axios.post(`${url}/resendOtp`)
+            const response = await axiosInstance.post(`/resendOtp`)
             console.log('the response we get after resend OTP is',response)
             if(response.data === "OTP sended"){
                 return true
@@ -81,7 +81,7 @@ export const verifyForgotEmail = (email: string)=>{
     return async()=>{
         try {
             console.log(email,'this this')
-            const response = await axios.post(`${url}/forgotEmail`, {email})
+            const response = await axiosInstance.post(`/forgotEmail`, {email})
             console.log(response,'this is it')
             if(response.data == 'Email verified otp has sent'){
                 return true

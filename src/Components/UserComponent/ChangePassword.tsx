@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import axios from 'axios'
+import axiosInstance from '../../config/userInstance';
 
 const url = 'http://localhost:7070';
 
@@ -18,7 +19,7 @@ const ChangePassword = ()=> {
             if(password !== confirmPassword){
                 toast.error('Both password must be same')
             }
-            const response = await axios.post(`${url}/changepassword`,{password})
+            const response = await axiosInstance.post(`/changepassword`,{password})
             if(response.data.success){
                 toast.success(response.data.message)
                 navigate('/login')

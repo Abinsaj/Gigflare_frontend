@@ -8,6 +8,7 @@ import { AppDispatch } from '../../Redux/store'
 import { toast } from 'sonner'
 import { useNavigate } from 'react-router-dom'
 import { posted } from '../../config/timeAgo'
+import axiosInstance from '../../config/userInstance'
 
 const url = 'http://localhost:7070'
 
@@ -34,7 +35,7 @@ export default function FreelancerApplications() {
 
   const fetchData = async (page = 1) => {
     try {
-      const response = await axios.get(`${url}/admin/getfreelancerapplications`, { withCredentials: true })
+      const response = await axiosInstance.get(`/admin/getfreelancerapplications`, { withCredentials: true })
       console.log(response.data.data)
       setFreelancers(response.data.data)
     } catch (error) {
