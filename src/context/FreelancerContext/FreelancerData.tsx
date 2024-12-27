@@ -67,10 +67,11 @@ const FreelancerProvider:React.FC<FreelancerProviderProps>  = ({children})=>{
     useEffect(()=>{
         const fetchData = async()=>{
             try {
-                
-                const response = await getDetails(id) 
-                console.log(response,'this is the response we got in the context')
-                setFreelancer(response)
+                if(id){
+                  const response = await getDetails(id) 
+                  console.log(response,'this is the response we got in the context')
+                  setFreelancer(response)
+                }
             } catch (error) {
                 console.error('Error fetching freelancer details:', error);
             }
