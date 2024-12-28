@@ -18,7 +18,7 @@ const LoginForm = () => {
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const { userInfo } = useSelector((state: any) => state.user);
-    const [loading, serLoading] = useState<boolean>(true)
+    const [loading, setLoadings] = useState<boolean>(true)
 
     const formik = useFormik({
         initialValues: {
@@ -52,7 +52,7 @@ const LoginForm = () => {
             } catch (error: any) {
                 toast.error(error.message )
             }finally{
-                setLoading(false)
+                setLoadings(false)
             }
         }
     })
