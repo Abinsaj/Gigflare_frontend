@@ -76,11 +76,11 @@ const LoginForm = () => {
         }
     })
 
-    if(loading){
-        return(
-            <LoadingSpinner/>
-        )
-    }
+    // if(loading){
+    //     return(
+    //         <LoadingSpinner/>
+    //     )
+    // }
 
     return (
         <>
