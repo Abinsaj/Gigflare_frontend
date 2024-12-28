@@ -37,7 +37,7 @@ const ClientHome = () => {
     };
 
     let visibleFreelancers = []
-    if(data && data._id){
+    if(freelancers && freelancers.length > 0){
             visibleFreelancers = freelancers.slice(
             visibleIndex,
             visibleIndex + itemsPerPage
