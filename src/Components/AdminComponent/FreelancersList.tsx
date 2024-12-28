@@ -22,19 +22,29 @@ export default function Freelancers() {
   const [selectedFreelancer, setSelectedFreelancer] = useState<Freelancer | null>(null)
   const [modalType, setModalType] = useState<'status' | 'block'>('status')
   const navigate = useNavigate()
+  const [pageSize] = useState(5)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axiosInstance.get(`/admin/getFreelancers`)
-        console.log(response,'this is the response we get after fetching the freelancer')
-        setFreelancers(response.data)
-      } catch (error) {
-        console.error('Error fetching freelancers:', error)
-      }
+  const fetchData = async (page = 1) => {
+    try {
+      const response = await axiosInstance.get(`/admin/getFreelancers?page=${page}&limit=${pageSize}`)
+      setFreelancers(response.data.freelancer)
+      setTotalPages(response.data.totalPages)
+    } catch (error) {
+      console.error('Error fetching freelancers:', error)
     }
+  }
+  useEffect(() => {
     fetchData()
   }, [])
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage > 0 && newPage <= totalPages) {
+        setCurrentPage(newPage);
+        fetchData(newPage);
+    }
+};
 
   const openModal = (freelancer: Freelancer, type: 'status' | 'block') => {
     setSelectedFreelancer(freelancer)
@@ -59,7 +69,7 @@ export default function Freelancers() {
           email = freelancer.email
         })
         
-        await axiosInstance.put(`/admin/blockUser/${email}`, { isBlocked: newBlockedStatus })
+        await axios.put(`${url}/admin/blockUser/${email}`, { isBlocked: newBlockedStatus })
         setFreelancers(freelancers.map(f =>
           f.email === email ? { ...f, isBlocked: newBlockedStatus } : f
         ))
@@ -89,7 +99,8 @@ export default function Freelancers() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          {freelancers && freelancers.length > 0 && (
+            <tbody className="bg-white divide-y divide-gray-200">
             {freelancers.map((freelancer) => (
               <tr key={freelancer.id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-500">{freelancer.firstName} {freelancer.lastName}</td>
@@ -121,19 +132,33 @@ export default function Freelancers() {
               </tr>
             ))}
           </tbody>
+          )}
+          
         </table>
       </div>
       <div className="flex justify-between items-center mt-4">
-        <button className="flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" disabled>
-          <ChevronLeft className="w-5 h-5 mr-2" />
-          Previous
-        </button>
-        {/* <span className="text-sm text-gray-700">Page 1 of 3</span> */}
-        <button className="flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md bg-[#003F62] hover:bg-[#002E62] text-white">
-          Next
-          <ChevronRight className="w-5 h-5 ml-2" />
-        </button>
-      </div>
+                <button
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}
+                            className={`flex items-center px-4 py-2 border ${
+                                currentPage === 1 ? "bg-gray-300" : "bg-white"
+                            }`}
+                        >
+                            <ChevronLeft className="w-5 h-5 mr-2" />
+                            Previous
+                        </button>
+                    <span className="text-sm text-gray-700">Page {currentPage} of {totalPages}</span>
+                    <button
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                            className={`flex items-center px-4 py-2 border ${
+                                currentPage === totalPages ? "bg-gray-300" : "bg-white"
+                            }`}
+                        >
+                            Next
+                            <ChevronRight className="w-5 h-5 ml-2" />
+                        </button>
+                </div>
 
       {isModalOpen && freelancers && (
         freelancers.map((freelancer)=>(
