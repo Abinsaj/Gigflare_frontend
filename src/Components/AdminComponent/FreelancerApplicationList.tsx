@@ -31,13 +31,14 @@ export default function FreelancerApplications() {
   const [freelancers, setFreelancers] = useState<Freelancer[]>([])
   const [pageSize] = useState(5)
   const [currentPage, setCurrentPage] = useState(1)
-  const [totalPage, setTotalPage] = useState(1)
+  const [totalPages, setTotalPage] = useState(1)
 
   const fetchData = async (page = 1) => {
     try {
-      const response = await axiosInstance.get(`/admin/getfreelancerapplications`, { withCredentials: true })
+      const response = await axiosInstance.get(`/admin/getfreelancerapplications?page=${page}&limit=${pageSize}`)
       console.log(response.data.data)
-      setFreelancers(response.data.data)
+      setFreelancers(response.data.data.freelancer)
+      setTotalPage(response.data.data.totalPages)
     } catch (error) {
       console.error('Error fetching freelancer applications:', error)
     }
@@ -46,8 +47,8 @@ export default function FreelancerApplications() {
     fetchData()
   }, [])
 
-  const handleChangePage = (currentPage: number)=>{
-    if(currentPage > 0 && currentPage <= totalPage){
+  const handlePageChange = (currentPage: number)=>{
+    if(currentPage > 0 && currentPage <= totalPages){
       setCurrentPage(currentPage)
       fetchData(currentPage)
     }
@@ -86,7 +87,9 @@ export default function FreelancerApplications() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {freelancers.map((freelancer) => (
+            {freelancers && freelancers.length > 0 && (
+
+            freelancers.map((freelancer) => (
               <tr key={freelancer.applicationId}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{`${freelancer.firstName} ${freelancer.lastName}`}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{freelancer.email}</td>
@@ -115,25 +118,34 @@ export default function FreelancerApplications() {
                   </select>
                 </td>
               </tr>
-            ))}
+            ))
+            )}
           </tbody>
         </table>
       </div>
       <div className="flex justify-between items-center mt-4">
-        <button
-          onClick={()=>handleChangePage(currentPage + 1)}
-          className="flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-          <ChevronLeft className="w-5 h-5 mr-2" />
-          Previous
-        </button>
-        <span className="text-sm text-gray-700">Page 1 of 1</span>
-        <button 
-          onClick={()=>handleChangePage(currentPage - 1)}
-          className="flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[#003F62] hover:bg-[#002E62]">
-          Next
-          <ChevronRight className="w-5 h-5 ml-2" />
-        </button>
-      </div>
+                <button
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}
+                            className={`flex items-center px-4 py-2 border ${
+                                currentPage === 1 ? "bg-gray-300" : "bg-white"
+                            }`}
+                        >
+                            <ChevronLeft className="w-5 h-5 mr-2" />
+                            Previous
+                        </button>
+                    <span className="text-sm text-gray-700">Page {currentPage} of {totalPages}</span>
+                    <button
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                            className={`flex items-center px-4 py-2 border ${
+                                currentPage === totalPages ? "bg-gray-300" : "bg-white"
+                            }`}
+                        >
+                            Next
+                            <ChevronRight className="w-5 h-5 ml-2" />
+                        </button>
+                </div>
     </div>
   )
 }
