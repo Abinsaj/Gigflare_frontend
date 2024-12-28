@@ -163,7 +163,7 @@ const Dashboard=()=> {
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-bold">Jobs Graph</h2>
             <div>
-          {["WEEKLY", "MONTHLY", "YEARLY"].map((option: any) => (
+          {[ "MONTHLY", "YEARLY"].map((option: any) => (
             <button
               key={option}
               className={`px-4 py-2 mr-2 rounded-md ${
