@@ -307,6 +307,18 @@ export const getUserSkills = async()=>{
   }
 }
 
+export const updateUserProfile = async(data: any, id: string | undefined)=>{
+  try {
+    const response = await axiosInstance.post('/updateprofile',{data,id})
+    return response.data
+  } catch (error: any) {
+    if (error.response.data) {
+      return error.response.data
+    }
+    console.log(error)
+  }
+}
+
 
 
 

@@ -1,10 +1,9 @@
 import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../Redux/store'
-import axiosInstance from '../../config/userInstance'
 import { toast } from 'sonner'
 import BlockChecker from '../../Services/userServices/blockChecker'
-import { addAddress } from '../../Services/userServices/userAxiosCalls'
+import { addAddress, updateUserProfile } from '../../Services/userServices/userAxiosCalls'
 
 interface address{
     address: string
@@ -19,7 +18,7 @@ const UserDetails = () => {
     BlockChecker()
 
     const data = useSelector((state:RootState)=>state.user.userInfo)
-
+    console.log(data,'this is the data we got here for user')
     const [address, setAddress] = useState('')
     const [country,setCountry] = useState('')
     const [state,setState] = useState('')
@@ -27,6 +26,28 @@ const UserDetails = () => {
     const [pincode, setPincode] = useState('')
     const [errors, setErrors] = useState<{ [key: string]: string }>({})
 
+    const [personalInfo, setPersonalInfo] = useState({
+        name: data?.name || '',
+        phone: data?.phone || '',
+    })
+
+    const handlePersonalInfoChange = (e: React.ChangeEvent<HTMLInputElement>)=>{
+        const {name, value} = e.target
+        setPersonalInfo((prev=>({...prev,[name]: value})))
+    }
+
+    const personalInfoSubmit = async(e:React.FormEvent<HTMLFormElement>)=>{
+        e.preventDefault()
+        try {
+            const response = await updateUserProfile(personalInfo, data?._id)
+            console.log(response,'this is the response')
+            if(response.success){
+                toast.success('profile info updated')
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
     
 
     const handleAddress = async(e:React.FormEvent<HTMLFormElement>)=>{
@@ -71,7 +92,7 @@ const UserDetails = () => {
             <div className='space-y-5'>
                 <div className='bg-white w-full p-6 rounded-md shadow-md'>
                     <h2 className='text-2xl font-semibold '>Personal Information</h2>
-                    <form action="" className='pt-5 py-6'>
+                    <form  onSubmit={personalInfoSubmit} className='pt-5 py-6'>
                         <div className='space-y-3'>
                             <div className='space-y-1 flex flex-col items-start'>
                                 <label htmlFor="" className='text-xs font-medium px-1'>
@@ -81,6 +102,8 @@ const UserDetails = () => {
                                     type="text"
                                     name='name'
                                     placeholder={data?.name}
+                                    value={personalInfo.name}
+                                    onChange={handlePersonalInfoChange}
                                     className='w-full h-10 border border-gray-300 px-3 rounded-md mb-4  '
                                 />
                             </div>
@@ -103,6 +126,8 @@ const UserDetails = () => {
                                     type="phone"
                                     name='phone'
                                     placeholder={data?.phone}
+                                    value={personalInfo.phone}
+                                    onChange={handlePersonalInfoChange}
                                     className='w-full h-10 border border-gray-300 px-3 shadow-sm rounded-md mb-4  '
                                 />
                             </div>
@@ -120,7 +145,7 @@ const UserDetails = () => {
 
                 <div className='bg-white w-full p-6 rounded-md shadow-md'>
                     <h2 className='text-2xl font-semibold '>Add Address</h2>
-                    <form action="" onSubmit={handleAddress} className='pt-5 py-6'>
+                    <form onSubmit={handleAddress} className='pt-5 py-6'>
                         <div className='space-y-6'>
                             <div className='space-y-1 flex flex-col items-start'>
                                 <label htmlFor="" className='text-xs font-medium px-1'>
