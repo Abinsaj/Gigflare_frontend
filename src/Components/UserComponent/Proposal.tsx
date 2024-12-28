@@ -7,6 +7,7 @@ import { getProposals, getWorkHistory } from '../../Services/userServices/userAx
 import FreelancerModal from '../Common/UserCommon/FreelancerModal'
 import ProposalModal from '../Common/UserCommon/ProposalModal'
 import { viewedNotification } from '../../Services/userServices/userAxiosCalls'
+import LoadingSpinner from '../Common/LoadinSpinner'
 
 
 const Proposal = () => {
@@ -22,15 +23,23 @@ const Proposal = () => {
     const [profileData, setProfileData] = useState<any>()
     const [proposalData, setProposalData] = useState<any>()
     const [status, setStatus] = useState<'submitted' | 'approved' | 'rejected' | ''>('')
+    const [loading, setLoading] = useState<boolean>(true)
    
 
     useEffect(() => {
         const fetchData = async () => {
-            const response = await getProposals(jobData._id)
-            setData(response.data)
-
-            const result = await viewedNotification(userData?._id,'proposal')
-            console.log(result,'this is the result')
+            try {
+                
+                const response = await getProposals(jobData._id)
+                setData(response.data)
+    
+                const result = await viewedNotification(userData?._id,'proposal')
+                console.log(result,'this is the result')
+            } catch (error) {
+                console.log(error)
+            }finally{
+                setLoading(false)
+            }
             
         }
         fetchData()
@@ -59,7 +68,11 @@ const Proposal = () => {
         setStatus(status)
     }
 
-    console.log(jobData,'this is the proposal data')
+        if(loading){
+            return (
+                <LoadingSpinner/>
+            )
+        }
     
     return (
         <div className="max-w-7xl mx-auto px-4 min-h-screen py-8">
@@ -99,8 +112,8 @@ const Proposal = () => {
         </button> */}
             </div>
 
-            {/* Proposals List */}
-            <div className="space-y-4">
+            {data && data.length > 0 ? (
+                <div className="space-y-4">
                 {data.map((proposal: any) => (
                     <div  className="bg-white rounded-lg shadow-md overflow-hidden">
                         <div className="p-6">
@@ -177,8 +190,12 @@ const Proposal = () => {
                     </div>
                 ))}
             </div>
+            ):(
+                <p>No proposal for this job</p>
+            )}
 
-            {/* Pagination */}
+           {data && data.length >0 && (
+
             <div className="flex items-end justify-between mt-8">
                 <div className="text-sm text-gray-500">
                     {/* 1 - {proposals.length} of {proposals.length} Proposals */}
@@ -201,6 +218,7 @@ const Proposal = () => {
                     </button>
                 </div>
             </div>
+           )}
 
             {isProfileModalOpen && profileData && (
                 <FreelancerModal freelancer={profileData} onClose={closeModal} />

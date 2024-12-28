@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Search, ChevronDown, Trash2 } from 'lucide-react'
 import { useFreelancer } from '../../context/FreelancerContext/FreelancerData'
 import { getProposals } from '../../Services/freelancerService/freelancerAxiosCalls'
+import LoadingSpinner from '../Common/LoadinSpinner'
 
 
 export default function ProposalsList() {
@@ -9,10 +10,18 @@ export default function ProposalsList() {
     const { freelancer } = useFreelancer()
     const id = freelancer?._id
     const [proposals, setProposals] = useState<any[]>([])
+    const [loading, setLoading] = useState<boolean>(true)
+
     useEffect(() => {
         const fetchData = async () => {
-            const response = await getProposals(id)
-            setProposals(response)
+            try { 
+                const response = await getProposals(id)
+                setProposals(response)
+            } catch (error) {
+                console.log(error)
+            }finally{
+                setLoading(false)
+            }
         }
         if(id !== undefined){
             fetchData()
@@ -26,6 +35,12 @@ export default function ProposalsList() {
         } catch (error) {
             
         }
+    }
+
+    if(loading){
+        return(
+            <LoadingSpinner/>
+        )
     }
 
     return (
@@ -65,7 +80,9 @@ export default function ProposalsList() {
                 </div> */}
 
                 {/* Table */}
-                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+
+                {proposals && proposals.length > 0 ? (
+                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead className="bg-gray-50">
@@ -104,6 +121,9 @@ export default function ProposalsList() {
                         </table>
                     </div>
                 </div>
+                ):(
+                    <p>You didnt make any proposal</p>
+                )}
             </div>
         </div>
     )

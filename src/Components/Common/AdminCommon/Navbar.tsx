@@ -17,7 +17,7 @@ const Navbar = () => {
   const handleLogout = async(e:React.MouseEvent<HTMLButtonElement>)=>{
     try {
       e.preventDefault()
-      const response = await axiosInstance.post(`/adminlogout`)
+      const response = await axiosInstance.post(`/admin/adminlogout`)
       console.log(response)
       if(response.data){
         toast.success(response.data.message)

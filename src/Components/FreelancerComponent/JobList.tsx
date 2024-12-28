@@ -83,6 +83,8 @@ export default function JobListing() {
     });
   };
 
+  
+
   return (
     <div className="flex h-screen bg-white">
       <FilterSidebar

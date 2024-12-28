@@ -16,8 +16,6 @@ export default function ContractList() {
     console.log(id,'we also got the id')
     const [contract, setContract] = useState<any[]>([])
     const navigate = useNavigate()
-
-  
     const [isLoading, setIsLoading] = useState(true);
 
     const fetchData = async () => {

@@ -4,6 +4,7 @@ import { getFreelancers } from '../../Services/userServices/userAxiosCalls'
 import FreelancerModal from '../Common/UserCommon/FreelancerModal'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../Redux/store'
+import LoadingSpinner from '../Common/LoadinSpinner'
 
 export default function FreelancerListing() {
     const [freelancers, setFreelancers] = useState<any[]>([])
@@ -13,6 +14,7 @@ export default function FreelancerListing() {
     const [currentPage, setCurrentPage] = useState<number>(1)
     const [totalPage, setTotalPage] = useState<number>(1)
     const userId = useSelector((state: RootState)=> state.user.userInfo?._id)
+    const [loading, setLoading] = useState<boolean>(true)
 
     
     const fetchFreelancers = async (page = 1) => {
@@ -23,6 +25,8 @@ export default function FreelancerListing() {
             setTotalPage(data.totalPage)
         } catch (error) {
             console.log(error)
+        }finally{
+            setLoading(false)
         }
         
     }
@@ -49,7 +53,11 @@ export default function FreelancerListing() {
         setSelectedFreelancer(null)
     }
 
-    console.log(freelancers,'this is the selected freelancer')
+    if(loading){
+        return(
+            <LoadingSpinner/>
+        )
+    }
 
     return (
         <div className="container mx-auto px-4 py-8 bg-white">

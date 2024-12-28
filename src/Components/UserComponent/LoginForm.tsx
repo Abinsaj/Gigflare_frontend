@@ -9,12 +9,16 @@ import * as Yup from "yup"
 import { useGoogleLogin } from '@react-oauth/google';
 import axiosInstance from '../../config/userInstance';
 import { googleLogin } from '../../Services/userServices/userAxiosCalls';
+import { useState } from 'react';
+import { setLoading } from '../../Redux/slices/userSlice';
+import LoadingSpinner from '../Common/LoadinSpinner';
 
 const LoginForm = () => {
 
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const { userInfo } = useSelector((state: any) => state.user);
+    const [loading, serLoading] = useState<boolean>(true)
 
     const formik = useFormik({
         initialValues: {
@@ -47,6 +51,8 @@ const LoginForm = () => {
 
             } catch (error: any) {
                 toast.error(error.message )
+            }finally{
+                setLoading(false)
             }
         }
     })
@@ -70,7 +76,11 @@ const LoginForm = () => {
         }
     })
 
-    
+    if(loading){
+        return(
+            <LoadingSpinner/>
+        )
+    }
 
     return (
         <>

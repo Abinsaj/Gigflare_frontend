@@ -64,7 +64,8 @@ export default function ContractList() {
                 </div>
             </div>
 
-            <div className="space-y-4   rounded-md md:space-y-6">
+            {contract && contract.length > 0 ? (
+                <div className="space-y-4   rounded-md md:space-y-6">
                 {contract.map((value: any)=>(
                     <Card className="w-full p-5 border border-gray-100 shadow-lg rounded-md">
                     <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -119,6 +120,10 @@ export default function ContractList() {
                 </Card>
                 ))}
             </div>
+            ):(
+                <p>No contract have made</p>
+            )}
+            
         </div>
     )
 }

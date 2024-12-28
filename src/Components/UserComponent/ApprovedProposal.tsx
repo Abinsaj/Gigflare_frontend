@@ -6,14 +6,13 @@ import { RootState } from '../../Redux/store'
 import { getProposals } from '../../Services/userServices/userAxiosCalls'
 import FreelancerModal from '../Common/UserCommon/FreelancerModal'
 import ProposalModal from '../Common/UserCommon/ProposalModal'
+import LoadingSpinner from '../Common/LoadinSpinner'
 
 
 const ApprovedProposal = () => {
 
     const location = useLocation()
     const jobData = location.state
-    console.log(jobData,'this is the jobData in offer')
-    // const [searchQuery, setSearchQuery] = useState('')
     const navigate = useNavigate()
     const userData = useSelector((state: RootState) => state.user.userInfo)
     const [data, setData] = useState<any[]>([])
@@ -22,14 +21,19 @@ const ApprovedProposal = () => {
     const [profileData, setProfileData] = useState<any>()
     const [proposalData, setProposalData] = useState<any>()
     const [status, setStatus] = useState<'submitted' | 'approved' | 'rejected' | ''>('')
-    // const [activeView, setActiveView] = useState<'all' | 'approved'>('all')
+    const [loading, setLoading] = useState<boolean>(true)
 
     useEffect(() => {
         const fetchData = async () => {
-            const response = await getProposals(jobData._id)
-            console.log(response.data, 'this is the response we got here')
-            setData(response.data)
-            console.log(data, 'this is the data of the proposal')
+            try {
+                const response = await getProposals(jobData._id)
+                setData(response.data)
+            } catch (error) {
+                console.log(error)
+            }finally{
+                setLoading(false)
+            }
+            
         }
         fetchData()
     }, [])
@@ -61,7 +65,14 @@ const ApprovedProposal = () => {
         navigate('/sendoffer',{state: {data:data, job:jobData}});
     };
 
+
     const filteredData =  data.filter(proposal => proposal.status === 'approved')
+
+    if(loading){
+        return (
+            <LoadingSpinner/>
+        )
+    }
 
     return (
         <div className="max-w-7xl mx-auto px-4 min-h-screen py-8">

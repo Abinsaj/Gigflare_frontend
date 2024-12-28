@@ -6,6 +6,7 @@ import WorkHistoryModal from '../Common/UserCommon/WorkHistoryModal';
 import { RootState } from '../../Redux/store';
 import { useSelector } from 'react-redux';
 import FreelancerModal from '../Common/UserCommon/FreelancerModal';
+import LoadingSpinner from '../Common/LoadinSpinner';
 
 const WorkHistory = () => {
     const navigate = useNavigate();
@@ -17,6 +18,7 @@ const WorkHistory = () => {
     const [filteredData, setFilteredData] = useState<any[]>([])
     const [filter, setFilter] = useState<'all' | 'completed' | 'In-progress'>('all')
     const user = useSelector((state: RootState)=> state.user.userInfo)
+    const [loading, setLoading] = useState<boolean>(true)
 
     useEffect(() => {
         const fetchWorkHistory = async () => {
@@ -28,6 +30,8 @@ const WorkHistory = () => {
                 
             } catch (error) {
                 console.error("Error fetching work history:", error);
+            }finally{
+                setLoading(false)
             }
         };
 
@@ -67,6 +71,12 @@ const WorkHistory = () => {
         setFreelancerData(null)
     }
 
+    if(loading){
+        return(
+            <LoadingSpinner/>
+        )
+    }
+
     return (
         <div className="max-w-7xl mx-auto px-4 min-h-screen py-8">
             <div className="border-b border-gray-200 mb-6">
@@ -96,7 +106,8 @@ const WorkHistory = () => {
             </div>
 
 
-            <div className="space-y-4">
+            {filteredData && filteredData.length > 0 ? (
+                <div className="space-y-4">
                 {filteredData.map((history: any) => (
                     <div key={history._id} className="bg-white rounded-lg shadow-md overflow-hidden">
                         <div className="p-6">
@@ -157,8 +168,13 @@ const WorkHistory = () => {
                     </div>
                 ))}
             </div>
+            ):(
+                <p>No worklist</p>
+            )}
 
-            <div className="flex items-end justify-between mt-8">
+            
+            {filteredData && filteredData.length > 0 && (
+                <div className="flex items-end justify-between mt-8">
                 <div className="text-sm text-gray-500">
                     {/* Add dynamic pagination details */}
                 </div>
@@ -180,6 +196,7 @@ const WorkHistory = () => {
                     </button>
                 </div>
             </div>
+            )}
 
             {isModalOpen && historyData && (
                 <WorkHistoryModal work={historyData} onClose={closeModal} />

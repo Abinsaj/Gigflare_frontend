@@ -79,11 +79,7 @@ const EditFreelancerProfile = () => {
       const file = e.target.files[0];
       if (file) {
         const compressedBlob = await compressImage(file);
-        console.log('Compressed Blob:', compressedBlob);
-
         const compressedFile = new File([compressedBlob], file.name, { type: file.type, lastModified: Date.now() });
-        console.log('Compressed File:', compressedFile);
-        console.log(compressedFile, ' this is the file we got')
         formik.setFieldValue('photo', compressedFile);
 
         const reader = new FileReader();
