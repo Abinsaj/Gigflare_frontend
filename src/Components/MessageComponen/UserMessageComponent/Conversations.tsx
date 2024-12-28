@@ -130,11 +130,11 @@ const Conversations = () => {
                   })}
                 </p>
                 <div className='pl-24'>
-                {unreadCount > 0 && (
+                {/* {unreadCount > 0 && (
                   <span className="text-xs font-semibold bg-red-500 text-white rounded-full px-2 py-1">
                     {unreadCount}
                   </span>
-                )}
+                )} */}
                 </div>
                 
                 <p className="text-xs text-gray-200"></p>
