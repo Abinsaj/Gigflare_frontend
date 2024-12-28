@@ -109,14 +109,14 @@ export default function Profile() {
                 <p className='text-sm text-gray-400'>{data.email}</p>
               </div>
               <div className="ml-auto flex flex-col items-end text-sm text-gray-600">
-                <div className="flex items-center">
+                {/* <div className="flex items-center">
                   <MapPinIcon className='w-4 h-4 mr-2' />
                   <span>Location in India</span>
-                </div>
-                <div className="flex items-center mt-2">
+                </div> */}
+                {/* <div className="flex items-center mt-2">
                   <ClockIcon className='w-4 h-4 mr-2' />
                   <span>Joined in {new Date(data.created_At).toLocaleString('en-US', { month: 'long', year: 'numeric' })}</span>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
