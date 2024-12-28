@@ -7,7 +7,7 @@ import { useDispatch } from 'react-redux';
 import { clearAdmin } from '../../../Redux/slices/adminSlice';
 import axiosInstance from '../../../config/userInstance';
 
-const url = 'http://localhost:7070/admin';
+
 
 const Navbar = () => {
 

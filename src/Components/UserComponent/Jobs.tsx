@@ -62,9 +62,6 @@ const Jobs = () => {
         <div className="max-w-7xl mx-auto px-4 h-screen py-8">
             {/* Tabs */}
             <h1 className="text-3xl font-semibold pb-5">All job posts</h1>
-
-
-\
             <div className="flex gap-4 mb-8 justify-end">
               
                 <button
