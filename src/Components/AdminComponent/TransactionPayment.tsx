@@ -65,7 +65,7 @@ const TransactionPayment = () => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {transactions.map((transaction)=>(
-                <tr >
+                <tr onClick={()=>navigate('/admin/transactiondetail',{state: transaction})} >
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{transaction.created}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.client}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.freelancer}</td>

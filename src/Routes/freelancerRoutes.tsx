@@ -15,6 +15,7 @@ import ContractList from "../Components/FreelancerComponent/FreelancerContractLi
 import ContractPage from "../Components/FreelancerComponent/Contract";
 import WorkHistory from "../Components/FreelancerComponent/WorkList";
 import TransactionsList from "../Components/FreelancerComponent/TransactionList";
+import TransactionDetailsPage from "../Components/Common/TransactionDetails";
 
 const FreelancerRoutes = () => {
     return (
@@ -29,6 +30,7 @@ const FreelancerRoutes = () => {
                 <Route path='/viewjobdetials' element={<GetJobDetailsPage />} />
                 <Route path="/freelancermessage" element={<MessageLayout/>}/>
                 <Route path="/contract" element={<ContractPage/>}/>
+                <Route path="/transactiondetail" element = {<TransactionDetailsPage/>}/>
                 
                 <Route element={<FreelancerLayout />}>
                     <Route path="dashboard" element={<DashboardPage />} />

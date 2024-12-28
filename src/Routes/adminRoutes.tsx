@@ -15,6 +15,7 @@ import JobDetails from '../Components/AdminComponent/JobDetails'
 import ContractList from '../Components/AdminComponent/ContractList'
 import SkillList from '../Components/AdminComponent/SkillList'
 import TransactionPayment from '../Components/AdminComponent/TransactionPayment'
+import TransactionDetailsPage from '../Components/Common/TransactionDetails'
 
 
 function AdminRoutes() {
@@ -44,6 +45,7 @@ function AdminRoutes() {
           <Route path='/jobdetails' element={<JobDetails/>}/>
           <Route path='/freelancerdetails' element={<FreelancerDetails/>}/>
         </Route>
+        <Route path='/transactiondetail' element={<TransactionDetailsPage/>}/>
       </Route>
         
     </Routes>

@@ -5,11 +5,13 @@ import { getTransactions } from '../../Services/userServices/userAxiosCalls'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../Redux/store'
 import LoadingSpinner from '../Common/LoadinSpinner'
+import { useNavigate } from 'react-router-dom'
 
 export default function TransactionsList() {
     const { freelancer } = useFreelancer()
     const [transactions, setTransactions] = useState<any[]>([])
-    const [loading, setLoading] = useState<boolean>(true) // Loading state
+    const [loading, setLoading] = useState<boolean>(true) 
+    const navigate = useNavigate()
 
     const user = useSelector((state: RootState) => state.user.userInfo)
 
@@ -74,7 +76,7 @@ export default function TransactionsList() {
                                 </thead>
                                 <tbody>
                                     {transactions.map((transaction) => (
-                                        <tr key={transaction.transactionId} className="border-b border-gray-200">
+                                        <tr key={transaction.transactionId} onClick={()=>navigate('/freelancer/transactiondetail', {state: transaction})}  className="border-b border-gray-200">
                                             <td className="py-3 px-5 sm:px-6 text-sm">{transaction.transactionId}</td>
                                             <td className="py-3 line-clamp-1 px-4 sm:px-6 text-sm">{transaction.created}</td>
                                             <td className="py-3 px-1 sm:px-6 text-sm text-center">{transaction.paymentMethod?.type.toUpperCase() || 'N/A'}</td>
