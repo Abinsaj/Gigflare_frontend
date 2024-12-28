@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
 import { ArrowLeft, Clock, CheckCircle, Heart, DollarSign, MapPin } from 'lucide-react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useFetcher, useLocation, useNavigate } from 'react-router-dom'
 import { timeAgo, posted } from '../../config/timeAgo';
 import SendProposal from './ProposalModal';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../Redux/store';
+import { useFreelancer } from '../../context/FreelancerContext/FreelancerData';
 
 export default function ViewJobDetails() {
 
@@ -13,6 +14,7 @@ export default function ViewJobDetails() {
     const { data } = location.state || {};
     const [modalOpen, setModalOpen] = useState<boolean>(false)
     const userId = useSelector((state: RootState)=>state.user.userInfo?._id)
+    const {freelancer} = useFreelancer()
 
     const openModal = () => {
         setModalOpen(true)
@@ -100,7 +102,7 @@ export default function ViewJobDetails() {
                     <p className="text-sm text-gray-500">Member since: {posted(data.createdAt)}</p>
                 </div>
             </div>
-            {data.proposals.includes(userId) ? (
+            {data.proposals.includes(freelancer?._id) ? (
                 
                 <div className="flex gap-4">
                     <button className="flex-1 bg-green-500 text-white py-3 rounded-md hover:bg-green-600 transition-colors">
