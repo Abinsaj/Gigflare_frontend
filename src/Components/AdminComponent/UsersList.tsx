@@ -90,6 +90,8 @@ const UsersList = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
             </tr>
           </thead>
+          {userData && userData.length > 0 && (
+
           <tbody className="bg-white divide-y divide-gray-200">
             {userData?.map((user,index) => (
               <tr key={user.userId}>
@@ -131,6 +133,7 @@ const UsersList = () => {
               </tr>
             ))}
           </tbody>
+          )}
         </table>
       </div>
       <div className="flex justify-between items-center mt-4">
