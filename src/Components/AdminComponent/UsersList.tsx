@@ -47,7 +47,7 @@ const UsersList = () => {
 
     try {
       console.log(selectedUser)
-      const response = await axios.put(`${url}/admin/blockUser/${selectedUser.email}`, {
+      const response = await axiosInstance.put(`/admin/blockUser/${selectedUser.email}`, {
         isBlocked: modalAction === "block"
       },{withCredentials:true})
 

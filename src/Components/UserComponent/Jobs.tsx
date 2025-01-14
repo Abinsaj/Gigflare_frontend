@@ -17,19 +17,30 @@ const Jobs = () => {
     const { notifications } = useGetNotification()
     const navigate = useNavigate()
     const [loading, setLoading] = useState<boolean>(true)
+    const [pageSize] = useState(3)
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
 
-    const fetchData = useCallback(async () => {
+    const fetchData = useCallback(async (page = 1) => {
         if (data?._id) {
             try {
-                const jobs = await getUserJobs(data._id)
-                setJob(jobs)
+                const jobs = await getUserJobs(data._id, page, pageSize)
+                setJob(jobs.jobData)
+                setTotalPages(jobs.totalPages)
             } catch (error) {
                 console.error('Error fetching jobs:', error)
             }finally{
                 setLoading(false)
             }
         }
-    }, [data?.userId])
+    }, [data?.userId]) 
+
+    const handlePageChange = (newPage: number) => {
+        if (newPage > 0 && newPage <= totalPages) {
+            setCurrentPage(newPage);
+            fetchData(newPage);
+        }
+    };
 
     useEffect(() => {
         if (data?.userId) {
@@ -127,29 +138,26 @@ const Jobs = () => {
                         1 - {job.length} of {job.length} Job posts
                     </div>
                     <div className="flex items-center gap-2">
-                        <button
-                            className="p-2 rounded-full text-gray-400 disabled:opacity-50"
-                            disabled
-                            aria-label="Previous page"
-                        >
-                            <ChevronLeft className="h-4 w-4" />
-                        </button>
-                        <div className="h-8 w-8 flex items-center justify-center rounded-full bg-green-600 text-white">
-                            1
-                        </div>
-                        <button
-                            className="p-2 rounded-full text-gray-400 disabled:opacity-50"
-                            disabled
-                            aria-label="Next page"
-                        >
-                            <ChevronRight className="h-4 w-4" />
-                        </button>
-                    </div>
+                                        <button
+                                            
+                                            className="p-2 rounded-full text-gray-400 disabled:opacity-50"
+                                            disabled={currentPage === 1}
+                                        >
+                                            <ChevronLeft onClick={()=>handlePageChange(currentPage - 1)} className="h-4 w-4" />
+                                        </button>
+                                        <div className="h-8 w-8 flex items-center justify-center rounded-full bg-green-600 text-white">
+                                            {currentPage}
+                                        </div>
+                                        <button
+                                            className="p-2 rounded-full text-gray-400 disabled:opacity-50"
+                                            disabled={currentPage === totalPages}
+                                            >
+                                           
+                                            <ChevronRight  onClick={()=>handlePageChange(currentPage + 1)} className="h-4 w-4" />
+                                        </button>
+                                    </div>
                 </div>
             )}
-
-
-
 
             {openModal && (
                 <JobPostForm onClose={onClose} onJobAdded={handleJobAdded} />

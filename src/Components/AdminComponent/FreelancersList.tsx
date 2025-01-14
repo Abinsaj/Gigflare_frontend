@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { ChevronLeft, ChevronRight, Calendar, X } from 'lucide-react'
-import axios from 'axios'
 import axiosInstance from '../../config/userInstance'
 import { useNavigate } from 'react-router-dom'
 import { posted } from '../../config/timeAgo'
 
-const url = 'http://localhost:7070'
 
 interface Freelancer {
   id: string
@@ -69,7 +67,7 @@ export default function Freelancers() {
           email = freelancer.email
         })
         
-        await axios.put(`${url}/admin/blockUser/${email}`, { isBlocked: newBlockedStatus })
+        await axiosInstance.put(`/admin/blockUser/${email}`, { isBlocked: newBlockedStatus })
         setFreelancers(freelancers.map(f =>
           f.email === email ? { ...f, isBlocked: newBlockedStatus } : f
         ))

@@ -74,9 +74,9 @@ export const googleLogin = async (tokenResponse: any) => {
   }
 }
 
-export const getUserJobs = async (id: string | undefined) => {
+export const getUserJobs = async (id: string | undefined, page: number, pageSize: number) => {
   try {
-    const result = await axiosInstance.get(`/getsinglejob/${id}`)
+    const result = await axiosInstance.get(`/getsinglejob?id=${id}&page=${page}&limit=${pageSize}`)
     console.log(result, 'this is the result of the single user job')
     return result.data
   } catch (error) {
