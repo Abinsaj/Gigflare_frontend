@@ -55,9 +55,9 @@ export default function ContractList() {
             </div>
             <div className="border-b border-gray-200 mb-4 sm:mb-6">
                 <div className="flex gap-4 sm:gap-8">
-                    <button className="pb-2 sm:pb-4 border-b-2 border-green-600 text-green-600 font-medium text-sm sm:text-base">
+                    {/* <button className="pb-2 sm:pb-4 border-b-2 border-green-600 text-green-600 font-medium text-sm sm:text-base">
                         Contracts
-                    </button>
+                    </button> */}
                     {/* <button className="pb-2 sm:pb-4 text-gray-500 hover:text-gray-700 text-sm sm:text-base">
                             Inactive
                         </button> */}

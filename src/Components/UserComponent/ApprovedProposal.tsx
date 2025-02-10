@@ -27,13 +27,14 @@ const ApprovedProposal = () => {
         const fetchData = async () => {
             try {
                 const response = await getProposals(jobData._id)
+                console.log(response.data, 'this is the response we expect here')
                 setData(response.data)
             } catch (error) {
                 console.log(error)
-            }finally{
+            } finally {
                 setLoading(false)
             }
-            
+
         }
         fetchData()
     }, [])
@@ -50,6 +51,8 @@ const ApprovedProposal = () => {
         setProposalData(data)
     }
 
+    console.log(data, jobData,'these are the datas we got herer......')
+
     const closeModal = () => {
         setIsProfileModalOpen(false)
         setIsProposalModalOpen(false)
@@ -62,34 +65,36 @@ const ApprovedProposal = () => {
     }
 
     const handleSendOfferClick = (data: any) => {
-        navigate('/sendoffer',{state: {data:data, job:jobData}});
+        navigate('/sendoffer', { state: { data: data, job: jobData } });
     };
 
 
-    const filteredData =  data.filter(proposal => proposal.status === 'approved')
+    const filteredData = data.filter(proposal => proposal.status === 'approved')
 
-    if(loading){
+    if (loading) {
         return (
-            <LoadingSpinner/>
+            <LoadingSpinner />
         )
     }
 
     return (
         <div className="max-w-7xl mx-auto px-4 min-h-screen py-8">
-            {/* Tabs */}
+            <div className="relative flex-1">
+                <h1 className="text-3xl font-semibold">Proposals</h1>
+            </div>
 
             <div className="border-b border-gray-200 mb-6">
                 <div className="flex gap-8">
                     <button
-                        onClick={() => navigate('/proposals',{state:jobData})}
-                        className={ 'border-transparent text-gray-500'}
+                        onClick={() => navigate('/proposals', { state: jobData })}
+                        className={'border-transparent text-gray-500'}
 
                     >
                         Proposals
                     </button>
                     <button
                         // onClick={() => setActiveView('approved')}
-                        className={'border-green-600 text-green-600' } 
+                        className={'border-green-600 text-green-600'}
 
                     >
                         Approved proposal
@@ -102,20 +107,12 @@ const ApprovedProposal = () => {
 
 
             {/* Search and Filters */}
-            <div className="flex gap-4 mb-8">
-                <div className="relative flex-1">
-                    <h1 className="text-3xl font-semibold">Proposals</h1>
-                </div>
-                {/* <button className="px-4 py-2 border border-gray-300 rounded-md flex items-center gap-2">
-          <SlidersHorizontal className="h-4 w-4" />
-          Filters
-        </button> */}
-            </div>
+
 
             {/* Proposals List */}
             <div className="space-y-4">
                 {filteredData.map((proposal: any) => (
-                    <div onClick={openProposalModal} className="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div className="bg-white rounded-lg shadow-md overflow-hidden">
                         <div className="p-6">
                             <div className="flex items-start gap-6">
                                 <img
@@ -146,18 +143,7 @@ const ApprovedProposal = () => {
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <button
-                                            // className={`p-2 rounded-full hover:bg-gray-100 ${
-                                            //   proposal.liked ? "text-green-500" : "text-gray-400"
-                                            // }`}
-                                            >
-                                                {/* <ThumbsUp className="w-5 h-5" /> */}
-                                            </button>
-                                            <button
-                                            // className={`p-2 rounded-full hover:bg-gray-100 ${
-                                            //   proposal.favorited ? "text-red-500" : "text-gray-400"
-                                            // }`}
-                                            >
+                                            <button>
                                                 <Heart className="w-5 h-5" />
                                             </button>
                                         </div>
@@ -169,23 +155,29 @@ const ApprovedProposal = () => {
                                         {jobData.title}
                                     </h4>
                                 </div>
-                                { }
                                 <div className="flex flex-col gap-2">
-                                    <button onClick={() => openProfileModal(proposal.freelancer)} className="w-32 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                    {/* View Profile Button */}
+                                    <button
+                                        onClick={() => openProfileModal(proposal.freelancer)}
+                                        className="w-32 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                                    >
                                         View Profile
                                     </button>
-                                   
-                                        <button onClick={()=>handleSendOfferClick(proposal)} className="w-32 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                                            Send Offer
-                                        </button>
-                                    {/* ):(
-                                        <button onClick={() => openProposalModal(proposal)} className="w-32 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                                            View Proposal
-                                        </button>
-                                    )} */}
 
-                                    <button onClick={()=>navigate(`/message/${proposal.userId}`)} className="w-32 px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                                        <MessageCircle   className="w-4 h-4 inline-block mr-2" />
+                                    {/* Send Offer Button */}
+                                    <button
+                                        onClick={() => handleSendOfferClick(proposal)}
+                                        className="w-32 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                                    >
+                                        Send Offer
+                                    </button>
+
+                                    {/* Message Button */}
+                                    <button
+                                        onClick={() => navigate(`/message/${proposal.userId}`)}
+                                        className="w-32 px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                                    >
+                                        <MessageCircle className="w-4 h-4 inline-block mr-2" />
                                         Message
                                     </button>
                                 </div>

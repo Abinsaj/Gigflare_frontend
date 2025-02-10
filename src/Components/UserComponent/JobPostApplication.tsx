@@ -12,10 +12,10 @@ import { getUserSkills } from '../../Services/userServices/userAxiosCalls'
 
 
    export interface Jobpost{
-        jobTitle: string;
-        jobDescription: string;
+        title: string;
+        description: string;
         category: string;
-        skills: string[];  
+        skillsRequired: string[];  
         duration: string;
         projectType: string;
         budget?: number;
@@ -38,10 +38,10 @@ export default function JobPostForm({ onClose, onJobAdded }: JobPostFormProps) {
   const [ allSkill, setAllSkills] = useState<any[]>([])
   const [filteredSkill, setFilteredSkills] = useState<any[]>([])
   const [formData, setFormData] = useState<Jobpost>({
-    jobTitle: '',
-    jobDescription: '',
+    title: '',
+    description: '',
     category: '',
-    skills: [],
+    skillsRequired: [],
     duration: '',
     projectType: '',
     budget: 0
@@ -85,10 +85,11 @@ console.log(filteredSkill,'this is the filtered data')
     }))
   }
 
-  const handleSkillChange = (skills: string[]) => {
+  const handleSkillChange = (skillsRequired: string[]) => {
+    console.log(skillsRequired,'yeah we got the skills hererererererer')
     setFormData(prevData => ({
       ...prevData,
-      skills
+      skillsRequired
     }))
   }
 

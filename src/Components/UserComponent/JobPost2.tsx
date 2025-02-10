@@ -2,7 +2,7 @@ import React from "react";
 
 interface JobPostPage2Props {
   formData: {
-    skills: string[]; 
+    skillsRequired: string[]; 
     duration: string; 
   };
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
@@ -20,13 +20,15 @@ export default function JobPostPage2({
   filteredSkill,
 }: JobPostPage2Props) {
   const addSkill = (skillName: string) => {
-    if (!formData.skills.includes(skillName)) {
-      handleSkillChange([...formData.skills, skillName]);
+    if (!formData.skillsRequired.includes(skillName)) {
+      console.log(skillName,'this is the skill name')
+      handleSkillChange([...formData.skillsRequired, skillName]);
     }
+    console.log(formData.skillsRequired,'this is the selected skills we got hererererereer')
   };
 
   const removeSkill = (skillToRemove: string) => {
-    handleSkillChange(formData.skills.filter((skill) => skill !== skillToRemove));
+    handleSkillChange(formData.skillsRequired.filter((skill) => skill !== skillToRemove));
   };
 
   return (
@@ -37,7 +39,7 @@ export default function JobPostPage2({
           Selected Skills
         </label>
         <div className="flex items-center flex-wrap border rounded-md px-3 py-2 shadow-sm bg-gray-100 text-gray-700 gap-2">
-          {formData.skills.map((skill) => (
+          {formData.skillsRequired.map((skill) => (
             <span
               key={skill}
               className="flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-gray-700"
@@ -52,7 +54,7 @@ export default function JobPostPage2({
               </button>
             </span>
           ))}
-          {formData.skills.length === 0 && (
+          {formData.skillsRequired.length === 0 && (
             <span className="text-sm text-gray-400">No skills selected</span>
           )}
         </div>
@@ -66,7 +68,7 @@ export default function JobPostPage2({
                 key={skill._id}
                 onClick={() => addSkill(skill.name)} 
                 className={`cursor-pointer inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                  formData.skills.includes(skill.name)
+                  formData.skillsRequired.includes(skill.name)
                     ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                     : "bg-blue-100 text-gray-700 hover:bg-blue-200"
                 }`}

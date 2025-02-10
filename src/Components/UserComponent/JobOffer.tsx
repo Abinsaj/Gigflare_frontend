@@ -32,6 +32,7 @@ export default function JobOffer() {
   const location = useLocation()
   const { data } = location.state
   const { job } = location.state
+  console.log(data,job,'these are the things we passed through state from the propo')
 
 
   const [offerData, setOfferData] = useState<OfferData>({
@@ -143,6 +144,7 @@ export default function JobOffer() {
   }
 
   return (
+    
     <div className="max-w-7xl mx-auto p-6">
       <div className="mb-8">
         <h1 className="text-2xl font-bold mb-2">Send an Offer</h1>
@@ -159,7 +161,12 @@ export default function JobOffer() {
           <div className='space-y-2'>
             <h2 className="text-lg font-semibold">{data.freelancer.firstName} {data.freelancer.lastName}</h2>
             <p className="text-gray-600">{data.freelancer.description}</p>
-            <p className="text-sm text-gray-400">{data.freelancer.skills}</p>
+            {/* {data.freelancer && data.freelancer.skills &&(
+              data.freelancer.skills.map((val: any)=>{
+
+                <p className="text-sm text-gray-400">{val.name}</p>
+              })
+            )} */}
           </div>
         </div>
       </div>

@@ -77,7 +77,7 @@ export default function FreelancerModal({ freelancer, onClose }: FreelancerModal
           {/* Profile Header */}
           <div className="flex items-start space-x-4">
             <div className="relative">
-              <img src={freelancer.profile} className="w-24 h-24 rounded-full" />
+              <img src={freelancer.photo} className="w-24 h-24 rounded-full" />
               <button className="absolute bottom-0 right-0 bg-white rounded-full p-1 shadow">
                 {/* <Camera className="w-4 h-4" /> */}
               </button>

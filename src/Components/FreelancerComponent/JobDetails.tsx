@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { ArrowLeft, Clock, CheckCircle, Heart, DollarSign, MapPin } from 'lucide-react'
 import { useFetcher, useLocation, useNavigate } from 'react-router-dom'
 import { timeAgo, posted } from '../../config/timeAgo';
@@ -12,10 +12,11 @@ export default function ViewJobDetails() {
     const navigate = useNavigate();
     const location = useLocation();
     const { data } = location.state || {};
+    console.log(data,'this is the freelancer data in job details page')
     const [modalOpen, setModalOpen] = useState<boolean>(false)
-    const userId = useSelector((state: RootState)=>state.user.userInfo?._id)
+    // const userId = useSelector((state: RootState)=>state.user.userInfo?._id)
+    const [button, setButton] = useState(false)
     const {freelancer} = useFreelancer()
-
     const openModal = () => {
         setModalOpen(true)
     }
@@ -23,7 +24,18 @@ export default function ViewJobDetails() {
     const closeModal = () => {
         setModalOpen(false)
     }
+    useEffect(()=>{
 
+        if(data.proposals.includes(freelancer?._id)){
+            setButton(true)
+        }
+    },[data])
+
+    const changeButton = (val: any)=>{
+        if(val == true){
+            setButton(true)
+        }
+    }
 
     return (
         <div className="max-w-7xl mx-auto pt-8 pb-8 bg-white">
@@ -102,7 +114,7 @@ export default function ViewJobDetails() {
                     <p className="text-sm text-gray-500">Member since: {posted(data.createdAt)}</p>
                 </div>
             </div>
-            {data.proposals.includes(freelancer?._id) ? (
+            {button == true ? (
                 
                 <div className="flex gap-4">
                     <button className="flex-1 bg-green-500 text-white py-3 rounded-md hover:bg-green-600 transition-colors">
@@ -123,7 +135,7 @@ export default function ViewJobDetails() {
             
 
             {modalOpen && (
-                <SendProposal onClose={closeModal} data={data} />
+                <SendProposal onClose={closeModal} statusChange={changeButton} data={data} />
             )}
         </div>
     )

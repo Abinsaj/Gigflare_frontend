@@ -9,6 +9,7 @@ import { getFreelancerDetails } from '../../Services/adminServices/adminAxiosCal
 const ClientHome = () => {
 
     const data = useSelector((state: RootState) => state.user.userInfo)
+    console.log(data,'this is the data of the user')
     const [freelancers, setFreelancers] = useState<any[]>([])
     const [visibleIndex, setVisibleIndex] = useState(0);
     const itemsPerPage = 4;

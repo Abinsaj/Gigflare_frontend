@@ -15,29 +15,40 @@ const UsersList = () => {
 
   const admin = useSelector((state:RootState)=>state.admin.adminInfo)
   console.log(admin,'qwertyui')
-
+  const [currentPage,setCurrentPage] = useState(1)
+  const [ totalPage, setTotalPage] = useState(1)
+  const [pageSize] = useState(7)
   const [userData, setUserData] = useState<User[]>([])
   const [showModal, setShowModal] = useState(false)
   const [modalAction, setModalAction] = useState<"block" | "unblock">("block")
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const userList = await axiosInstance.get(`/admin/getUsers`,{withCredentials:true})
-        console.log(userList.data, ' this is the users list') 
-        const data = userList.data
-        setUserData(data)
-      } catch (error) {
-        toast.error('Failed to fetch user data')
-      }
+  const fetchData = async (page = 1) => {
+    try {
+      const userList = await axiosInstance.get(`/admin/getUsers?page=${page}&limit=${pageSize}`,{withCredentials:true})
+      console.log(userList.data, ' this is the users list') 
+      const data = userList.data
+      setUserData(data.user)
+      setTotalPage(data.totalPages)
+    } catch (error) {
+      toast.error('Failed to fetch user data')
     }
+  }
+  useEffect(() => {
     fetchData()
   }, [])
 
+  const handlePageChange = (newPage: number)=>{
+    console.log('its herereerererererereerer')
+    if(newPage > 0 && newPage <= totalPage){
+      console.log('its inside the function')
+      setCurrentPage(newPage)
+      fetchData(newPage)
+    }
+  }
+
   const handleBlockUnblock = (user: User, action: "block" | "unblock") => {
     setSelectedUser(user)
-    console.log(selectedUser,'this is the selected user')
     setModalAction(action)
     setShowModal(true)
   }
@@ -137,12 +148,22 @@ const UsersList = () => {
         </table>
       </div>
       <div className="flex justify-between items-center mt-4">
-        <button className="flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" disabled>
+        <button
+          onClick={()=>handlePageChange(currentPage - 1)}
+          className={`flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md ${
+            currentPage == 1 ? 'text-white bg-[#003F62] hover:bg-[#002E62]':'text-white bg-[#003F62]'
+          }`}
+        >
           <ChevronLeft className="w-5 h-5 mr-2" />
           Previous
         </button>
-        <span className="text-sm text-gray-700">Page 1 of 3</span>
-        <button className="flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[#003F62] hover:bg-[#002E62]">
+        <span className="text-sm text-gray-700">Page {currentPage} of {totalPage}</span>
+        <button
+          onClick={()=>handlePageChange(currentPage + 1)}
+          className={`flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md ${
+          currentPage == 1 ? 'text-white bg-[#003F62] hover:bg-[#002E62]':'text-white bg-[#003F62]'
+        }`}
+        >
           Next
           <ChevronRight className="w-5 h-5 ml-2" />
         </button>

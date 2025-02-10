@@ -50,16 +50,16 @@ export default function WorkHistory() {
             </div>
             <div className="border-b border-gray-200 mb-4 sm:mb-6">
                 <div className="flex gap-4 sm:gap-8">
-                    <button className="pb-2 sm:pb-4 border-b-2 border-green-600 text-green-600 font-medium text-sm sm:text-base">
+                    {/* <button className="pb-2 sm:pb-4 border-b-2 border-green-600 text-green-600 font-medium text-sm sm:text-base">
                         Works
-                    </button>
+                    </button> */}
                     {/* <button className="pb-2 sm:pb-4 text-gray-500 hover:text-gray-700 text-sm sm:text-base">
                             Inactive
                         </button> */}
                 </div>
             </div>
 
-            <div className="container mx-auto px-4 py-8">
+            <div className="container mx-auto px-4 py-4">
                 {workHistory.length === 0 ? (
                     <p className="text-gray-500 text-center">No work history available.</p>
                 ) : (

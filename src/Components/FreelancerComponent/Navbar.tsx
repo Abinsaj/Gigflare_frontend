@@ -60,7 +60,14 @@ const Navbar = () => {
                         alt="Your Company"
                         src={require('../../Assets/logo.jpg')}
                         className="h-10 w-auto "
-                        onClick={()=>navigate('/freelancer/home')}
+                        onClick={()=>{
+                            if(data.isFreelancer == true){
+                                navigate('/freelancer/home')
+                            }else{
+                                navigate('/')
+                            }
+                        }
+                        }
                     />
                 </div>
                 {userData?.isFreelancer == true ? (
@@ -87,7 +94,8 @@ const Navbar = () => {
                 <div className="flex items-center space-x-4 ml-auto">
 
                     {/* Notification Icon */}
-                    <Menu as="div" className="relative">
+                    {userData && userData?.isFreelancer == true && (
+                        <Menu as="div" className="relative">
                         <MenuButton className="rounded-full p-1 text-gray-400 hover:text-gray-300 focus:outline-none">
                             <BellIcon className="h-6 w-6" aria-hidden="true" />
                             {notifications?.length > 0 && (
@@ -131,7 +139,9 @@ const Navbar = () => {
                             </div>
                         </MenuItems>
                     </Menu>
-
+                    )}
+                    
+                    {userData && userData?.isFreelancer == true && (
                     <button
                         type="button"
                         className="relative rounded-full bg-black p-1 text-gray-400"
@@ -139,7 +149,7 @@ const Navbar = () => {
                         <span className="sr-only">View messages</span>
                         <Mail onClick={() => navigate('/freelancer/freelancermessage')} className="h-6 w-6" aria-hidden="true" />
                     </button>
-
+                    )}
                     {/* Profile Icon */}
                     {/* <button
                         type="button"

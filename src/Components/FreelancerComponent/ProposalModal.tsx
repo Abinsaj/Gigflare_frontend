@@ -9,10 +9,13 @@ import { useFreelancer } from '../../context/FreelancerContext/FreelancerData';
 
 interface SendProposalProps {
   onClose: () => void;
+  statusChange:(val: any)=> void;
   data: any
 }
 
-export default function SendProposal({ onClose, data }: SendProposalProps) {
+
+
+export default function SendProposal({ onClose, statusChange, data }: SendProposalProps) {
 
   const { freelancer } = useFreelancer()
   const userId = useSelector((state: RootState)=>state.user.userInfo?._id)
@@ -46,6 +49,7 @@ export default function SendProposal({ onClose, data }: SendProposalProps) {
     try {
       const response = await createProposal(proposal, userId, data._id, freelancer?._id)
       if (response.success === true) {
+        statusChange(true)
         toast.success(response.message)
         onClose()
       } else {
@@ -59,7 +63,7 @@ export default function SendProposal({ onClose, data }: SendProposalProps) {
 
   }
 
-  const amountAfterDeduction: any = proposal.totalBudget - proposal.totalBudget * 0.1;
+  const amountAfterDeduction: any = proposal.totalBudget - proposal.totalBudget * 0.05;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
@@ -156,7 +160,7 @@ export default function SendProposal({ onClose, data }: SendProposalProps) {
                 <IndianRupee className="w-5 h-5 text-gray-400 ml-2" />
               </div>
               <label htmlFor="totalBid" className="block pt-1 text-xs font-medium text-gray-700 mb-1">
-                A 10% from the total amount will fo to GIGFLARE as service charge
+                A 5% from the total amount will fo to GIGFLARE as service charge
               </label>
               <label htmlFor="totalBid" className="block pt-3 text-sm font-medium text-gray-700 mb-1">
                 You'll get <span className='text-green-500'>{amountAfterDeduction}</span> after deduction

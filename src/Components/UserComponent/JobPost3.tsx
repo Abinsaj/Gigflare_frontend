@@ -24,7 +24,7 @@ export default function JobPostPage3({ formData, handleChange}: JobPostPage3Prop
           name="projectType"
           value={formData.projectType}
           onChange={handleChange}
-          className="mt-1 h-10 block w-full rounded-md border shadow-sm focus:outline-none focus:ring-2 focus:border-none focus:ring-[#1AA803]"
+          className="mt-1 h-10 block w-full px-2 rounded-md border shadow-sm focus:outline-none focus:ring-2 focus:border-none focus:ring-[#1AA803]"
         >
           <option value="">Select project type</option>
           <option value="low">Low complexity</option>
@@ -45,7 +45,7 @@ export default function JobPostPage3({ formData, handleChange}: JobPostPage3Prop
           value={formData.budget}
           onChange={handleChange}
           placeholder="Enter budget in USD"
-          className="mt-1 h-10 block w-full rounded-md border shadow-sm focus:outline-none focus:ring-2 focus:border-none focus:ring-[#1AA803]"
+          className="mt-1 h-10 block w-full px-2 rounded-md border shadow-sm focus:outline-none focus:ring-2 focus:border-none focus:ring-[#1AA803]"
         />
       </div>
     </div>

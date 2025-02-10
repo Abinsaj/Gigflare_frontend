@@ -9,10 +9,10 @@ interface changePassword {
 }
 
 interface Jobpost {
-  jobTitle: string;
-  jobDescription: string;
+  title: string;
+  description: string;
   category: string;
-  skills: string[];
+  skillsRequired: string[];
   duration: string;
   projectType: string;
   experienceLevel?: string;

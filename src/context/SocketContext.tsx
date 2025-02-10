@@ -22,7 +22,7 @@ interface SocketProviderProps {
     children: ReactNode;
 }
 
-const API_URL = "https://www.gigflare.online";
+const API_URL = "http://localhost:7070";
 
 export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     const [socketIo, setsocketIo] = useState<Socket | null>(null);
@@ -46,6 +46,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
               userId: sendingId
             }
           });
+          console.log(newSocket,'rithirthirhtihirirhti')
           setsocketIo(newSocket);
 
           socketIo?.on('getOnlineUsers',(users)=>{

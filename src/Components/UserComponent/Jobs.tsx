@@ -29,11 +29,11 @@ const Jobs = () => {
                 setTotalPages(jobs.totalPages)
             } catch (error) {
                 console.error('Error fetching jobs:', error)
-            }finally{
+            } finally {
                 setLoading(false)
             }
         }
-    }, [data?.userId]) 
+    }, [data?.userId])
 
     const handlePageChange = (newPage: number) => {
         if (newPage > 0 && newPage <= totalPages) {
@@ -63,31 +63,31 @@ const Jobs = () => {
         setOpenModal(true)
     }
 
-    if(loading){
+    if (loading) {
         return (
-            <LoadingSpinner/>
+            <LoadingSpinner />
         )
     }
 
     return (
         <div className="max-w-7xl mx-auto px-4 h-screen py-8">
             {/* Tabs */}
-            <h1 className="text-3xl font-semibold pb-5">All job posts</h1>
-            <div className="flex gap-4 mb-8 justify-end">
-              
+            <div className="flex gap-4 mb-8 justify-between">
+                <h1 className="text-3xl font-semibold pb-5">All job posts</h1>
                 <button
                     className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
                     onClick={modalOpen}
                 >
                     Add Job
                 </button>
+
             </div>
 
             {/* Job Posts List */}
             {job && job.length > 0 ? (
                 <div className="space-y-4">
                     {job.map((val: any) => {
-         
+
                         const proposalCount = notifications?.filter(
                             (notif: any) => notif.type === 'proposal' && notif.data?.jobId === val._id
                         ).length || 0; // Fallback to 0 if notifications are undefined
@@ -100,11 +100,11 @@ const Jobs = () => {
                                 <div>
                                     <h2 className="text-xl font-semibold mb-2">{val.title || "Untitled Job"}</h2>
                                     <div className="text-gray-500">
-                                        Fixed-price - {val.experienceLevel || "N/A"} - Est. Budget: {val.budget || "N/A"}
+                                        Fixed-price - {val.projectType || "N/A"} - Est. Budget: {val.budget || "N/A"}
                                     </div>
                                     <div className="text-gray-500">
                                         {val.description
-                                            ? val.description.substring(0, 100)
+                                            ? val.description.substring(0, 150)
                                             : "No description available"}
                                         ...
                                     </div>
@@ -128,34 +128,36 @@ const Jobs = () => {
                     })}
                 </div>
             ) : (
-                <p>You don't have any job posts.</p>
+                <div className="flex justify-center items-center h-screen w-full">
+                    <p className="pb-40">You don't have any job posts.</p>
+                </div>
             )}
 
 
             {job && job.length > 0 && (
                 <div className="flex items-end justify-between mt-8">
                     <div className="text-sm text-gray-500">
-                        1 - {job.length} of {job.length} Job posts
+                        {job.length} of {job.length} Job posts
                     </div>
                     <div className="flex items-center gap-2">
-                                        <button
-                                            
-                                            className="p-2 rounded-full text-gray-400 disabled:opacity-50"
-                                            disabled={currentPage === 1}
-                                        >
-                                            <ChevronLeft onClick={()=>handlePageChange(currentPage - 1)} className="h-4 w-4" />
-                                        </button>
-                                        <div className="h-8 w-8 flex items-center justify-center rounded-full bg-green-600 text-white">
-                                            {currentPage}
-                                        </div>
-                                        <button
-                                            className="p-2 rounded-full text-gray-400 disabled:opacity-50"
-                                            disabled={currentPage === totalPages}
-                                            >
-                                           
-                                            <ChevronRight  onClick={()=>handlePageChange(currentPage + 1)} className="h-4 w-4" />
-                                        </button>
-                                    </div>
+                        <button
+
+                            className="p-2 rounded-full text-gray-400 disabled:opacity-50"
+                            disabled={currentPage === 1}
+                        >
+                            <ChevronLeft onClick={() => handlePageChange(currentPage - 1)} className="h-4 w-4" />
+                        </button>
+                        <div className="h-8 w-8 flex items-center justify-center rounded-full bg-green-600 text-white">
+                            {currentPage}
+                        </div>
+                        <button
+                            className="p-2 rounded-full text-gray-400 disabled:opacity-50"
+                            disabled={currentPage === totalPages}
+                        >
+
+                            <ChevronRight onClick={() => handlePageChange(currentPage + 1)} className="h-4 w-4" />
+                        </button>
+                    </div>
                 </div>
             )}
 

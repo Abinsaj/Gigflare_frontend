@@ -63,12 +63,14 @@ const LoginForm = () => {
             const password: string = 'Gig@flare'
             const value = {email: result.email, password: password}
             const loginResult = await dispatch(verifyLogin(value))
-            console.log(loginResult.payload,'this is the blah blah')
+            console.log(loginResult,'this is the blah blah')
+            
             if(loginResult.payload){
+                
                 toast.success('Login successful')
-                    setTimeout(() => {
+                 
                         navigate("/")
-                    }, 1500)
+           
             }
         },
         onError: (error)=>{

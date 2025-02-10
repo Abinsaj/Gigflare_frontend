@@ -42,14 +42,14 @@ export default function JobOffers() {
     return (
         <div className="p-4 sm:p-6 md:p-8 bg-white min-h-screen">
             <div className="max-w-7xl mx-auto">
-                <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">All Proposals</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">All Offers</h1>
 
                 {/* Tabs */}
                 <div className="border-b border-gray-200 mb-4 sm:mb-6">
                     <div className="flex gap-4 sm:gap-8">
-                        <button className="pb-2 sm:pb-4 border-b-2 border-green-600 text-green-600 font-medium text-sm sm:text-base">
+                        {/* <button className="pb-2 sm:pb-4 border-b-2 border-green-600 text-green-600 font-medium text-sm sm:text-base">
                             Active
-                        </button>
+                        </button> */}
                         {/* <button className="pb-2 sm:pb-4 text-gray-500 hover:text-gray-700 text-sm sm:text-base">
                             Inactive
                         </button> */}

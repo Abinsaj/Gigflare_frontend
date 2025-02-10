@@ -5,7 +5,7 @@ import LoadingSpinner from '../Common/LoadinSpinner'
 import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../Redux/store'
-import { getContractList } from '../../Services/userServices/userAxiosCalls'
+import { getContractList, viewedNotification } from '../../Services/userServices/userAxiosCalls'
 import { posted } from '../../config/timeAgo'
 
 
@@ -22,7 +22,9 @@ export default function ContractList() {
         if (!id) return;
         try {
             const response = await getContractList(id);
+            console.log(response,'this is the response in the contract list of the user')
             setContract(response);
+            const notification = await viewedNotification(user._id,'contract')
         } catch (error) {
             console.error("Error fetching contracts:", error);
         } finally {

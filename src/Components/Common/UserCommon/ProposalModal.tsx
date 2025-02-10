@@ -80,7 +80,7 @@ const ProposalModal=({proposal, onClose ,title, handleStatus}:ProposalModalProps
 
   return (
     <>
-    // Wrap the whole modal container with flex and h-full to make it fill the viewport height.
+    {/* // Wrap the whole modal container with flex and h-full to make it fill the viewport height. */}
 <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
   <div className="bg-white rounded-lg w-11/12 max-w-6xl flex flex-col h-full"> {/* Changed here */}
     {/* Modal Header */}
@@ -119,7 +119,7 @@ const ProposalModal=({proposal, onClose ,title, handleStatus}:ProposalModalProps
       {/* Total Budget */}
       <div>
         <h3 className="text-xl font-semibold mb-2">Total Budget</h3>
-        <p className="text-2xl font-bold text-green-600">₹{proposal.totalBudget.toFixed(2)}</p>
+        <p className="text-2xl font-bold text-green-600">₹{proposal.totalBudget}</p>
       </div>
 
       {/* Timestamps */}

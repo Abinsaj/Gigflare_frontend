@@ -37,6 +37,7 @@ export default function ContractPage() {
 
     const handleStatusChange = async(status: 'submitted' | 'termination_requested')=>{
       const data = await statusUpdate(contractData._id, status)
+      console.log(data,'this is the data we got here in the contract status change')
       if(data.success){
         toast.success(data.message)
         setSubmitted(true)
@@ -199,13 +200,16 @@ export default function ContractPage() {
               </div>
             </div>
           </div> */}
+          {/* {contractData.status == 'completed' && 
+            <p className='text-[#1AA803] font-semibold'>Work Done</p>
+          } */}
         {freelancerSign == false && contractData.signedByFreelancer.signed == false ? (
           <div className="flex justify-center mt-1">
             <Button onClick={signContract} color="primary" size="lg" className="font-semibold px-12 py-6 text-lg bg-[#1AA803] text-white rounded-full shadow-lg hover:shadow-xl transition-shadow duration-300">
               Sign Contract
             </Button>
           </div>
-        ): contractData.status == 'active'?(
+        ): contractData.status == 'active' && submitted == false?(
           <>
           <p className='text-[#1AA803] font-semibold'>Project is Active now you can submit once you completed the project</p>
           <Button onClick={()=>handleStatusChange('submitted')} color="primary" size="lg" className="font-semibold px-12 py-6 text-lg bg-[#1AA803] text-white rounded-full shadow-lg hover:shadow-xl transition-shadow duration-300">
@@ -220,8 +224,11 @@ export default function ContractPage() {
             </Button>
         ):contractData.status == 'terminated'?(
           <p className='text-[#1AA803] font-semibold'>The project has been terminated</p>
+        ): contractData.status == 'draft'?(
+
+          <p className='text-[#1AA803] font-semibold'>Your Signature have been registered</p>
         ):(
-            <p className='text-[#1AA803] font-semibold'>Your Signature have been registered</p>
+          <p className='text-[#1AA803] font-semibold'>Work Done</p>
         )}
         </CardBody>
       </Card>

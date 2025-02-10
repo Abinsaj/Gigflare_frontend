@@ -27,6 +27,7 @@ export default function Freelancers() {
   const fetchData = async (page = 1) => {
     try {
       const response = await axiosInstance.get(`/admin/getFreelancers?page=${page}&limit=${pageSize}`)
+      console.log(response,'this is the response we got in frontend')
       setFreelancers(response.data.freelancer)
       setTotalPages(response.data.totalPages)
     } catch (error) {

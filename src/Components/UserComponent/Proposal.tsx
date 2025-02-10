@@ -29,12 +29,10 @@ const Proposal = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                
                 const response = await getProposals(jobData._id)
-                setData(response.data)
-    
+                console.log(response,'this is the response we got ib the proposakl')
+                setData(response.data)    
                 const result = await viewedNotification(userData?._id,'proposal')
-                console.log(result,'this is the result')
             } catch (error) {
                 console.log(error)
             }finally{

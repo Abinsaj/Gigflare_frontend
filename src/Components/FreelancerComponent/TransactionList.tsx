@@ -19,6 +19,7 @@ export default function TransactionsList() {
         const fetchData = async () => {
             try {
                 if (freelancer?._id) {
+                    console.log(freelancer._id,'this is the id we have')
                     const response = await getTransactions(freelancer._id)
                     console.log(response)
                     setTransactions(response.data || [])

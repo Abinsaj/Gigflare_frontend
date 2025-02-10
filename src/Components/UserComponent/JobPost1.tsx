@@ -10,8 +10,8 @@ interface Category {
 
 interface JobPostPage1Props {
     formData: {
-        jobTitle: string
-        jobDescription: string
+        title: string
+        description: string
         category: string
         
     }
@@ -34,10 +34,10 @@ console.log(category,'this is the category we got in add job post')
                 <input
                     type="text"
                     id="jobTitle"
-                    name="jobTitle"
-                    value={formData.jobTitle}
+                    name="title"
+                    value={formData.title}
                     onChange={handleChange}
-                    className="mt-1 h-10 block w-full rounded-md border shadow-sm focus:outline-none focus:ring-2 focus:border-none focus:ring-[#1AA803]"
+                    className="mt-1 h-10 block w-full px-2 rounded-md border shadow-sm focus:outline-none focus:ring-2 focus:border-none focus:ring-[#1AA803]"
                 />
             </div>
             <div>
@@ -48,11 +48,11 @@ console.log(category,'this is the category we got in add job post')
                 <label htmlFor="jobDescription" className="block text-sm font-medium text-gray-700">Job Description</label>
                 <textarea
                     id="jobDescription"
-                    name="jobDescription"
-                    value={formData.jobDescription}
+                    name="description"
+                    value={formData.description}
                     onChange={handleChange}
                     rows={4}
-                    className="mt-1 h-20 block w-full rounded-md border shadow-sm focus:outline-none focus:ring-2 focus:border-none focus:ring-[#1AA803]"
+                    className="mt-1 h-20 block w-full px-2 py-2 rounded-md border shadow-sm focus:outline-none focus:ring-2 focus:border-none focus:ring-[#1AA803]"
                 ></textarea>
             </div>
             <div>
@@ -62,7 +62,7 @@ console.log(category,'this is the category we got in add job post')
                     name="category"
                     value={formData.category}
                     onChange={handleChange}
-                    className="mt-1 h-10 block w-full rounded-md border shadow-sm focus:outline-none focus:ring-2 focus:border-none focus:ring-[#1AA803]"
+                    className="mt-1 h-10 block w-full px-2 rounded-md border shadow-sm focus:outline-none focus:ring-2 focus:border-none focus:ring-[#1AA803]"
                 >
                     <option value="" disabled className="text-gray-400">Add Category</option>
                     {category.map((data) => (
