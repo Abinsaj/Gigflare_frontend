@@ -1,4 +1,4 @@
-import { MenuIcon, X, Mail, ChevronDown, User, LogOut } from "lucide-react"
+import { MenuIcon, X, Mail, ChevronDown, User, LogOut, Briefcase, FileText, TrendingUp, Users } from "lucide-react"
 import { Disclosure, Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react"
 import { BellIcon } from "@heroicons/react/24/outline"
 import { useDispatch, useSelector } from "react-redux"
@@ -98,56 +98,74 @@ const Navbar = () => {
                         JOBS
                         <ChevronDown className="ml-1 h-4 w-4" aria-hidden="true" />
                       </Menu.Button>
-                      <Menu.Items className="absolute left-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                      <Menu.Items 
+  className="absolute left-0 z-50 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+>
                         <div className="py-1">
-                          <Menu.Item>
-                            {({ active }) => (
-                              <a
-                                href="/joblist"
-                                className={`${
-                                  active ? "bg-gray-100 text-gray-900" : "text-gray-700"
-                                } block px-4 py-2 text-sm`}
-                              >
-                                All Job Post
-                              </a>
-                            )}
-                          </Menu.Item>
-                          <Menu.Item>
-                            {({ active }) => (
-                              <a
-                                href="/contracts"
-                                className={`${
-                                  active ? "bg-gray-100 text-gray-900" : "text-gray-700"
-                                } block px-4 py-2 text-sm`}
-                              >
-                                Contracts
-                              </a>
-                            )}
-                          </Menu.Item>
-                          <Menu.Item>
-                            {({ active }) => (
-                              <a
-                                href="/transactions"
-                                className={`${
-                                  active ? "bg-gray-100 text-gray-900" : "text-gray-700"
-                                } block px-4 py-2 text-sm`}
-                              >
-                                Transactions
-                              </a>
-                            )}
-                          </Menu.Item>
-                          <Menu.Item>
-                            {({ active }) => (
-                              <a
-                                href="/worklist"
-                                className={`${
-                                  active ? "bg-gray-100 text-gray-900" : "text-gray-700"
-                                } block px-4 py-2 text-sm`}
-                              >
-                                All Works
-                              </a>
-                            )}
-                          </Menu.Item>
+                        <Menu.Item>
+                          {({ active }) => (
+                            <button
+                              className={`${active ? 'bg-[#1AA803] text-white' : 'text-gray-900'
+                                } group flex items-center w-full px-2 py-2 pl-4 text-sm`}
+                              onClick={() => navigate('/joblist')}
+                            >
+                              <Briefcase className="inline-block w-4 h-4 mr-2" />
+                              All Job Post
+                            </button>
+                          )}
+                        </Menu.Item>
+                        <div className=" border-gray-200 my-1"></div>
+                        {/* <Menu.Item>
+                          {({ active }) => (
+                            <button
+                              className={`${
+                                active ? 'bg-[#1AA803] text-white' : 'text-gray-900'
+                              } group flex  items-center w-full px-2 py-2 text-sm`}
+                              onClick={()=>navigate('/proposals')}
+                            >
+                              Proposals
+                            </button>
+                          )}
+                        </Menu.Item> */}
+                        <div className=" border-gray-200 my-1"></div>
+                        <Menu.Item>
+                          {({ active }) => (
+                            <button
+                              className={`${active ? 'bg-[#1AA803] text-white' : 'text-gray-900'
+                                } group flex  items-center w-full px-2 py-2 pl-4 text-sm`}
+                              onClick={() => navigate('/contracts')}
+                            >
+                              <FileText className="inline-block w-4 h-4 mr-2" />
+                              Contracts
+                            </button>
+                          )}
+                        </Menu.Item>
+                        <div className=" border-gray-200 my-1"></div>
+                        <Menu.Item>
+                          {({ active }) => (
+                            <button
+                              className={`${active ? 'bg-[#1AA803] text-white' : 'text-gray-900'
+                                } group flex items-center w-full px-2 py-2 pl-4 text-sm`}
+                                onClick={()=>navigate('/transactions')}
+                            >
+                              <TrendingUp className="inline-block w-4 h-4 mr-2" />
+                              Transactions
+                            </button>
+                          )}
+                        </Menu.Item>
+                        <div className=" border-gray-200 my-1"></div>
+                        <Menu.Item>
+                          {({ active }) => (
+                            <button
+                              className={`${active ? 'bg-[#1AA803] text-white' : 'text-gray-900'
+                                } group flex items-center w-full px-2 py-2 pl-4 text-sm`}
+                                onClick={()=>navigate('/worklist')}
+                            >
+                              <Users className="inline-block w-4 h-4 mr-2" />
+                              All Works
+                            </button>
+                          )}
+                        </Menu.Item>
                         </div>
                       </Menu.Items>
                     </Menu>
