@@ -1,7 +1,7 @@
 import axios from "axios";
 import { toast } from "sonner";
 
-const url =  "https://www.gigflare.online"
+const url =  "http://localhost:7070"
 
 
 const axiosInstance = axios.create({
