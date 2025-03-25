@@ -63,9 +63,7 @@ const TransactionDetailsPage = () => {
               <button className="p-2 hover:bg-green-500 rounded" onClick={downloadInvoice}>
                 <Download className="h-5 w-5" />
               </button>
-              {/* <button className="p-2 hover:bg-blue-500 rounded">
-                <RefreshCw className="h-5 w-5" />
-              </button> */}
+          \
             </div>
           </div>
 
@@ -167,39 +165,6 @@ const TransactionDetailsPage = () => {
                   </div>
                 </div>
               </div>
-              {/* <div>
-                <h3 className="text-xl font-semibold mb-4 flex items-center">
-                  <Hash className="mr-2 text-indigo-600" size={20} />
-                  Contract Overview
-                </h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span>Total Budget</span>
-                    <span className="font-bold">
-                      {contract.totalBudget}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Initial Payment</span>
-                    <span>
-                      {contract.initialPayment}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Remaining Payment</span>
-                    <span>
-                      {transactionData.contract.remainingPayment}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Contract Status</span>
-                    <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded">
-                      {transactionData.contract.status}
-                    </span>
-                  </div>
-                </div>
-              </div> */}
-
               
             </div>
 

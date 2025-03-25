@@ -63,33 +63,6 @@ export default function FreelancerListing() {
         <div className="container mx-auto px-4 py-8 bg-white">
             <h1 className="text-2xl font-semibold mb-6">Explore some of GIGFLARE Freelancers</h1>
 
-            {/* <div className="flex justify-between items-center mb-6">
-                <div className="flex items-center space-x-4">
-                    <span className="text-sm text-gray-600">Filters:</span>
-                    <div className="relative inline-block text-left">
-                        <button className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                            Any Country
-                            <ChevronDown className="ml-2 -mr-1 h-5 w-5" aria-hidden="true" />
-                        </button>
-                    </div>
-                    <div className="relative inline-block text-left">
-                        <button className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                            Any hourly rate
-                            <ChevronDown className="ml-2 -mr-1 h-5 w-5" aria-hidden="true" />
-                        </button>
-                    </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                    <span className="text-sm text-gray-600">Sort By:</span>
-                    <div className="relative inline-block text-left">
-                        <button className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                            Most Relevant
-                            <ChevronDown className="ml-2 -mr-1 h-5 w-5" aria-hidden="true" />
-                        </button>
-                    </div>
-                </div>
-            </div> */}
-
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {freelancers.map((freelancer: any, index: any) => (
                     <div
