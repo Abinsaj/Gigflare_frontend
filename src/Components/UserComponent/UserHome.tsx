@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Card, CardHeader, CardBody, CardFooter, Button, Avatar } from "@nextui-org/react";
-import { ChevronLeft, ChevronRight, } from 'lucide-react'
+import { ChevronLeft, ChevronRight, User, } from 'lucide-react'
 import { useSelector } from 'react-redux';
 import { RootState } from '../../Redux/store';
 import { getFreelancers } from '../../Services/userServices/userAxiosCalls';
@@ -9,25 +9,24 @@ import { getFreelancerDetails } from '../../Services/adminServices/adminAxiosCal
 const ClientHome = () => {
 
     const data = useSelector((state: RootState) => state.user.userInfo)
-    console.log(data,'this is the data of the user')
     const [freelancers, setFreelancers] = useState<any[]>([])
     const [visibleIndex, setVisibleIndex] = useState(0);
     const itemsPerPage = 4;
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-    // const scroll = (direction: 'left' | 'right') => {
-    //     if (scrollContainerRef.current) {
-    //         const scrollAmount = 300;
-    //         const newScrollLeft = direction === 'left'
-    //             ? scrollContainerRef.current.scrollLeft - scrollAmount
-    //             : scrollContainerRef.current.scrollLeft + scrollAmount;
+    const scroll = (direction: 'left' | 'right') => {
+        if (scrollContainerRef.current) {
+            const scrollAmount = 300;
+            const newScrollLeft = direction === 'left'
+                ? scrollContainerRef.current.scrollLeft - scrollAmount
+                : scrollContainerRef.current.scrollLeft + scrollAmount;
 
-    //         scrollContainerRef.current.scrollTo({
-    //             left: newScrollLeft,
-    //             behavior: 'smooth'
-    //         });
-    //     }
-    // };
+            scrollContainerRef.current.scrollTo({
+                left: newScrollLeft,
+                behavior: 'smooth'
+            });
+        }
+    };
 
     const handleScroll = (direction: string) => {
         if (direction === "right" && visibleIndex + itemsPerPage < freelancers.length) {
@@ -36,6 +35,8 @@ const ClientHome = () => {
             setVisibleIndex(visibleIndex - itemsPerPage);
         }
     };
+
+    console.log(freelancers,'this is the freelancers in the data')
 
     let visibleFreelancers = []
     if(freelancers && freelancers.length > 0){
@@ -54,7 +55,7 @@ const ClientHome = () => {
                 response = await getFreelancers(data?._id)
             }
             console.log(response, 'this hte response we got in the user home page')
-            setFreelancers(Array.isArray(response) ? response : []);
+            setFreelancers(Array.isArray(response.freelancerData) ? response.freelancerData : []);
         }
         fetchFreelancers()
     }, [data?._id])
@@ -103,35 +104,35 @@ const ClientHome = () => {
                         <div className="mx-auto mt-10 grid max-w-lg grid-cols-4 items-center gap-x-8 gap-y-10 sm:max-w-xl sm:grid-cols-6 sm:gap-x-10 lg:mx-0 lg:max-w-none lg:grid-cols-5">
                             <img
                                 alt="Transistor"
-                                src="https://tailwindui.com/plus/img/logos/158x48/transistor-logo-gray-900.svg"
+                                src="data:image/png;base64,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"
                                 width={158}
                                 height={48}
                                 className="col-span-2 max-h-12 w-full object-contain lg:col-span-1"
                             />
                             <img
                                 alt="Reform"
-                                src="https://tailwindui.com/plus/img/logos/158x48/reform-logo-gray-900.svg"
+                                src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAllBMVEX/9e0AAAD/+PAGCw7/+/P//fX/9+7///j///v/+/L////Jx8L//vi6t7JWUk/g2tP69fHz7ujr5+HW1M/Iw73Rzsiko52trKfy7ec4NDKuqKIpJyY8OjhzcG53dXJsa2iNjIpfXVocGxygnpy8u7aXlZBOTEs9P0Ht7u6DhIUPDw6KhoPf3+AmJCN/f3oNCwkzLy1bWVcxp87XAAADq0lEQVR4nO3XbXeaSBiHcWc6AyoSZFB8iIomJmnTNjHf/8vtfQNqTdqze/Zswrbn+r3QYRgS/vME9noAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD4v4ns65o3Fb83lyeF/7HCh0nwv2r9G3KlMWY1P1fYjVSs/6Bh7C8e0q2ZnBMFU6WVydsj623UzY39Z6I89z7UAW3zGayz82PisDvc/TFT1k/S/PXktBNjNnFbdsezUoq0O+oaO2hKOtRR00TLzvvTVae2x17sRn4j62/qLupsdmvMbjqV23LZrNyP9f4GYVZOfTrr9fZl4ed6YPdlquf2ZTKQi/aFtaXRsXfSNvGTWW6Tci8Nosm0s4j+/uHz8IuZv6o0tdCzT3VBesDfaeHKmCSR76UebFby8Zj1dY9aOifnfJBi3vO6jRn5I/tUvrdu8FUu6yiiTczDt89fzPZi0bnb78bcrBa5l1vbPT1LVpeaVhLMhftY417VCZ2rJGw8OZ5LM/lYWC99kHaU0DdjZFaDi2qn63A0jiTM1bC/N+auL+O1zaeacFBI+TZfG3MIhY50Lg3u24TSEevhTq7OC+mY1GXP5rrbhFfmk3oMF9X1TuN1hFu7XO806j/pdBtLwtxLlk1fg2c2OyW00gcv/toYa+M7TejlOtdlQvfQJDTffpVwtVmvN+vlvEm4OSac62htRvEp4cjrOtTBr+I64ahO6GQki7DoJqHN525w3yT8FAZ5OG+omrAa5gOZpQs3HE6LkdNZGnSB/SThXDacEGTtFmNdhyOdpSF5rMewOi7Jj09op98f0+G6TmgOcbEw5SliJOvrefccdKe5rl4khT/vNG8T6t57o08dI6Mnw3ea3KmzGryjhH6tO3naJHzSANfnm4jr58VX75qdqLLt02JXJzzIOmwTLjRhFG7ak6KQtjMtSMfIs7BvZ3dJWhc/mptJONNO0kctVz9sqHa7Wm3kKRmHdJmGkfZImC2n/aKI5AUvyeSNZZrkWiz0zcUny2XWD8vlpH6H8fNU2mbymHdX5ag/kuWbfXhAuY3bY75ms6kuXrZ9HI/qghsc652+qNXlejyaH5jt0ETOHVs0h/VLXc/KaB6qlW6wH5DoDZ+sjhnle/ke9xCNn9qnzTv88X/A2vSlfeKXc/f37f8NF9LbWdbdbzEbR1mSFHn8Tvl6Opltl78sVNf/HwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB36CyezMqC1pHlgAAAAAElFTkSuQmCC"
                                 width={158}
                                 height={48}
                                 className="col-span-2 max-h-12 w-full object-contain lg:col-span-1"
                             />
                             <img
                                 alt="Tuple"
-                                src="https://tailwindui.com/plus/img/logos/158x48/tuple-logo-gray-900.svg"
+                                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQa-W8dn-tap14EaxWD27PkQcQVMzdoxozotA&s"
                                 width={158}
                                 height={48}
                                 className="col-span-2 max-h-12 w-full object-contain lg:col-span-1"
                             />
                             <img
                                 alt="SavvyCal"
-                                src="https://tailwindui.com/plus/img/logos/158x48/savvycal-logo-gray-900.svg"
+                                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSnbZCJA5btB6r_QmRpFXsUozXVWrXnL-ARQw&s"
                                 width={158}
                                 height={48}
                                 className="col-span-2 max-h-12 w-full object-contain sm:col-start-2 lg:col-span-1"
                             />
                             <img
                                 alt="Statamic"
-                                src="https://tailwindui.com/plus/img/logos/158x48/statamic-logo-gray-900.svg"
+                                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSDZdA0XLLbKnx4Be_QRwf5CQAVoi-DqSmWuQ&s"
                                 width={158}
                                 height={48}
                                 className="col-span-2 col-start-2 max-h-12 w-full object-contain sm:col-start-auto lg:col-span-1"
@@ -164,15 +165,20 @@ const ClientHome = () => {
                                 className="flex gap-4 pb-4 overflow-hidden"
                             >
                                 {visibleFreelancers.map((freelancer) => (
-                                    <Card key={freelancer._id} className="max-w-[290px] bg-gray-100 rounded-2xl">
+                                    <Card key={freelancer._id} className="max-w-[290px] bg-gray-100 rounded-2xl" >
                                         <CardHeader className="justify-between">
                                             <div className="flex gap-5">
-                                                <Avatar
-                                                    isBordered
-                                                    radius="full"
-                                                    size="md"
-                                                    src={freelancer.profile}
-                                                />
+                                                {freelancer.profile?(
+
+                                                    <Avatar
+                                                        isBordered
+                                                        radius="full"
+                                                        size="md"
+                                                        src={freelancer.profile}
+                                                    />
+                                                ):(
+                                                    <User/>
+                                                )}
                                                 <div className="flex flex-col gap-1 items-start justify-center">
                                                     <h4 className="text-small font-semibold leading-none text-default-600">
                                                         {freelancer?.firstName}

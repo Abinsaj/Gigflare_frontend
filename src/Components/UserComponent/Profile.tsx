@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
-import { UserCircleIcon, MapPinIcon, ClockIcon,Camera } from 'lucide-react'
+import { UserCircleIcon,User,Camera } from 'lucide-react'
 import { RootState } from '../../Redux/store'
 import UserDetails from './UserDetails'
 import JobPost from './JobPost'
@@ -80,13 +80,15 @@ export default function Profile() {
           <div className="relative bg-white rounded-lg shadow-lg p-6 w-11/12 max-w-4xl overflow-hidden">
             <div className="relative flex items-center">
             <div className='relative'>
-            <UserCircleIcon className="h-24 w-24 text-gray-300" aria-hidden="true" />
-            {selectedImage && (
+       
+            {selectedImage ? (
                 <img
                     src={URL.createObjectURL(selectedImage)}
                     alt="Selected preview"
                     className="h-24 w-24 rounded-full object-cover absolute top-0 left-0"
                 />
+            ):(
+              <User className='h-24 w-24'/>
             )}
             <button
                 type="button"

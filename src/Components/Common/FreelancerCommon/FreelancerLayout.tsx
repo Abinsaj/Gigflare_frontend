@@ -1,6 +1,6 @@
 import React from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
-import { Home, FileText, TrendingUp, ArrowLeft, FileCheck ,Briefcase } from 'lucide-react'
+import { Home, FileText, TrendingUp, ArrowLeft, FileCheck ,Briefcase, User } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import { useFreelancer } from '../../../context/FreelancerContext/FreelancerData'
 
@@ -28,11 +28,15 @@ const FreelancerLayout = () => {
                     <ArrowLeft onClick={()=>navigate('/freelancer/home')}/>
                         <div className="mb-8">
                             <div className="pl-16 ml-2 mb-6">
-                                <img
-                                    src={freelancer?.profile}
-                                    alt="Uploaded preview"
-                                    className="h-36 w-36 rounded-full object-cover"
-                                />
+                                {freelancer?.profile?(
+                                    <img
+                                        src={freelancer?.profile}
+                                        alt="Uploaded preview"
+                                        className="h-36 w-36 rounded-full object-cover"
+                                    />
+                                ):(
+                                    <User className='h-36 w-36'/>
+                                )}
                             </div>
                             <h2 className="text-gray-700 text-center text-xl font-semibold mb-4">{freelancer?.firstName} {freelancer?.lastName}</h2>
                             <p className="text-gray-500 text-center">{freelancer?.email}</p>

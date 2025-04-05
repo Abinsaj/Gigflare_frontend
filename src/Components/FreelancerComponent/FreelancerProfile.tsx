@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Camera, CalendarDays, IndianRupee } from "lucide-react"
+import { Camera, CalendarDays, IndianRupee, User } from "lucide-react"
 import { Card, CardBody, CardHeader } from "@nextui-org/react"
 import BlockChecker from "../../Services/userServices/blockChecker"
 import { getDetails, getWorkHistory, getRatingAndReview } from "../../Services/freelancerService/freelancerAxiosCalls"
@@ -67,11 +67,16 @@ const FreelancerProfile = () => {
             <div className="relative bg-white rounded-lg shadow-lg p-4 sm:p-6 w-11/12 max-w-4xl overflow-hidden">
               <div className="relative flex flex-col sm:flex-row items-center">
                 <div className="relative mb-4 sm:mb-0">
-                  <img
-                    src={freelancerData?.profile || "/placeholder.svg"}
+                  {freelancerData.profile ? (
+                    <img
+                    src={freelancerData?.profile }
                     alt=""
                     className="w-20 h-20 sm:w-28 sm:h-28 rounded-full"
                   />
+                  ):(
+                    <User className="w-20 h-20 sm:w-28 sm:h-28"/>
+                  )}
+                  
                   <button className="absolute bottom-0 right-0 bg-white rounded-full p-1 shadow">
                     <Camera className="w-3 h-3 sm:w-4 sm:h-4" />
                   </button>

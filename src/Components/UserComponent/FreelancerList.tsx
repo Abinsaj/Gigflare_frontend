@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { ChevronDown, Star, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronDown, Star, ChevronLeft, ChevronRight, User } from 'lucide-react'
 import { getFreelancers } from '../../Services/userServices/userAxiosCalls'
 import FreelancerModal from '../Common/UserCommon/FreelancerModal'
 import { useSelector } from 'react-redux'
@@ -59,6 +59,8 @@ export default function FreelancerListing() {
         )
     }
 
+    console.log(freelancers,'this is hte freelancers')
+
     return (
         <div className="container mx-auto px-4 py-8 bg-white">
             <h1 className="text-2xl font-semibold mb-6">Explore some of GIGFLARE Freelancers</h1>
@@ -71,11 +73,17 @@ export default function FreelancerListing() {
                     >
                         <div className="p-4 flex-grow">
                             <div className="flex items-start space-x-4">
-                                <img
+                                {freelancer.profile !== '' ?(
+                                
+                                    <img
                                     src={freelancer.profile}
-                                    alt={freelancer.firstName}
+                                    alt=''
                                     className="w-16 h-16 rounded-full"
-                                />
+                                    />
+                                ):(
+                                    <User className='w-16 h-16'/>
+                                )}
+                                
                                 <div>
                                     <h2 className="text-lg font-semibold">
                                         {freelancer.firstName} {freelancer.lastName}

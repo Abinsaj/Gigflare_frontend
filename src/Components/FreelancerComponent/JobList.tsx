@@ -261,7 +261,7 @@ function JobList({ data, navigate }: { data: any[]; navigate: any }) {
   if (data.length == 0) {
     return (
       <div className='justify-center'>
-        <p className='text-center font-medium'>No data have been found</p>
+        <p className='text-center font-medium'>No jobs have been found</p>
       </div>
     )
 
